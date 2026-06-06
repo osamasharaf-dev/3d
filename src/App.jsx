@@ -21,10 +21,7 @@ import ReactBitsCursorProvider from "./reactbits/context/ReactBitsCursorProvider
 const PrivacyPolicy = lazy(() => import("./components/PrivacyPolicy"));
 
 const MainPage = () => (
-  <div
-    className="relative z-0"
-    style={{ backgroundColor: "hsl(222.2 84% 4.9%)" }}
-  >
+  <div className="relative z-0" style={{ backgroundColor: "#f3f4f8" }}>
     <ElasticCursor />
     <EasterEggs />
     <div className="bg-hero-pattern bg-cover bg-no-repeat bg-center">
@@ -54,7 +51,13 @@ const App = () => {
             <Route
               path="/privacy-policy"
               element={
-                <Suspense fallback={<div style={{ background: "hsl(222.2 84% 4.9%)", minHeight: "100vh" }} />}>
+                <Suspense
+                  fallback={
+                    <div
+                      style={{ background: "#f3f4f8", minHeight: "100vh" }}
+                    />
+                  }
+                >
                   <PrivacyPolicy />
                 </Suspense>
               }

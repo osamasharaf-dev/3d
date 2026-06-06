@@ -1,74 +1,187 @@
 import { motion } from "framer-motion";
-import React from "react";
-import {
-  VerticalTimeline,
-  VerticalTimelineElement,
-} from "react-vertical-timeline-component";
-
-import "react-vertical-timeline-component/style.min.css";
+import React, { useRef, useState } from "react";
 
 import { achievements } from "../constants";
 import { SectionWrapper } from "../hoc";
 import { styles } from "../styles";
 import { textVariant } from "../utils/motion";
 
-const AchievementCard = ({ Achievement }) => {
-  return (
-    <VerticalTimelineElement
-      contentStyle={{
-        background: "#111522",
-        color: "#fff",
-      }}
-      contentArrowStyle={{ borderRight: "7px solid  #232631" }}
-      date={Achievement.date}
-      iconStyle={{ background: Achievement.iconBg }}
-      icon={
-        <div className="flex justify-center items-center w-full h-full">
-          <img
-            src={Achievement.icon}
-            alt={Achievement.company_name}
-            className="object-contain rounded-full"
-          />
-        </div>
-      }
-    >
-      <div>
-        <h3 className="text-[#8eadff] text-[24px] font-bold">
-          {Array.isArray(Achievement.title)
-            ? Achievement.title.map((t, i) => <div key={i}>{t}</div>)
-            : Achievement.title}
-        </h3>
-        {/* <p
-          className="text-white text-[16px] font-semibold"
-          style={{ margin: 0 }}
-        >
-          {Achievement.company_name}
-        </p> */}
-      </div>
+const CertCard = ({ Achievement, index }) => {
+  const cardRef = useRef(null);
+  const [tilt, setTilt] = useState({ x: 0, y: 0 });
+  const [hovered, setHovered] = useState(false);
 
-      <ul className="mt-5 list-disc ml-5 space-y-2">
-        {Achievement.points.map((point, index) => (
-          <li
-            key={`Achievement-point-${index}`}
-            className="text-white-100 text-[14px] pl-1 tracking-wider"
+  const handleMouseMove = (e) => {
+    if (!cardRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    setTilt({
+      x: ((e.clientY - cy) / rect.height) * 10,
+      y: -((e.clientX - cx) / rect.width) * 10,
+    });
+  };
+
+  const handleMouseLeave = () => {
+    setTilt({ x: 0, y: 0 });
+    setHovered(false);
+  };
+
+  const title = Array.isArray(Achievement.title)
+    ? Achievement.title[0]
+    : Achievement.title;
+
+  return (
+    <motion.div
+      ref={cardRef}
+      initial={{ opacity: 0, y: 40 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.2 }}
+      transition={{ duration: 0.6, delay: index * 0.12, ease: [0.16, 1, 0.3, 1] }}
+      onMouseMove={handleMouseMove}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={handleMouseLeave}
+      style={{
+        transform: `perspective(800px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg) translateZ(${hovered ? "8px" : "0px"})`,
+        transition: hovered
+          ? "transform 0.1s ease-out"
+          : "transform 0.5s cubic-bezier(0.16, 1, 0.3, 1)",
+        transformStyle: "preserve-3d",
+      }}
+      className="relative rounded-2xl overflow-hidden cursor-default"
+    >
+      {/* Glass card */}
+      <div
+        className="relative h-full p-6"
+        style={{
+          background: hovered
+            ? "rgba(255,255,255,0.92)"
+            : "rgba(255,255,255,0.75)",
+          backdropFilter: "blur(16px)",
+          WebkitBackdropFilter: "blur(16px)",
+          border: hovered
+            ? "1.5px solid rgba(145,94,255,0.35)"
+            : "1.5px solid rgba(255,255,255,0.85)",
+          boxShadow: hovered
+            ? "0 20px 50px rgba(145,94,255,0.18), 0 6px 20px rgba(0,0,0,0.08)"
+            : "0 8px 30px rgba(0,0,0,0.07), 0 2px 8px rgba(0,0,0,0.04)",
+          transition: "background 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease",
+        }}
+      >
+        {/* Top shimmer on hover */}
+        <div
+          className="absolute top-0 left-0 right-0 h-px transition-opacity duration-300"
+          style={{
+            background:
+              "linear-gradient(90deg, transparent, rgba(145,94,255,0.6), rgba(142,197,255,0.5), transparent)",
+            opacity: hovered ? 1 : 0,
+          }}
+        />
+
+        {/* Header */}
+        <div className="flex items-start gap-4 mb-4">
+          {/* Icon circle */}
+          <div
+            className="flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center overflow-hidden"
+            style={{
+              background: Achievement.iconBg || "rgba(145,94,255,0.12)",
+              border: "1.5px solid rgba(145,94,255,0.2)",
+            }}
           >
-            {point}
-            {Achievement.credential && Achievement.credential[index] && (
-              <div className="my-2">
-                <a
-                  href={Achievement.credential[index]}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-400 underline hover:text-blue-300 transition-colors duration-200"
-                >
-                  View Credential
-                </a>
-              </div>
+            <img
+              src={Achievement.icon}
+              alt={title}
+              className="w-8 h-8 object-contain"
+              loading="lazy"
+            />
+          </div>
+
+          {/* Title + date */}
+          <div className="flex-1 min-w-0">
+            <h3 className="text-[#0f172a] font-bold text-[16px] leading-snug">
+              {title}
+            </h3>
+            {Achievement.company_name && (
+              <p className="text-[#915EFF] text-[12px] font-semibold mt-0.5 uppercase tracking-wide">
+                {Achievement.company_name}
+              </p>
             )}
-          </li>
-        ))}
-      </ul>
-    </VerticalTimelineElement>
+          </div>
+
+          {/* Date badge */}
+          {Achievement.date && (
+            <div
+              className="flex-shrink-0 px-2.5 py-1 rounded-lg text-[11px] font-semibold whitespace-nowrap"
+              style={{
+                background: "rgba(145,94,255,0.10)",
+                color: "#7c3aed",
+                border: "1px solid rgba(145,94,255,0.20)",
+              }}
+            >
+              {Achievement.date}
+            </div>
+          )}
+        </div>
+
+        {/* Divider */}
+        <div
+          className="w-full h-px mb-4"
+          style={{ background: "rgba(0,0,0,0.06)" }}
+        />
+
+        {/* Points */}
+        <ul className="space-y-2.5">
+          {Achievement.points.map((point, i) => (
+            <li key={i} className="flex items-start gap-2.5">
+              <div
+                className="flex-shrink-0 w-1.5 h-1.5 rounded-full mt-[6px]"
+                style={{ background: "#915EFF" }}
+              />
+              <div className="flex-1">
+                <p className="text-[#475569] text-[13px] leading-relaxed">
+                  {point}
+                </p>
+                {Achievement.credential?.[i] && (
+                  <a
+                    href={Achievement.credential[i]}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 mt-1 text-[11px] font-semibold transition-colors duration-200"
+                    style={{ color: "#7c3aed" }}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <svg
+                      className="w-3 h-3"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2.5}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                      />
+                    </svg>
+                    View Credential
+                  </a>
+                )}
+              </div>
+            </li>
+          ))}
+        </ul>
+
+        {/* Bottom glow on hover */}
+        <div
+          className="absolute bottom-0 left-0 right-0 h-px transition-opacity duration-300"
+          style={{
+            background:
+              "linear-gradient(90deg, transparent, rgba(145,94,255,0.4), transparent)",
+            opacity: hovered ? 1 : 0,
+          }}
+        />
+      </div>
+    </motion.div>
   );
 };
 
@@ -84,18 +197,13 @@ const Achievement = () => {
         </h2>
       </motion.div>
 
-      <div className="mt-20 flex flex-col">
-        <VerticalTimeline>
-          {achievements.map((achievement, index) => (
-            <AchievementCard
-              key={`Achievement-${index}`}
-              Achievement={achievement}
-            />
-          ))}
-        </VerticalTimeline>
+      <div className="mt-16 grid grid-cols-1 md:grid-cols-2 gap-6">
+        {achievements.map((achievement, index) => (
+          <CertCard key={index} Achievement={achievement} index={index} />
+        ))}
       </div>
-      
-      <span id="skills"></span>
+
+      <span id="skills" />
     </>
   );
 };

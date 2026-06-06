@@ -1,0 +1,103 @@
+Enhance the existing portfolio website for OSAMA SHARAF while preserving ALL current structure, 3D effects, animations, layout, and cinematic design style.
+
+DO NOT rebuild the site. Only improve UI sections, theme, and performance.
+
+========================================
+
+LIGHT MODE TRANSFORMATION
+========================================
+
+Convert the entire website into a premium light mode theme.
+
+Requirements:
+
+Soft off-white / luxury white background (not pure white)
+Maintain depth using gradients and subtle shadows
+Preserve brand accent colors
+Adjust text colors to dark elegant charcoal
+Maintain readability and contrast
+
+Glassmorphism:
+
+Convert dark glass effects into light glass style
+Soft blur + white transparency + subtle borders
+Keep premium futuristic feel
+
+DO NOT remove:
+
+3D objects
+Animations
+Cinematic effects
+
+Enhance hero section into a premium interactive identity layout.
+
+Add:
+
+Professional portrait image of OSAMA SHARAF
+Place it inside a floating 3D glass card
+Add soft glow matching accent color
+Add slow floating animation (up/down)
+Add subtle 3D tilt effect on mouse hover
+Add parallax cursor interaction
+
+Layout:
+
+Desktop: text on left, image on right
+Mobile: stacked layout
+
+Make the hero feel like a premium digital identity reveal, not a static portfolio.
+
+Redesign certifications section into a modern interactive card system.
+
+Layout:
+
+Grid of elegant certification cards
+Each card contains:
+Certificate title
+Issuer (optional)
+Short description
+Date (optional)
+
+Card Design:
+
+Glassmorphism style
+Soft shadows
+Rounded corners
+Subtle border glow
+
+Animation (IMPORTANT):
+
+Cards have smooth wave-like hover animation
+On hover:
+card tilts slightly in 3D
+content shifts smoothly upward
+soft wave distortion effect (subtle liquid motion)
+On scroll:
+cards appear with staggered fade-in animation
+
+Interaction feel:
+
+Premium, smooth, liquid-like motion
+Inspired by modern Apple / Awwwards UI
+
+Improve website performance without changing visuals:
+
+Remove unused scripts and components
+Optimize rendering performance
+Reduce heavy scroll computations
+Lazy load images and 3D assets where possible
+Improve FPS stability (target 60fps smooth scrolling)
+Optimize animations to use GPU (transform, opacity only)
+Reduce layout reflows
+
+DO NOT:
+
+Remove 3D effects
+Remove animations
+Simplify design
+Keep cinematic premium feel
+Maintain responsiveness on all devices
+Keep modern developer portfolio identity
+Ensure smooth transitions everywhere
+Maintain high-end aesthetic (Awwwards level)
+Do not break existing layout structure

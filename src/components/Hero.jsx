@@ -1,17 +1,180 @@
-import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { motion, useSpring, useMotionValue } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
 
 import useParallax from "../reactbits/hooks/useParallax";
 import { styles } from "../styles";
 import useMediaQuery from "../utils/useMediaQuery";
 import { ComputersCanvas } from "./canvas";
 
+const FloatingPortraitCard = () => {
+  const cardRef = useRef(null);
+  const [tilt, setTilt] = useState({ x: 0, y: 0 });
+
+  const rawX = useMotionValue(0);
+  const rawY = useMotionValue(0);
+  const springX = useSpring(rawX, { stiffness: 120, damping: 18 });
+  const springY = useSpring(rawY, { stiffness: 120, damping: 18 });
+
+  const handleMouseMove = (e) => {
+    if (!cardRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    rawX.set(((e.clientY - cy) / rect.height) * 14);
+    rawY.set(-((e.clientX - cx) / rect.width) * 14);
+  };
+
+  const handleMouseLeave = () => {
+    rawX.set(0);
+    rawY.set(0);
+  };
+
+  return (
+    <motion.div
+      ref={cardRef}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      animate={{ y: [0, -14, 0] }}
+      transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut" }}
+      style={{
+        rotateX: springX,
+        rotateY: springY,
+        transformStyle: "preserve-3d",
+        perspective: 1000,
+      }}
+      className="relative cursor-pointer select-none"
+    >
+      {/* Glow orb behind card */}
+      <div
+        className="absolute -inset-6 rounded-full opacity-30 blur-3xl"
+        style={{
+          background:
+            "radial-gradient(ellipse, rgba(145,94,255,0.6) 0%, rgba(142,197,255,0.3) 60%, transparent 80%)",
+        }}
+      />
+
+      {/* Glass card */}
+      <div
+        className="relative rounded-3xl overflow-hidden"
+        style={{
+          background: "rgba(255,255,255,0.70)",
+          backdropFilter: "blur(20px)",
+          WebkitBackdropFilter: "blur(20px)",
+          border: "1.5px solid rgba(255,255,255,0.9)",
+          boxShadow:
+            "0 20px 60px rgba(145,94,255,0.15), 0 4px 16px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.9)",
+          width: "220px",
+          padding: "28px 24px 24px",
+        }}
+      >
+        {/* Shimmer top bar */}
+        <div
+          className="absolute top-0 left-0 right-0 h-px"
+          style={{
+            background:
+              "linear-gradient(90deg, transparent, rgba(145,94,255,0.5), rgba(142,197,255,0.5), transparent)",
+          }}
+        />
+
+        {/* Avatar ring + circle */}
+        <div className="flex flex-col items-center gap-4">
+          <div className="relative">
+            {/* Outer ring */}
+            <div
+              className="absolute -inset-1.5 rounded-full"
+              style={{
+                background:
+                  "linear-gradient(135deg, #915EFF, #8ec5ff, #915EFF)",
+                padding: "2px",
+              }}
+            />
+            {/* Avatar */}
+            <div
+              className="relative w-24 h-24 rounded-full flex items-center justify-center"
+              style={{
+                background:
+                  "linear-gradient(135deg, #915EFF 0%, #6d28d9 50%, #8ec5ff 100%)",
+              }}
+            >
+              <span className="text-white text-3xl font-black tracking-tight">
+                OS
+              </span>
+            </div>
+            {/* Online dot */}
+            <div
+              className="absolute bottom-1 right-1 w-4 h-4 rounded-full border-2 border-white"
+              style={{ background: "#22c55e" }}
+            />
+          </div>
+
+          {/* Name & title */}
+          <div className="text-center">
+            <p className="text-[#0f172a] font-bold text-[15px] tracking-wide">
+              OSAMA SHARAF
+            </p>
+            <p className="text-[#915EFF] text-[11px] font-semibold tracking-wider uppercase mt-0.5">
+              Software Engineer
+            </p>
+          </div>
+
+          {/* Skill badges */}
+          <div className="flex flex-wrap justify-center gap-1.5">
+            {["React", "Node.js", "Full-Stack"].map((tag) => (
+              <span
+                key={tag}
+                className="text-[10px] font-semibold px-2 py-0.5 rounded-full"
+                style={{
+                  background: "rgba(145,94,255,0.10)",
+                  color: "#7c3aed",
+                  border: "1px solid rgba(145,94,255,0.20)",
+                }}
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+
+          {/* Divider */}
+          <div
+            className="w-full h-px"
+            style={{ background: "rgba(0,0,0,0.06)" }}
+          />
+
+          {/* Status */}
+          <div className="flex items-center gap-2">
+            <div
+              className="w-2 h-2 rounded-full animate-pulse"
+              style={{ background: "#22c55e" }}
+            />
+            <span className="text-[11px] text-[#64748b] font-medium">
+              Available for work
+            </span>
+          </div>
+        </div>
+
+        {/* Corner accent */}
+        <div
+          className="absolute bottom-0 right-0 w-16 h-16 opacity-20"
+          style={{
+            background:
+              "radial-gradient(circle, #915EFF 0%, transparent 70%)",
+          }}
+        />
+      </div>
+    </motion.div>
+  );
+};
+
 const Hero = () => {
   const [typedText, setTypedText] = useState("");
-  const typedItems = ["Full-Stack Developer", "Software Engineer", "Web Architect", "Problem Solver"];
+  const typedItems = [
+    "Full-Stack Developer",
+    "Software Engineer",
+    "Web Architect",
+    "Problem Solver",
+  ];
   const [itemIndex, setItemIndex] = useState(0);
   const [charIndex, setCharIndex] = useState(0);
-  const [isTyping, setIsTyping] = useState(true);
 
   const isMobile = useMediaQuery("(max-width: 768px)");
   const { style: parallaxStyle } = useParallax({
@@ -23,61 +186,81 @@ const Hero = () => {
   useEffect(() => {
     const typeItem = () => {
       if (charIndex < typedItems[itemIndex].length) {
-        setTypedText((prevText) => prevText + typedItems[itemIndex][charIndex]);
-        setCharIndex(charIndex + 1);
+        setTypedText((prev) => prev + typedItems[itemIndex][charIndex]);
+        setCharIndex((c) => c + 1);
       } else {
-        setIsTyping(false);
         setTimeout(() => {
-          setIsTyping(true);
-          setItemIndex((itemIndex + 1) % typedItems.length);
+          setItemIndex((i) => (i + 1) % typedItems.length);
           setCharIndex(0);
           setTypedText("");
-        }, 1000); // Delay before typing the next item
+        }, 1000);
       }
     };
 
-    const typingInterval = setInterval(typeItem, 100); // Typing speed
-
-    return () => clearInterval(typingInterval);
+    const interval = setInterval(typeItem, 100);
+    return () => clearInterval(interval);
   }, [charIndex, itemIndex]);
+
   return (
-    <section className={`relative w-full h-screen mx-auto`} id="hero">
+    <section className="relative w-full h-screen mx-auto" id="hero">
       <div
-        className={`absolute inset-0 top-[120px]  max-w-7xl mx-auto ${styles.paddingX} flex flex-row items-start gap-5`}
+        className={`absolute inset-0 top-[120px] max-w-7xl mx-auto ${styles.paddingX} flex flex-row items-start gap-5`}
       >
+        {/* Left accent line */}
         <div className="flex flex-col justify-center items-center mt-5">
           <div className="w-5 h-5 rounded-full bg-[#915EFF]" />
           <div className="w-1 sm:h-80 h-40 violet-gradient" />
         </div>
 
-        <div style={parallaxStyle}>
-          <h1 className={`${styles.heroHeadText} text-white`}>
-            Hi, I'm <span className="text-[#915EFF]">Osama Sharaf</span>
-          </h1>
-          <p className={`${styles.heroSubText} mt-2 text-white-100`}>
-            I'm{" "}
-            <span
-              className="typed"
-              aria-hidden="true"
-              style={{
-                backgroundImage:
-                  "linear-gradient(to bottom, rgba(245, 202, 153, 0.5), rgba(245, 202, 153, 0.5))",
-                backgroundRepeat: "no-repeat",
-                backgroundSize: "100% 8px",
-                backgroundPosition: "0 100%",
-                color: "#915EFF",
-                display: "inline-block",
-                fontWeight: "bold",
-              }}
-            >
-              {typedText}
-            </span>
-            <span className="typed-cursor" aria-hidden="true">
-              |
-            </span>
-            <br />
-            <b>Building modern digital solutions, scalable web applications, and high-performance digital experiences.</b>
-          </p>
+        {/* Text content */}
+        <div
+          className="flex-1 flex flex-col lg:flex-row items-start lg:items-center gap-8 lg:gap-12"
+          style={parallaxStyle}
+        >
+          <div className="flex-1">
+            <h1 className={styles.heroHeadText}>
+              Hi, I'm{" "}
+              <span className="text-[#915EFF]">Osama Sharaf</span>
+            </h1>
+            <p className={`${styles.heroSubText} mt-2`}>
+              I'm{" "}
+              <span
+                className="typed"
+                aria-hidden="true"
+                style={{
+                  backgroundImage:
+                    "linear-gradient(to bottom, rgba(145,94,255,0.18), rgba(145,94,255,0.18))",
+                  backgroundRepeat: "no-repeat",
+                  backgroundSize: "100% 8px",
+                  backgroundPosition: "0 100%",
+                  color: "#915EFF",
+                  display: "inline-block",
+                  fontWeight: "bold",
+                }}
+              >
+                {typedText}
+              </span>
+              <span
+                className="typed-cursor"
+                aria-hidden="true"
+                style={{ color: "#915EFF" }}
+              >
+                |
+              </span>
+              <br />
+              <b className="text-[#334155]">
+                Building modern digital solutions, scalable web applications,
+                and high-performance digital experiences.
+              </b>
+            </p>
+          </div>
+
+          {/* Portrait card — desktop only */}
+          {!isMobile && (
+            <div className="hidden lg:flex items-center justify-center flex-shrink-0 mr-8 mt-4">
+              <FloatingPortraitCard />
+            </div>
+          )}
         </div>
       </div>
 
@@ -85,17 +268,19 @@ const Hero = () => {
 
       <div className="absolute xs:bottom-10 bottom-32 w-full flex justify-center items-center">
         <a href="#about">
-          <div className="w-[35px] h-[64px] rounded-3xl border-4 border-secondary flex justify-center items-start p-2">
+          <div
+            className="w-[35px] h-[64px] rounded-3xl border-4 flex justify-center items-start p-2"
+            style={{ borderColor: "#915EFF" }}
+          >
             <motion.div
-              animate={{
-                y: [0, 24, 0],
-              }}
+              animate={{ y: [0, 24, 0] }}
               transition={{
                 duration: 1.5,
                 repeat: Infinity,
                 repeatType: "loop",
               }}
-              className="w-3 h-3 rounded-full bg-secondary mb-1"
+              className="w-3 h-3 rounded-full mb-1"
+              style={{ background: "#915EFF" }}
             />
           </div>
         </a>

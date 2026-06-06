@@ -9,7 +9,7 @@ const professionalSkills = [
   {
     category: "Communication & Teamwork",
     icon: "🤝",
-    color: "#8ec5ff",
+    color: "#3b82f6",
     skills: [
       "Effective Communication",
       "Team Collaboration",
@@ -20,7 +20,7 @@ const professionalSkills = [
   {
     category: "Problem Solving",
     icon: "🧠",
-    color: "#a78bfa",
+    color: "#7c3aed",
     skills: [
       "Analytical Thinking",
       "Technical Troubleshooting",
@@ -31,7 +31,7 @@ const professionalSkills = [
   {
     category: "Work Excellence",
     icon: "⚡",
-    color: "#34d399",
+    color: "#059669",
     skills: [
       "Time Management",
       "Adaptability",
@@ -46,36 +46,65 @@ const professionalSkills = [
 const SkillCategoryCard = ({ index, category, icon, color, skills }) => (
   <motion.div
     variants={fadeIn("", "spring", index * 0.5, 0.75)}
-    className="bg-[#0f0f0f] p-10 rounded-3xl xs:w-[320px] w-full border border-white/[0.06] hover:border-white/[0.12] transition-all duration-400"
+    className="xs:w-[320px] w-full rounded-3xl overflow-hidden"
+    style={{
+      background: "rgba(255,255,255,0.82)",
+      backdropFilter: "blur(16px)",
+      WebkitBackdropFilter: "blur(16px)",
+      border: "1.5px solid rgba(255,255,255,0.9)",
+      boxShadow: "0 8px 30px rgba(0,0,0,0.07), 0 2px 8px rgba(0,0,0,0.04)",
+    }}
   >
-    <div className="flex items-center gap-3 mb-4">
-      <span className="text-4xl">{icon}</span>
-      <h3 className="text-white font-bold text-[20px]" style={{ color }}>
-        {category}
-      </h3>
+    <div
+      className="p-10"
+      style={{
+        borderLeft: `3px solid ${color}`,
+      }}
+    >
+      <div className="flex items-center gap-3 mb-4">
+        <span className="text-4xl">{icon}</span>
+        <h3 className="font-bold text-[20px]" style={{ color }}>
+          {category}
+        </h3>
+      </div>
+      <ul className="mt-4 space-y-2.5">
+        {skills.map((skill, i) => (
+          <li
+            key={i}
+            className="flex items-center gap-2 text-[#475569] text-[15px]"
+          >
+            <span
+              className="w-1.5 h-1.5 rounded-full flex-shrink-0"
+              style={{ backgroundColor: color }}
+            />
+            {skill}
+          </li>
+        ))}
+      </ul>
     </div>
-    <ul className="mt-4 space-y-2">
-      {skills.map((skill, i) => (
-        <li key={i} className="flex items-center gap-2 text-secondary text-[15px]">
-          <span
-            className="w-1.5 h-1.5 rounded-full flex-shrink-0"
-            style={{ backgroundColor: color }}
-          />
-          {skill}
-        </li>
-      ))}
-    </ul>
   </motion.div>
 );
 
 const Feedbacks = () => {
   return (
-    <div className={`mt-12 bg-[#0a0c14] rounded-[20px]`}>
+    <div
+      className="mt-12 rounded-[20px]"
+      style={{ background: "#eaecf5" }}
+    >
       <div
-        className={` bg-[#111522] rounded-2xl ${styles.padding} min-h-[300px]`}
+        className={`rounded-2xl ${styles.padding} min-h-[300px]`}
+        style={{
+          background: "rgba(255,255,255,0.70)",
+          backdropFilter: "blur(12px)",
+          WebkitBackdropFilter: "blur(12px)",
+          borderBottom: "1px solid rgba(0,0,0,0.05)",
+        }}
       >
         <motion.div variants={textVariant()}>
-          <p className={`text-[#8ec5ff] ${styles.sectionSubText}`}>
+          <p
+            className={styles.sectionSubText}
+            style={{ color: "#7c3aed" }}
+          >
             Soft skills & mindset
           </p>
           <h2 className={styles.sectionHeadText}>Professional Skills.</h2>
@@ -83,11 +112,7 @@ const Feedbacks = () => {
       </div>
       <div className={`-mt-20 pb-14 ${styles.paddingX} flex flex-wrap gap-7`}>
         {professionalSkills.map((item, index) => (
-          <SkillCategoryCard
-            key={item.category}
-            index={index}
-            {...item}
-          />
+          <SkillCategoryCard key={item.category} index={index} {...item} />
         ))}
       </div>
     </div>

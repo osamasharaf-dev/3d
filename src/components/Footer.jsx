@@ -19,7 +19,7 @@ const SOCIAL_LINKS = [
     icon: FaGithub,
     label: "GitHub",
     href: "https://github.com/osamasharaf",
-    color: "#ffffff",
+    color: "#1e293b",
   },
   {
     icon: FaFacebook,
@@ -37,7 +37,13 @@ const SOCIAL_LINKS = [
 
 const Footer = () => {
   return (
-    <footer className="relative z-10 w-full border-t border-white/[0.06] bg-[#07080d] px-6 py-10">
+    <footer
+      className="relative z-10 w-full px-6 py-10"
+      style={{
+        background: "#eaecf5",
+        borderTop: "1px solid rgba(0,0,0,0.07)",
+      }}
+    >
       <div className="max-w-7xl mx-auto flex flex-col items-center gap-6">
         {/* Social links */}
         <div className="flex gap-4">
@@ -51,8 +57,12 @@ const Footer = () => {
               whileHover={{ scale: 1.15, y: -3 }}
               whileTap={{ scale: 0.92 }}
               transition={{ type: "spring", stiffness: 400, damping: 20 }}
-              className="w-10 h-10 rounded-xl bg-[#111522] border border-white/[0.08] hover:border-white/20 flex items-center justify-center transition-all duration-300"
-              style={{ color }}
+              className="w-10 h-10 rounded-xl border flex items-center justify-center transition-all duration-300 hover:shadow-md"
+              style={{
+                background: "rgba(255,255,255,0.85)",
+                borderColor: "rgba(0,0,0,0.08)",
+                color,
+              }}
             >
               <Icon className="text-lg" />
             </motion.a>
@@ -60,16 +70,17 @@ const Footer = () => {
         </div>
 
         {/* Divider */}
-        <div className="w-full max-w-xs h-px bg-white/[0.06]" />
+        <div
+          className="w-full max-w-xs h-px"
+          style={{ background: "rgba(0,0,0,0.08)" }}
+        />
 
         {/* Copyright */}
         <div className="text-center space-y-1">
-          <p className="text-secondary text-sm">
-            © 2026 All Rights Reserved.
-          </p>
+          <p className="text-secondary text-sm">© 2026 All Rights Reserved.</p>
           <p className="text-secondary text-sm">
             Developed by{" "}
-            <span className="text-[#8ec5ff] font-semibold">
+            <span className="text-[#7c3aed] font-semibold">
               Eng. OSAMA SHARAF
             </span>{" "}
             <span className="text-[#915EFF] font-mono">&lt;/&gt;</span>
@@ -79,7 +90,7 @@ const Footer = () => {
         {/* Privacy Policy link */}
         <Link
           to="/privacy-policy"
-          className="text-secondary text-xs hover:text-[#8ec5ff] transition-colors duration-200 underline underline-offset-2"
+          className="text-secondary text-xs hover:text-[#7c3aed] transition-colors duration-200 underline underline-offset-2"
         >
           Privacy Policy
         </Link>
