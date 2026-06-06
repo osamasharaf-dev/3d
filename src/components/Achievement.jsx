@@ -77,10 +77,10 @@ const Achievement = () => {
     <>
       <motion.div variants={textVariant()}>
         <p className={`${styles.sectionSubText} text-center`}>
-          What I have Achieved so far
+          Professional credentials & accomplishments
         </p>
         <h2 className={`${styles.sectionHeadText} text-center`}>
-          Achievements.
+          Certifications.
         </h2>
       </motion.div>
 

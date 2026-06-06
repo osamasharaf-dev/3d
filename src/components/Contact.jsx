@@ -1,6 +1,14 @@
 import emailjs from "@emailjs/browser";
 import { motion } from "framer-motion";
 import React, { useRef, useState } from "react";
+import {
+  FaLinkedin,
+  FaGithub,
+  FaFacebook,
+  FaInstagram,
+  FaEnvelope,
+  FaPhone,
+} from "react-icons/fa";
 
 import { SectionWrapper } from "../hoc";
 import useMagnetic from "../reactbits/hooks/useMagnetic";
@@ -9,6 +17,33 @@ import { styles } from "../styles";
 import { slideIn } from "../utils/motion";
 import { EarthCanvas } from "./canvas";
 import Toast from "./ui/toast";
+
+const SOCIAL_LINKS = [
+  {
+    icon: FaLinkedin,
+    label: "LinkedIn",
+    href: "https://linkedin.com/in/osamasharaf",
+    color: "#0A66C2",
+  },
+  {
+    icon: FaGithub,
+    label: "GitHub",
+    href: "https://github.com/osamasharaf",
+    color: "#ffffff",
+  },
+  {
+    icon: FaFacebook,
+    label: "Facebook",
+    href: "https://facebook.com/osamasharaf",
+    color: "#1877F2",
+  },
+  {
+    icon: FaInstagram,
+    label: "Instagram",
+    href: "https://instagram.com/osamasharaf",
+    color: "#E4405F",
+  },
+];
 
 const Contact = () => {
   const formRef = useRef();
@@ -42,7 +77,6 @@ const Contact = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Validate form fields
     if (!form.name.trim() || !form.email.trim() || !form.message.trim()) {
       play("notification");
       setToast({
@@ -54,7 +88,6 @@ const Contact = () => {
     }
     setLoading(true);
 
-    // Check if EmailJS environment variables are configured
     const serviceId = import.meta.env.VITE_APP_EMAILJS_SERVICE_ID;
     const templateId = import.meta.env.VITE_APP_EMAILJS_TEMPLATE_ID;
     const publicKey = import.meta.env.VITE_APP_EMAILJS_PUBLIC_KEY;
@@ -77,9 +110,9 @@ const Contact = () => {
         templateId,
         {
           user_name: form.name,
-          my_name: "Jayant Potdar",
+          my_name: "Osama Sharaf",
           user_email: form.email,
-          my_email: "jayantpotdar2006@gmail.com",
+          my_email: "osamaabdulhalimsharaf@gmail.com",
           user_message: form.message,
         },
         publicKey
@@ -125,7 +158,46 @@ const Contact = () => {
         <h2 className="text-white text-center font-black md:text-[60px] sm:text-[50px] xs:text-[40px] text-[30px] px-4">
           Let's Work Together
         </h2>
-        <div className="xl:mt-12 flex xl:flex-row flex-col-reverse gap-6 lg:gap-10 overflow-hidden text-white px-4 sm:px-6 lg:px-8">
+
+        {/* Contact info bar */}
+        <div className="flex flex-wrap justify-center gap-6 mt-6 mb-2 px-4">
+          <a
+            href="mailto:osamaabdulhalimsharaf@gmail.com"
+            className="flex items-center gap-2 text-[#8ec5ff] hover:text-white transition-colors duration-200 text-sm sm:text-base"
+          >
+            <FaEnvelope className="text-lg" />
+            <span>osamaabdulhalimsharaf@gmail.com</span>
+          </a>
+          <a
+            href="tel:+963935562470"
+            className="flex items-center gap-2 text-[#8ec5ff] hover:text-white transition-colors duration-200 text-sm sm:text-base"
+          >
+            <FaPhone className="text-lg" />
+            <span>+963 935 562 470</span>
+          </a>
+        </div>
+
+        {/* Social media links */}
+        <div className="flex justify-center gap-4 mt-4 mb-6">
+          {SOCIAL_LINKS.map(({ icon: Icon, label, href, color }) => (
+            <motion.a
+              key={label}
+              href={href}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={label}
+              whileHover={{ scale: 1.15, y: -3 }}
+              whileTap={{ scale: 0.92 }}
+              transition={{ type: "spring", stiffness: 400, damping: 20 }}
+              className="w-11 h-11 rounded-xl bg-[#111522] border border-white/[0.08] hover:border-white/20 flex items-center justify-center transition-all duration-300"
+              style={{ color }}
+            >
+              <Icon className="text-xl" />
+            </motion.a>
+          ))}
+        </div>
+
+        <div className="xl:mt-8 flex xl:flex-row flex-col-reverse gap-6 lg:gap-10 overflow-hidden text-white px-4 sm:px-6 lg:px-8">
           <motion.div
             variants={slideIn("left", "tween", 0.2, 1)}
             className="flex-[0.75] w-full xl:w-[40rem] bg-[#111522] p-4 sm:p-6 lg:p-8 rounded-2xl"
@@ -180,7 +252,7 @@ const Contact = () => {
                   name="message"
                   value={form.message}
                   onChange={handleChange}
-                  placeholder="Tell me about your project,"
+                  placeholder="Tell me about your project..."
                   className="bg-[#07080d] py-3 sm:py-4 px-4 sm:px-6 placeholder:text-[#fafafa8a] rounded-lg outline-none border-none font-medium text-sm sm:text-base w-full resize-none"
                 />
               </label>
@@ -191,7 +263,7 @@ const Contact = () => {
                 style={magneticStyle}
                 className="bg-[#07080d] py-3 px-6 sm:px-8 rounded-xl outline-none w-fit text-white font-bold shadow-md shadow-primary text-sm sm:text-base hover:bg-[#0a0b12] transition-colors duration-200"
               >
-                {loading ? "Sending..." : "Send"}
+                {loading ? "Sending..." : "Send Message"}
               </button>
             </form>
           </motion.div>

@@ -8,7 +8,7 @@ import { ComputersCanvas } from "./canvas";
 
 const Hero = () => {
   const [typedText, setTypedText] = useState("");
-  const typedItems = ["Developer", "Freelancer", "Designer", "Learner"];
+  const typedItems = ["Full-Stack Developer", "Software Engineer", "Web Architect", "Problem Solver"];
   const [itemIndex, setItemIndex] = useState(0);
   const [charIndex, setCharIndex] = useState(0);
   const [isTyping, setIsTyping] = useState(true);
@@ -52,7 +52,7 @@ const Hero = () => {
 
         <div style={parallaxStyle}>
           <h1 className={`${styles.heroHeadText} text-white`}>
-            Hi, I'm <span className="text-[#915EFF]">Jayant Potdar</span>
+            Hi, I'm <span className="text-[#915EFF]">Osama Sharaf</span>
           </h1>
           <p className={`${styles.heroSubText} mt-2 text-white-100`}>
             I'm{" "}
@@ -76,7 +76,7 @@ const Hero = () => {
               |
             </span>
             <br />
-            <b>Bring on the challenges, I'm ready to soak up knowledge!</b>
+            <b>Building modern digital solutions, scalable web applications, and high-performance digital experiences.</b>
           </p>
         </div>
       </div>

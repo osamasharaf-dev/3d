@@ -1,13 +1,11 @@
 import { AnimatePresence, motion } from "framer-motion";
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import {
   about,
   achievements,
   project,
   portfolio,
   skills,
-  testimonials,
   contact,
   logo,
 } from "../assets";
@@ -15,36 +13,11 @@ import useNavPeek from "../reactbits/hooks/useNavPeek";
 
 const NAV_LINKS = [
   { title: "home", href: "#hero", img: portfolio },
-  {
-    title: "about",
-    href: "#about",
-    img: about,
-  },
-  {
-    title: "project",
-    href: "#projects",
-    img: project,
-  },
-  {
-    title: "achievements",
-    href: "#achievements",
-    img: achievements,
-  },
-  {
-    title: "skills",
-    href: "#skills",
-    img: skills,
-  },
-  {
-    title: "testimonials",
-    href: "#testimonials",
-    img: testimonials,
-  },
-  {
-    title: "contact",
-    href: "#contact",
-    img: contact,
-  },
+  { title: "about", href: "#about", img: about },
+  { title: "skills", href: "#skills", img: skills },
+  { title: "certifications", href: "#achievements", img: achievements },
+  { title: "portfolio", href: "#projects", img: project },
+  { title: "contact", href: "#contact", img: contact },
 ];
 
 const opacity = {
@@ -178,7 +151,6 @@ const Navbar = () => {
             </motion.p>
           </div>
           <div className="relative w-[22.5px] h-[16px] flex flex-col justify-center items-center mx-2">
-            {/* Top line */}
             <motion.span
               className="absolute left-0 w-full h-[1px] bg-white block"
               style={{ top: 0 }}
@@ -187,7 +159,6 @@ const Navbar = () => {
               }
               transition={{ duration: 1, ease: [0.76, 0, 0.24, 1] }}
             />
-            {/* Middle line */}
             <motion.span
               className="absolute left-0 w-full h-[1px] bg-white block"
               style={{ top: "7.5px" }}
@@ -198,7 +169,6 @@ const Navbar = () => {
               }
               transition={{ duration: 1, ease: [0.76, 0, 0.24, 1] }}
             />
-            {/* Bottom line */}
             <motion.span
               className="absolute left-0 w-full h-[1px] bg-white block"
               style={{ top: "15px" }}

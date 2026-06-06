@@ -1,0 +1,142 @@
+Analyze the existing portfolio website and keep the current design, animations, transitions, 3D effects, layout structure, scrolling behavior, responsiveness, and overall visual identity unchanged.
+
+Replace all existing content with the following professional personal portfolio content for OSAMA SHARAF.
+
+Create the following navigation structure:
+
+* Home
+* About
+* Skills
+* Certifications
+* Portfolio
+* Contact
+
+Hero Section:
+
+Name:
+OSAMA SHARAF
+
+Title:
+Software Engineer | Full-Stack Web Developer
+
+Professional headline:
+Building modern digital solutions, scalable web applications, and high-performance digital experiences.
+
+Use a strong call-to-action structure while keeping the existing buttons and animations.
+
+About Section:
+
+I am a Software Engineer and Full-Stack Web Developer passionate about building modern digital solutions, scalable web applications, and high-performance digital experiences.
+
+With expertise spanning front-end development, back-end systems, databases, and cloud-based deployment, I transform ideas into reliable and impactful products that help businesses grow and succeed in the digital world.
+
+My goal is not only to write code, but to create meaningful solutions that combine functionality, performance, and exceptional user experience.
+
+Technical Skills Section:
+
+Frontend:
+
+* HTML5
+* CSS3
+* JavaScript (ES6+)
+* TypeScript
+* React.js
+* Next.js
+* Tailwind CSS
+* Responsive Web Design
+* Framer Motion
+
+Backend:
+
+* Node.js
+* Express.js
+* RESTful APIs
+* Authentication & Authorization
+* Server Architecture
+
+Databases:
+
+* MySQL
+* PostgreSQL
+* MongoDB
+* Firebase
+* Database Design & Optimization
+
+Development Tools:
+
+* Git & GitHub
+* Vercel
+* Netlify
+* VS Code
+* Deployment & Version Control
+
+Professional Skills Section:
+
+Communication & Teamwork:
+
+* Effective Communication
+* Team Collaboration
+* Client Interaction
+* Leadership & Coordination
+
+Problem Solving:
+
+* Analytical Thinking
+* Technical Troubleshooting
+* Strategic Planning
+* Decision Making
+
+Work Excellence:
+
+* Time Management
+* Adaptability
+* Working Under Pressure
+* Attention to Detail
+* Continuous Learning
+* Fast Problem Resolution
+
+Certifications Section:
+
+Create a dedicated certifications area with animated certification cards and placeholders for future certificates.
+
+Portfolio Section:
+
+Create a professional projects showcase section with project cards, image support, project description, technologies used, and project links.
+
+Contact Section:
+
+Email:
+[osamaabdulhalimsharaf@gmail.com](mailto:osamaabdulhalimsharaf@gmail.com)
+
+Phone:
++963935562470
+
+Include social media buttons:
+
+* LinkedIn
+* GitHub
+* Facebook
+* Instagram
+
+Privacy Policy:
+
+Add a dedicated privacy policy page linked from the footer.
+
+Footer:
+
+© 2026 All Rights Reserved.
+
+Developed by Eng. OSAMA SHARAF </>
+
+Important Requirements:
+
+* Keep the existing cinematic design.
+* Keep all animations and visual effects.
+* Keep all 3D interactions.
+* Maintain mobile responsiveness.
+* Improve typography where necessary.
+* Use modern software-engineering visual language.
+* Preserve performance and loading speed.
+* Do not simplify the design.
+* Do not remove any premium visual elements.
+* Make the final result feel like a professional software engineer portfolio suitable for international clients and technology companies.
