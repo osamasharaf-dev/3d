@@ -9,7 +9,6 @@ import {
   Hero,
   Navbar,
   StarsCanvas,
-  Works,
 } from "./components";
 import EasterEggs from "./components/EasterEggs";
 import ElasticCursor from "./components/ElasticCursor";
@@ -33,7 +32,6 @@ const MainPage = () => (
     </div>
     <StarsCanvas />
     <About />
-    <Works />
     <Achievement />
     <SkillKeyboard />
     <Feedbacks />

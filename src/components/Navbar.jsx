@@ -8,7 +8,6 @@ const NAV_LINKS = [
   { title: "About", href: "#about", id: "about" },
   { title: "Skills", href: "#skills", id: "skills" },
   { title: "Certifications", href: "#achievements", id: "achievements" },
-  { title: "Portfolio", href: "#projects", id: "projects" },
   { title: "Contact", href: "#contact", id: "contact" },
 ];
 

@@ -6,7 +6,6 @@ import Feedbacks from "./Feedbacks";
 import Hero from "./Hero";
 import CanvasLoader from "./Loader";
 import Navbar from "./Navbar";
-import Works from "./Works";
 
 export {
   About,
@@ -19,5 +18,4 @@ export {
   Hero,
   Navbar,
   StarsCanvas,
-  Works,
 };
