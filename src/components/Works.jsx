@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import React, { useState } from "react";
+import React, { memo, useCallback, useState } from "react";
 import { Tilt } from "react-tilt";
 
 import { github } from "../assets";
@@ -12,7 +12,7 @@ import { fadeIn, textVariant } from "../utils/motion";
 import useMediaQuery from "../utils/useMediaQuery";
 import ProjectModal from "./ProjectModal";
 
-const ProjectCard = ({ index, name, image, source_code_link, onOpenModal }) => {
+const ProjectCard = memo(({ index, name, image, source_code_link, onOpenModal }) => {
   const { hoverDepth, previewReady, handlers } = useCardIntent({
     id: `project-${index}`,
     hoverDelay: 200,
@@ -32,12 +32,7 @@ const ProjectCard = ({ index, name, image, source_code_link, onOpenModal }) => {
           y: previewReady ? -6 - hoverDepth * 6 : 0,
           scale: 1 + hoverDepth * 0.012,
         }}
-        transition={{
-          duration: 0.28,
-          type: "spring",
-          stiffness: 230,
-          damping: 24,
-        }}
+        transition={{ duration: 0.28, type: "spring", stiffness: 230, damping: 24 }}
         className="relative h-[320px] rounded-xl overflow-hidden cursor-pointer group bg-[#0a0e17] border border-white/[0.06] hover:border-white/[0.14] transition-all duration-400 shadow-[0_6px_24px_rgb(0,0,0,0.25)] hover:shadow-[0_12px_30px_rgb(0,0,0,0.4)]"
         onClick={() => onOpenModal(previewReady)}
       >
@@ -63,7 +58,7 @@ const ProjectCard = ({ index, name, image, source_code_link, onOpenModal }) => {
             className="relative w-10 h-10 rounded-lg bg-white/[0.05] backdrop-blur-lg border border-white/[0.12] hover:border-blue-500/40 hover:bg-white/[0.08] flex items-center justify-center transition-all duration-400"
             aria-label="View source code"
           >
-            <img src={github} alt="github" className="w-5 h-5 opacity-75 group-hover:opacity-100 transition-opacity duration-300" />
+            <img src={github} alt="github" loading="lazy" decoding="async" className="w-5 h-5 opacity-75 group-hover:opacity-100 transition-opacity duration-300" />
           </motion.button>
         </div>
 
@@ -72,6 +67,7 @@ const ProjectCard = ({ index, name, image, source_code_link, onOpenModal }) => {
             src={image}
             alt={name}
             loading="lazy"
+            decoding="async"
             className="w-full h-full object-cover transition-all duration-500 ease-out group-hover:scale-[1.02]"
             style={{
               filter: "brightness(0.88) saturate(1.05) contrast(1.02)",
@@ -83,36 +79,30 @@ const ProjectCard = ({ index, name, image, source_code_link, onOpenModal }) => {
         </div>
 
         <div className="absolute inset-0 flex flex-col justify-end p-5">
-          <motion.div
-            initial={{ opacity: 0, x: -10 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.4 }}
-            className="mb-2 opacity-0 group-hover:opacity-100 transition-all duration-400"
-          >
+          <div className="mb-2 opacity-0 group-hover:opacity-100 transition-all duration-400">
             <div className="inline-flex items-center gap-1.5 text-xs text-blue-400/85 font-medium tracking-wide">
               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
               </svg>
               <span>View Project</span>
             </div>
-          </motion.div>
-
+          </div>
           <h3 className="text-white font-bold text-lg leading-snug mb-2 tracking-tight group-hover:text-blue-50 transition-colors duration-400 line-clamp-2">
             {name}
           </h3>
-
           <div className="h-[1.5px] w-0 group-hover:w-12 bg-gradient-to-r from-blue-500 to-blue-400 rounded-full transition-all duration-600 ease-out" />
         </div>
 
         <div className="absolute bottom-0 left-0 right-0 h-px bg-white/5 group-hover:bg-blue-500/25 transition-all duration-500" />
-
         <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none">
           <div className="absolute top-0 right-0 w-72 h-72 bg-blue-500/8 rounded-full blur-3xl" />
         </div>
       </motion.div>
     </motion.div>
   );
-};
+});
+
+ProjectCard.displayName = "ProjectCard";
 
 const Works = () => {
   const [selectedProject, setSelectedProject] = useState(null);
@@ -120,29 +110,29 @@ const Works = () => {
   const [currentProjectIndex, setCurrentProjectIndex] = useState(-1);
   const [modalPreviewReady, setModalPreviewReady] = useState(false);
 
-  const handleOpenModal = (project, previewReady = false) => {
+  const handleOpenModal = useCallback((project, previewReady = false) => {
     const index = projects.findIndex((p) => p.name === project.name);
     setCurrentProjectIndex(index);
     setSelectedProject(project);
     setModalPreviewReady(previewReady);
     setIsModalOpen(true);
-  };
+  }, []);
 
-  const handleCloseModal = () => {
+  const handleCloseModal = useCallback(() => {
     setIsModalOpen(false);
     setTimeout(() => {
       setSelectedProject(null);
       setCurrentProjectIndex(-1);
       setModalPreviewReady(false);
     }, 300);
-  };
+  }, []);
 
-  const handleNavigateProject = (newIndex) => {
+  const handleNavigateProject = useCallback((newIndex) => {
     if (newIndex >= 0 && newIndex < projects.length) {
       setCurrentProjectIndex(newIndex);
       setSelectedProject(projects[newIndex]);
     }
-  };
+  }, []);
 
   return (
     <>
@@ -169,6 +159,7 @@ const Works = () => {
                         src={word.imgPath}
                         alt="person"
                         loading="lazy"
+                        decoding="async"
                         className="md:p-2 p-1 rounded-full bg-[#8ec5ff]"
                       />
                       <span

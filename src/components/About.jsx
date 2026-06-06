@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import React from "react";
+import React, { memo } from "react";
 import { RiBriefcase4Fill } from "react-icons/ri";
 import { Tilt } from "react-tilt";
 import { services } from "../constants";
@@ -8,7 +8,7 @@ import useMagnetic from "../reactbits/hooks/useMagnetic";
 import { styles } from "../styles";
 import { fadeIn, textVariant } from "../utils/motion";
 
-const ServiceCard = ({ index, title, icon }) => (
+const ServiceCard = memo(({ index, title, icon }) => (
   <Tilt className="xs:w-[255px] w-full">
     <motion.div
       variants={fadeIn("right", "spring", index * 0.5, 0.75)}
@@ -23,6 +23,7 @@ const ServiceCard = ({ index, title, icon }) => (
           alt={title}
           className="w-16 h-16 object-contain"
           loading="lazy"
+          decoding="async"
         />
         <h3 className="text-white text-[20px] font-bold text-center">
           {title}
@@ -30,7 +31,9 @@ const ServiceCard = ({ index, title, icon }) => (
       </div>
     </motion.div>
   </Tilt>
-);
+));
+
+ServiceCard.displayName = "ServiceCard";
 
 const About = () => {
   const { ref: resumeButtonRef, style: magneticStyle } = useMagnetic({

@@ -1,31 +1,31 @@
 import { motion } from "framer-motion";
-import React, { useRef, useState } from "react";
+import React, { memo, useCallback, useRef, useState } from "react";
 
 import { achievements } from "../constants";
 import { SectionWrapper } from "../hoc";
 import { styles } from "../styles";
 import { textVariant } from "../utils/motion";
 
-const CertCard = ({ Achievement, index }) => {
+const CertCard = memo(({ Achievement, index }) => {
   const cardRef = useRef(null);
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
   const [hovered, setHovered] = useState(false);
 
-  const handleMouseMove = (e) => {
+  const handleMouseMove = useCallback((e) => {
     if (!cardRef.current) return;
     const rect = cardRef.current.getBoundingClientRect();
-    const cx = rect.left + rect.width / 2;
-    const cy = rect.top + rect.height / 2;
     setTilt({
-      x: ((e.clientY - cy) / rect.height) * 10,
-      y: -((e.clientX - cx) / rect.width) * 10,
+      x: ((e.clientY - rect.top - rect.height / 2) / rect.height) * 10,
+      y: -((e.clientX - rect.left - rect.width / 2) / rect.width) * 10,
     });
-  };
+  }, []);
 
-  const handleMouseLeave = () => {
+  const handleMouseEnter = useCallback(() => setHovered(true), []);
+
+  const handleMouseLeave = useCallback(() => {
     setTilt({ x: 0, y: 0 });
     setHovered(false);
-  };
+  }, []);
 
   const title = Array.isArray(Achievement.title)
     ? Achievement.title[0]
@@ -39,7 +39,7 @@ const CertCard = ({ Achievement, index }) => {
       viewport={{ once: true, amount: 0.2 }}
       transition={{ duration: 0.6, delay: index * 0.12, ease: [0.16, 1, 0.3, 1] }}
       onMouseMove={handleMouseMove}
-      onMouseEnter={() => setHovered(true)}
+      onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       style={{
         transform: `perspective(800px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg) translateZ(${hovered ? "8px" : "0px"})`,
@@ -50,13 +50,10 @@ const CertCard = ({ Achievement, index }) => {
       }}
       className="relative rounded-2xl overflow-hidden cursor-default"
     >
-      {/* Dark glass card */}
       <div
         className="relative h-full p-6"
         style={{
-          background: hovered
-            ? "rgba(17, 21, 34, 0.95)"
-            : "rgba(11, 13, 22, 0.80)",
+          background: hovered ? "rgba(17,21,34,0.95)" : "rgba(11,13,22,0.80)",
           backdropFilter: "blur(16px)",
           WebkitBackdropFilter: "blur(16px)",
           border: hovered
@@ -65,10 +62,9 @@ const CertCard = ({ Achievement, index }) => {
           boxShadow: hovered
             ? "0 20px 50px rgba(0,0,0,0.55), 0 0 30px rgba(145,94,255,0.12)"
             : "0 8px 30px rgba(0,0,0,0.35)",
-          transition: "background 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease",
+          transition: "background 0.3s, box-shadow 0.3s, border-color 0.3s",
         }}
       >
-        {/* Shimmer on hover */}
         <div
           className="absolute top-0 left-0 right-0 h-px transition-opacity duration-300"
           style={{
@@ -80,7 +76,6 @@ const CertCard = ({ Achievement, index }) => {
 
         {/* Header */}
         <div className="flex items-start gap-4 mb-4">
-          {/* Icon */}
           <div
             className="flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center overflow-hidden"
             style={{
@@ -93,10 +88,10 @@ const CertCard = ({ Achievement, index }) => {
               alt={title}
               className="w-8 h-8 object-contain"
               loading="lazy"
+              decoding="async"
             />
           </div>
 
-          {/* Title + company */}
           <div className="flex-1 min-w-0">
             <h3 className="text-[#8eadff] font-bold text-[16px] leading-snug">
               {title}
@@ -108,7 +103,6 @@ const CertCard = ({ Achievement, index }) => {
             )}
           </div>
 
-          {/* Date badge */}
           {Achievement.date && (
             <div
               className="flex-shrink-0 px-2.5 py-1 rounded-lg text-[11px] font-semibold whitespace-nowrap"
@@ -123,7 +117,6 @@ const CertCard = ({ Achievement, index }) => {
           )}
         </div>
 
-        {/* Divider */}
         <div
           className="w-full h-px mb-4"
           style={{ background: "rgba(255,255,255,0.07)" }}
@@ -146,21 +139,11 @@ const CertCard = ({ Achievement, index }) => {
                     href={Achievement.credential[i]}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 mt-1 text-[11px] font-semibold transition-colors duration-200 text-blue-400 hover:text-blue-300"
+                    className="inline-flex items-center gap-1 mt-1 text-[11px] font-semibold text-blue-400 hover:text-blue-300 transition-colors duration-200"
                     onClick={(e) => e.stopPropagation()}
                   >
-                    <svg
-                      className="w-3 h-3"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={2.5}
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                      />
+                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                     </svg>
                     View Credential
                   </a>
@@ -170,7 +153,6 @@ const CertCard = ({ Achievement, index }) => {
           ))}
         </ul>
 
-        {/* Bottom glow line on hover */}
         <div
           className="absolute bottom-0 left-0 right-0 h-px transition-opacity duration-300"
           style={{
@@ -182,7 +164,9 @@ const CertCard = ({ Achievement, index }) => {
       </div>
     </motion.div>
   );
-};
+});
+
+CertCard.displayName = "CertCard";
 
 const Achievement = () => {
   return (

@@ -1,73 +1,81 @@
-import React, { Suspense, useEffect, useState } from "react";
+import React, { Suspense, useEffect, useState, memo } from "react";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls, Preload, useGLTF } from "@react-three/drei";
 
 import CanvasLoader from "../Loader";
 
-const Computers = ({ isMobile }) => {
+const SIZES = {
+  mobile:  { scale: 0.50, position: [0, -2.6, -2.0] },
+  tablet:  { scale: 0.60, position: [0, -3.0, -1.5] },
+  desktop: { scale: 0.65, position: [0, -3.5, -1.5] },
+};
+
+const Computers = memo(({ size }) => {
   const computer = useGLTF("./desktop_pc/scene.gltf");
+  const { scale, position } = SIZES[size];
 
   return (
     <mesh>
-      <hemisphereLight intensity={0.15} groundColor='black' />
+      <hemisphereLight intensity={0.15} groundColor="black" />
       <spotLight
         position={[-20, 50, 10]}
         angle={0.12}
         penumbra={1}
         intensity={1}
         castShadow
-        shadow-mapSize={1024}
+        shadow-mapSize={512}
       />
       <pointLight intensity={1} />
       <primitive
         object={computer.scene}
-        scale={isMobile ? 0.7 : 0.75}
-        position={isMobile ? [0, -3.30, -2.2] : [0, -3.80, -1.5]}
-        rotation={[-0.00, -0.2, -0.1]}
+        scale={scale}
+        position={position}
+        rotation={[-0.01, -0.2, -0.1]}
       />
     </mesh>
   );
-};
+});
+
+Computers.displayName = "Computers";
 
 const ComputersCanvas = () => {
-  const [isMobile, setIsMobile] = useState(false);
+  const [size, setSize] = useState("desktop");
 
   useEffect(() => {
-    // Add a listener for changes to the screen size
-    const mediaQuery = window.matchMedia("(max-width: 500px)");
-
-    // Set the initial value of the `isMobile` state variable
-    setIsMobile(mediaQuery.matches);
-
-    // Define a callback function to handle changes to the media query
-    const handleMediaQueryChange = (event) => {
-      setIsMobile(event.matches);
+    const update = () => {
+      const w = window.innerWidth;
+      if (w <= 500) setSize("mobile");
+      else if (w <= 850) setSize("tablet");
+      else setSize("desktop");
     };
 
-    // Add the callback function as a listener for changes to the media query
-    mediaQuery.addEventListener("change", handleMediaQueryChange);
-
-    // Remove the listener when the component is unmounted
-    return () => {
-      mediaQuery.removeEventListener("change", handleMediaQueryChange);
-    };
+    update();
+    window.addEventListener("resize", update, { passive: true });
+    return () => window.removeEventListener("resize", update);
   }, []);
+
+  const isMobile = size === "mobile";
 
   return (
     <Canvas
-      frameloop='demand'
+      frameloop="demand"
       shadows
-      dpr={[1, 2]}
-      camera={{ position: [20, 3, 5], fov: 25 }}
-      gl={{ preserveDrawingBuffer: true }}
+      dpr={isMobile ? 1 : [1, 1.5]}
+      camera={{ position: [20, 3, 5], fov: size === "mobile" ? 30 : 25 }}
+      gl={{
+        preserveDrawingBuffer: false,
+        antialias: !isMobile,
+        powerPreference: "high-performance",
+      }}
     >
       <Suspense fallback={<CanvasLoader />}>
         <OrbitControls
           enableZoom={false}
           maxPolarAngle={Math.PI / 2}
           minPolarAngle={Math.PI / 2}
+          enablePan={false}
         />
-        <Computers isMobile={isMobile} />
+        <Computers size={size} />
       </Suspense>
 
       <Preload all />

@@ -1,0 +1,56 @@
+Perform a deep performance audit and optimization of the entire web application with the goal of achieving ultra-fast load time, smooth rendering, and production-grade UX.
+
+⚡ 1. Core Performance Refactor
+Profile the application and identify all performance bottlenecks.
+Reduce Total Blocking Time (TBT) and improve Time To Interactive (TTI).
+Eliminate unnecessary re-renders and heavy computations on the main thread.
+Split large bundles using dynamic imports / code splitting.
+Remove unused dependencies, dead code, and redundant logic.
+Optimize rendering pipeline to ensure smooth 60fps UI interactions.
+📦 2. Asset Optimization
+Compress and optimize all images (use modern formats like WebP or AVIF where possible).
+Implement lazy loading for all off-screen images and components.
+Preload critical assets only (hero section + above-the-fold content).
+Minify CSS, JS, and HTML.
+Ensure fonts are optimized and not blocking render.
+🌐 3. Routing & Page Speed
+Optimize routing transitions for instant navigation feel.
+Prefetch important routes intelligently.
+Avoid full page reloads where possible.
+Cache repeated API calls and static data.
+🧠 4. JavaScript / React Optimization (if applicable)
+Reduce unnecessary state updates and re-renders.
+Use memoization (React.memo, useMemo, useCallback) where beneficial.
+Optimize component hierarchy to reduce render depth.
+Move heavy logic outside render functions.
+Ensure asynchronous tasks do not block UI thread.
+🖼️ 5. Hero Section Fix (Critical UI Issue)
+There is a 3D 360° rotating image in the hero section.
+The current size is too large and visually dominates the layout, pushing or overlapping text content.
+
+Fix it as follows:
+
+Scale down the 3D element to a balanced, modern hero composition.
+Ensure it stays visually dominant but NOT overwhelming.
+Maintain correct alignment with text content.
+Ensure no overlap with headings or buttons.
+Make it fully responsive:
+Desktop: medium-sized, balanced layout
+Tablet: slightly smaller
+Mobile: significantly reduced size or repositioned below text if needed
+Ensure smooth 360° rotation animation remains fluid without lag.
+Preserve aspect ratio and visual quality during resizing.
+📱 6. Responsive & UX Improvements
+Ensure perfect layout stability across all screen sizes.
+Prevent layout shifts (CLS optimization).
+Improve spacing, typography rendering, and visual hierarchy.
+Ensure touch interactions are smooth on mobile.
+🎯 Final Goal
+
+Deliver a cinematic, ultra-smooth, high-performance website with:
+
+Instant-feeling navigation
+No UI lag
+Optimized rendering pipeline
+Balanced hero section design
+Premium production-level UX

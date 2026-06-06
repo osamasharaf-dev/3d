@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo } from "react";
 import { motion } from "framer-motion";
 
 import { styles } from "../styles";
@@ -43,7 +43,7 @@ const professionalSkills = [
   },
 ];
 
-const SkillCategoryCard = ({ index, category, icon, color, skills }) => (
+const SkillCategoryCard = memo(({ index, category, icon, color, skills }) => (
   <motion.div
     variants={fadeIn("", "spring", index * 0.5, 0.75)}
     className="bg-[#0f0f0f] p-10 rounded-3xl xs:w-[320px] w-full border border-white/[0.06] hover:border-white/[0.12] transition-all duration-400"
@@ -56,10 +56,7 @@ const SkillCategoryCard = ({ index, category, icon, color, skills }) => (
     </div>
     <ul className="mt-4 space-y-2">
       {skills.map((skill, i) => (
-        <li
-          key={i}
-          className="flex items-center gap-2 text-secondary text-[15px]"
-        >
+        <li key={i} className="flex items-center gap-2 text-secondary text-[15px]">
           <span
             className="w-1.5 h-1.5 rounded-full flex-shrink-0"
             style={{ backgroundColor: color }}
@@ -69,14 +66,14 @@ const SkillCategoryCard = ({ index, category, icon, color, skills }) => (
       ))}
     </ul>
   </motion.div>
-);
+));
+
+SkillCategoryCard.displayName = "SkillCategoryCard";
 
 const Feedbacks = () => {
   return (
     <div className="mt-12 bg-[#0a0c14] rounded-[20px]">
-      <div
-        className={`bg-[#111522] rounded-2xl ${styles.padding} min-h-[300px]`}
-      >
+      <div className={`bg-[#111522] rounded-2xl ${styles.padding} min-h-[300px]`}>
         <motion.div variants={textVariant()}>
           <p className={`text-[#8ec5ff] ${styles.sectionSubText}`}>
             Soft skills & mindset

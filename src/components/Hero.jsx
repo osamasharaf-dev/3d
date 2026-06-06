@@ -1,12 +1,19 @@
 import { motion, useSpring, useMotionValue } from "framer-motion";
-import { useEffect, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useRef, useState } from "react";
 
 import useParallax from "../reactbits/hooks/useParallax";
 import { styles } from "../styles";
 import useMediaQuery from "../utils/useMediaQuery";
 import { ComputersCanvas } from "./canvas";
 
-const FloatingPortraitCard = () => {
+const TYPED_ITEMS = [
+  "Full-Stack Developer",
+  "Software Engineer",
+  "Web Architect",
+  "Problem Solver",
+];
+
+const FloatingPortraitCard = memo(() => {
   const cardRef = useRef(null);
 
   const rawX = useMotionValue(0);
@@ -14,19 +21,19 @@ const FloatingPortraitCard = () => {
   const springX = useSpring(rawX, { stiffness: 120, damping: 18 });
   const springY = useSpring(rawY, { stiffness: 120, damping: 18 });
 
-  const handleMouseMove = (e) => {
+  const handleMouseMove = useCallback((e) => {
     if (!cardRef.current) return;
     const rect = cardRef.current.getBoundingClientRect();
     const cx = rect.left + rect.width / 2;
     const cy = rect.top + rect.height / 2;
     rawX.set(((e.clientY - cy) / rect.height) * 14);
     rawY.set(-((e.clientX - cx) / rect.width) * 14);
-  };
+  }, [rawX, rawY]);
 
-  const handleMouseLeave = () => {
+  const handleMouseLeave = useCallback(() => {
     rawX.set(0);
     rawY.set(0);
-  };
+  }, [rawX, rawY]);
 
   return (
     <motion.div
@@ -43,7 +50,7 @@ const FloatingPortraitCard = () => {
       }}
       className="relative cursor-pointer select-none"
     >
-      {/* Glow orb behind card */}
+      {/* Glow orb */}
       <div
         className="absolute -inset-6 rounded-full opacity-40 blur-3xl pointer-events-none"
         style={{
@@ -66,7 +73,6 @@ const FloatingPortraitCard = () => {
           padding: "28px 24px 24px",
         }}
       >
-        {/* Shimmer top bar */}
         <div
           className="absolute top-0 left-0 right-0 h-px"
           style={{
@@ -76,7 +82,6 @@ const FloatingPortraitCard = () => {
         />
 
         <div className="flex flex-col items-center gap-4">
-          {/* Avatar ring + circle */}
           <div className="relative">
             <div
               className="absolute -inset-1.5 rounded-full"
@@ -95,8 +100,7 @@ const FloatingPortraitCard = () => {
               <span
                 className="text-3xl font-black tracking-tight"
                 style={{
-                  background:
-                    "linear-gradient(135deg, #915EFF, #8ec5ff)",
+                  background: "linear-gradient(135deg, #915EFF, #8ec5ff)",
                   WebkitBackgroundClip: "text",
                   WebkitTextFillColor: "transparent",
                 }}
@@ -104,17 +108,12 @@ const FloatingPortraitCard = () => {
                 OS
               </span>
             </div>
-            {/* Online dot */}
             <div
               className="absolute bottom-1 right-1 w-4 h-4 rounded-full border-2"
-              style={{
-                background: "#22c55e",
-                borderColor: "rgba(7,8,13,0.9)",
-              }}
+              style={{ background: "#22c55e", borderColor: "rgba(7,8,13,0.9)" }}
             />
           </div>
 
-          {/* Name & title */}
           <div className="text-center">
             <p className="text-white font-bold text-[15px] tracking-wide">
               OSAMA SHARAF
@@ -124,7 +123,6 @@ const FloatingPortraitCard = () => {
             </p>
           </div>
 
-          {/* Skill badges */}
           <div className="flex flex-wrap justify-center gap-1.5">
             {["React", "Node.js", "Full-Stack"].map((tag) => (
               <span
@@ -141,13 +139,11 @@ const FloatingPortraitCard = () => {
             ))}
           </div>
 
-          {/* Divider */}
           <div
             className="w-full h-px"
             style={{ background: "rgba(255,255,255,0.07)" }}
           />
 
-          {/* Status */}
           <div className="flex items-center gap-2">
             <div
               className="w-2 h-2 rounded-full animate-pulse"
@@ -159,31 +155,26 @@ const FloatingPortraitCard = () => {
           </div>
         </div>
 
-        {/* Corner accent */}
         <div
           className="absolute bottom-0 right-0 w-16 h-16 opacity-20 pointer-events-none"
           style={{
-            background:
-              "radial-gradient(circle, #915EFF 0%, transparent 70%)",
+            background: "radial-gradient(circle, #915EFF 0%, transparent 70%)",
           }}
         />
       </div>
     </motion.div>
   );
-};
+});
+
+FloatingPortraitCard.displayName = "FloatingPortraitCard";
 
 const Hero = () => {
   const [typedText, setTypedText] = useState("");
-  const typedItems = [
-    "Full-Stack Developer",
-    "Software Engineer",
-    "Web Architect",
-    "Problem Solver",
-  ];
   const [itemIndex, setItemIndex] = useState(0);
   const [charIndex, setCharIndex] = useState(0);
 
   const isMobile = useMediaQuery("(max-width: 768px)");
+  const isSmallMobile = useMediaQuery("(max-width: 500px)");
   const { style: parallaxStyle } = useParallax({
     strength: 0.03,
     maxOffset: 15,
@@ -191,27 +182,28 @@ const Hero = () => {
   });
 
   useEffect(() => {
-    const typeItem = () => {
-      if (charIndex < typedItems[itemIndex].length) {
-        setTypedText((prev) => prev + typedItems[itemIndex][charIndex]);
+    const currentItem = TYPED_ITEMS[itemIndex];
+    if (charIndex < currentItem.length) {
+      const t = setTimeout(() => {
+        setTypedText((prev) => prev + currentItem[charIndex]);
         setCharIndex((c) => c + 1);
-      } else {
-        setTimeout(() => {
-          setItemIndex((i) => (i + 1) % typedItems.length);
-          setCharIndex(0);
-          setTypedText("");
-        }, 1000);
-      }
-    };
-
-    const interval = setInterval(typeItem, 100);
-    return () => clearInterval(interval);
+      }, 100);
+      return () => clearTimeout(t);
+    } else {
+      const t = setTimeout(() => {
+        setItemIndex((i) => (i + 1) % TYPED_ITEMS.length);
+        setCharIndex(0);
+        setTypedText("");
+      }, 1000);
+      return () => clearTimeout(t);
+    }
   }, [charIndex, itemIndex]);
 
   return (
     <section className="relative w-full h-screen mx-auto" id="hero">
+      {/* Text overlay */}
       <div
-        className={`absolute inset-0 top-[120px] max-w-7xl mx-auto ${styles.paddingX} flex flex-row items-start gap-5`}
+        className={`absolute inset-0 top-[120px] max-w-7xl mx-auto ${styles.paddingX} flex flex-row items-start gap-5 z-10`}
       >
         {/* Left accent line */}
         <div className="flex flex-col justify-center items-center mt-5">
@@ -219,7 +211,7 @@ const Hero = () => {
           <div className="w-1 sm:h-80 h-40 violet-gradient" />
         </div>
 
-        {/* Text content */}
+        {/* Content row */}
         <div
           className="flex-1 flex flex-col lg:flex-row items-start lg:items-center gap-8 lg:gap-12"
           style={parallaxStyle}
@@ -232,11 +224,10 @@ const Hero = () => {
             <p className={`${styles.heroSubText} mt-2`}>
               I'm{" "}
               <span
-                className="typed"
                 aria-hidden="true"
                 style={{
                   backgroundImage:
-                    "linear-gradient(to bottom, rgba(245, 202, 153, 0.5), rgba(245, 202, 153, 0.5))",
+                    "linear-gradient(to bottom, rgba(245,202,153,0.5), rgba(245,202,153,0.5))",
                   backgroundRepeat: "no-repeat",
                   backgroundSize: "100% 8px",
                   backgroundPosition: "0 100%",
@@ -247,13 +238,7 @@ const Hero = () => {
               >
                 {typedText}
               </span>
-              <span
-                className="typed-cursor"
-                aria-hidden="true"
-                style={{ color: "#915EFF" }}
-              >
-                |
-              </span>
+              <span aria-hidden="true" style={{ color: "#915EFF" }}>|</span>
               <br />
               <b>
                 Building modern digital solutions, scalable web applications,
@@ -262,27 +247,28 @@ const Hero = () => {
             </p>
           </div>
 
-          {/* Portrait card — desktop only */}
-          {!isMobile && (
-            <div className="hidden lg:flex items-center justify-center flex-shrink-0 mr-8 mt-4">
-              <FloatingPortraitCard />
-            </div>
-          )}
+          {/* Portrait card — lg+ only */}
+          <div className="hidden lg:flex items-center justify-center flex-shrink-0 mr-8 mt-4">
+            <FloatingPortraitCard />
+          </div>
         </div>
       </div>
 
-      <ComputersCanvas />
+      {/* 3D Canvas — pushed down on small mobile so text stays readable */}
+      <div
+        className="absolute inset-x-0 bottom-0"
+        style={{ top: isSmallMobile ? "200px" : "0" }}
+      >
+        <ComputersCanvas />
+      </div>
 
-      <div className="absolute xs:bottom-10 bottom-32 w-full flex justify-center items-center">
+      {/* Scroll indicator */}
+      <div className="absolute xs:bottom-10 bottom-32 w-full flex justify-center items-center z-10">
         <a href="#about">
           <div className="w-[35px] h-[64px] rounded-3xl border-4 border-secondary flex justify-center items-start p-2">
             <motion.div
               animate={{ y: [0, 24, 0] }}
-              transition={{
-                duration: 1.5,
-                repeat: Infinity,
-                repeatType: "loop",
-              }}
+              transition={{ duration: 1.5, repeat: Infinity, repeatType: "loop" }}
               className="w-3 h-3 rounded-full bg-secondary mb-1"
             />
           </div>

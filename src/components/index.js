@@ -6,7 +6,6 @@ import Feedbacks from "./Feedbacks";
 import Hero from "./Hero";
 import CanvasLoader from "./Loader";
 import Navbar from "./Navbar";
-import Preloader from "./preloader";
 import Works from "./Works";
 
 export {
@@ -19,7 +18,6 @@ export {
   Feedbacks,
   Hero,
   Navbar,
-  Preloader,
   StarsCanvas,
   Works,
 };
