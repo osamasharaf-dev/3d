@@ -50,42 +50,42 @@ const CertCard = ({ Achievement, index }) => {
       }}
       className="relative rounded-2xl overflow-hidden cursor-default"
     >
-      {/* Glass card */}
+      {/* Dark glass card */}
       <div
         className="relative h-full p-6"
         style={{
           background: hovered
-            ? "rgba(255,255,255,0.92)"
-            : "rgba(255,255,255,0.75)",
+            ? "rgba(17, 21, 34, 0.95)"
+            : "rgba(11, 13, 22, 0.80)",
           backdropFilter: "blur(16px)",
           WebkitBackdropFilter: "blur(16px)",
           border: hovered
             ? "1.5px solid rgba(145,94,255,0.35)"
-            : "1.5px solid rgba(255,255,255,0.85)",
+            : "1.5px solid rgba(255,255,255,0.07)",
           boxShadow: hovered
-            ? "0 20px 50px rgba(145,94,255,0.18), 0 6px 20px rgba(0,0,0,0.08)"
-            : "0 8px 30px rgba(0,0,0,0.07), 0 2px 8px rgba(0,0,0,0.04)",
+            ? "0 20px 50px rgba(0,0,0,0.55), 0 0 30px rgba(145,94,255,0.12)"
+            : "0 8px 30px rgba(0,0,0,0.35)",
           transition: "background 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease",
         }}
       >
-        {/* Top shimmer on hover */}
+        {/* Shimmer on hover */}
         <div
           className="absolute top-0 left-0 right-0 h-px transition-opacity duration-300"
           style={{
             background:
-              "linear-gradient(90deg, transparent, rgba(145,94,255,0.6), rgba(142,197,255,0.5), transparent)",
+              "linear-gradient(90deg, transparent, rgba(145,94,255,0.7), rgba(142,197,255,0.5), transparent)",
             opacity: hovered ? 1 : 0,
           }}
         />
 
         {/* Header */}
         <div className="flex items-start gap-4 mb-4">
-          {/* Icon circle */}
+          {/* Icon */}
           <div
             className="flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center overflow-hidden"
             style={{
-              background: Achievement.iconBg || "rgba(145,94,255,0.12)",
-              border: "1.5px solid rgba(145,94,255,0.2)",
+              background: Achievement.iconBg || "rgba(145,94,255,0.15)",
+              border: "1.5px solid rgba(255,255,255,0.08)",
             }}
           >
             <img
@@ -96,9 +96,9 @@ const CertCard = ({ Achievement, index }) => {
             />
           </div>
 
-          {/* Title + date */}
+          {/* Title + company */}
           <div className="flex-1 min-w-0">
-            <h3 className="text-[#0f172a] font-bold text-[16px] leading-snug">
+            <h3 className="text-[#8eadff] font-bold text-[16px] leading-snug">
               {title}
             </h3>
             {Achievement.company_name && (
@@ -113,9 +113,9 @@ const CertCard = ({ Achievement, index }) => {
             <div
               className="flex-shrink-0 px-2.5 py-1 rounded-lg text-[11px] font-semibold whitespace-nowrap"
               style={{
-                background: "rgba(145,94,255,0.10)",
-                color: "#7c3aed",
-                border: "1px solid rgba(145,94,255,0.20)",
+                background: "rgba(145,94,255,0.15)",
+                color: "#c4b5fd",
+                border: "1px solid rgba(145,94,255,0.25)",
               }}
             >
               {Achievement.date}
@@ -126,7 +126,7 @@ const CertCard = ({ Achievement, index }) => {
         {/* Divider */}
         <div
           className="w-full h-px mb-4"
-          style={{ background: "rgba(0,0,0,0.06)" }}
+          style={{ background: "rgba(255,255,255,0.07)" }}
         />
 
         {/* Points */}
@@ -138,7 +138,7 @@ const CertCard = ({ Achievement, index }) => {
                 style={{ background: "#915EFF" }}
               />
               <div className="flex-1">
-                <p className="text-[#475569] text-[13px] leading-relaxed">
+                <p className="text-[#aaa6c3] text-[13px] leading-relaxed">
                   {point}
                 </p>
                 {Achievement.credential?.[i] && (
@@ -146,8 +146,7 @@ const CertCard = ({ Achievement, index }) => {
                     href={Achievement.credential[i]}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 mt-1 text-[11px] font-semibold transition-colors duration-200"
-                    style={{ color: "#7c3aed" }}
+                    className="inline-flex items-center gap-1 mt-1 text-[11px] font-semibold transition-colors duration-200 text-blue-400 hover:text-blue-300"
                     onClick={(e) => e.stopPropagation()}
                   >
                     <svg
@@ -171,12 +170,12 @@ const CertCard = ({ Achievement, index }) => {
           ))}
         </ul>
 
-        {/* Bottom glow on hover */}
+        {/* Bottom glow line on hover */}
         <div
           className="absolute bottom-0 left-0 right-0 h-px transition-opacity duration-300"
           style={{
             background:
-              "linear-gradient(90deg, transparent, rgba(145,94,255,0.4), transparent)",
+              "linear-gradient(90deg, transparent, rgba(145,94,255,0.5), transparent)",
             opacity: hovered ? 1 : 0,
           }}
         />

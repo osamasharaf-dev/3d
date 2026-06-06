@@ -38,12 +38,7 @@ const ProjectCard = ({ index, name, image, source_code_link, onOpenModal }) => {
           stiffness: 230,
           damping: 24,
         }}
-        className="relative h-[320px] rounded-xl overflow-hidden cursor-pointer group border transition-all duration-400"
-        style={{
-          background: "#0a0e17",
-          borderColor: "rgba(255,255,255,0.06)",
-          boxShadow: "0 6px 24px rgba(0,0,0,0.18)",
-        }}
+        className="relative h-[320px] rounded-xl overflow-hidden cursor-pointer group bg-[#0a0e17] border border-white/[0.06] hover:border-white/[0.14] transition-all duration-400 shadow-[0_6px_24px_rgb(0,0,0,0.25)] hover:shadow-[0_12px_30px_rgb(0,0,0,0.4)]"
         onClick={() => onOpenModal(previewReady)}
       >
         <div className="absolute top-0 left-0 right-0 h-px bg-white/8 group-hover:bg-blue-500/40 transition-all duration-500" />
@@ -177,10 +172,10 @@ const Works = () => {
                         className="md:p-2 p-1 rounded-full bg-[#8ec5ff]"
                       />
                       <span
-                        className="font-extrabold text-[#0f172a]"
+                        className="font-extrabold text-white"
                         style={{
                           fontFamily: word.font,
-                          textShadow: "0 0 8px rgba(145,94,255,0.25), 0 0 16px rgba(142,197,255,0.15)",
+                          textShadow: "0 0 4px #8ec5ff, 0 0 6px white",
                         }}
                       >
                         {word.text}

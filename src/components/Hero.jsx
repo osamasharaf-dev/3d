@@ -8,7 +8,6 @@ import { ComputersCanvas } from "./canvas";
 
 const FloatingPortraitCard = () => {
   const cardRef = useRef(null);
-  const [tilt, setTilt] = useState({ x: 0, y: 0 });
 
   const rawX = useMotionValue(0);
   const rawY = useMotionValue(0);
@@ -46,23 +45,23 @@ const FloatingPortraitCard = () => {
     >
       {/* Glow orb behind card */}
       <div
-        className="absolute -inset-6 rounded-full opacity-30 blur-3xl"
+        className="absolute -inset-6 rounded-full opacity-40 blur-3xl pointer-events-none"
         style={{
           background:
-            "radial-gradient(ellipse, rgba(145,94,255,0.6) 0%, rgba(142,197,255,0.3) 60%, transparent 80%)",
+            "radial-gradient(ellipse, rgba(145,94,255,0.55) 0%, rgba(142,197,255,0.2) 60%, transparent 80%)",
         }}
       />
 
-      {/* Glass card */}
+      {/* Dark glass card */}
       <div
         className="relative rounded-3xl overflow-hidden"
         style={{
-          background: "rgba(255,255,255,0.70)",
+          background: "rgba(7, 8, 13, 0.72)",
           backdropFilter: "blur(20px)",
           WebkitBackdropFilter: "blur(20px)",
-          border: "1.5px solid rgba(255,255,255,0.9)",
+          border: "1.5px solid rgba(255,255,255,0.09)",
           boxShadow:
-            "0 20px 60px rgba(145,94,255,0.15), 0 4px 16px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.9)",
+            "0 20px 60px rgba(0,0,0,0.55), 0 4px 16px rgba(145,94,255,0.15), inset 0 1px 0 rgba(255,255,255,0.07)",
           width: "220px",
           padding: "28px 24px 24px",
         }}
@@ -72,44 +71,52 @@ const FloatingPortraitCard = () => {
           className="absolute top-0 left-0 right-0 h-px"
           style={{
             background:
-              "linear-gradient(90deg, transparent, rgba(145,94,255,0.5), rgba(142,197,255,0.5), transparent)",
+              "linear-gradient(90deg, transparent, rgba(145,94,255,0.7), rgba(142,197,255,0.5), transparent)",
           }}
         />
 
-        {/* Avatar ring + circle */}
         <div className="flex flex-col items-center gap-4">
+          {/* Avatar ring + circle */}
           <div className="relative">
-            {/* Outer ring */}
             <div
               className="absolute -inset-1.5 rounded-full"
               style={{
                 background:
                   "linear-gradient(135deg, #915EFF, #8ec5ff, #915EFF)",
-                padding: "2px",
               }}
             />
-            {/* Avatar */}
             <div
               className="relative w-24 h-24 rounded-full flex items-center justify-center"
               style={{
                 background:
-                  "linear-gradient(135deg, #915EFF 0%, #6d28d9 50%, #8ec5ff 100%)",
+                  "linear-gradient(135deg, #1a0533 0%, #2d1060 50%, #0d1f40 100%)",
               }}
             >
-              <span className="text-white text-3xl font-black tracking-tight">
+              <span
+                className="text-3xl font-black tracking-tight"
+                style={{
+                  background:
+                    "linear-gradient(135deg, #915EFF, #8ec5ff)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                }}
+              >
                 OS
               </span>
             </div>
             {/* Online dot */}
             <div
-              className="absolute bottom-1 right-1 w-4 h-4 rounded-full border-2 border-white"
-              style={{ background: "#22c55e" }}
+              className="absolute bottom-1 right-1 w-4 h-4 rounded-full border-2"
+              style={{
+                background: "#22c55e",
+                borderColor: "rgba(7,8,13,0.9)",
+              }}
             />
           </div>
 
           {/* Name & title */}
           <div className="text-center">
-            <p className="text-[#0f172a] font-bold text-[15px] tracking-wide">
+            <p className="text-white font-bold text-[15px] tracking-wide">
               OSAMA SHARAF
             </p>
             <p className="text-[#915EFF] text-[11px] font-semibold tracking-wider uppercase mt-0.5">
@@ -124,9 +131,9 @@ const FloatingPortraitCard = () => {
                 key={tag}
                 className="text-[10px] font-semibold px-2 py-0.5 rounded-full"
                 style={{
-                  background: "rgba(145,94,255,0.10)",
-                  color: "#7c3aed",
-                  border: "1px solid rgba(145,94,255,0.20)",
+                  background: "rgba(145,94,255,0.15)",
+                  color: "#c4b5fd",
+                  border: "1px solid rgba(145,94,255,0.30)",
                 }}
               >
                 {tag}
@@ -137,7 +144,7 @@ const FloatingPortraitCard = () => {
           {/* Divider */}
           <div
             className="w-full h-px"
-            style={{ background: "rgba(0,0,0,0.06)" }}
+            style={{ background: "rgba(255,255,255,0.07)" }}
           />
 
           {/* Status */}
@@ -146,7 +153,7 @@ const FloatingPortraitCard = () => {
               className="w-2 h-2 rounded-full animate-pulse"
               style={{ background: "#22c55e" }}
             />
-            <span className="text-[11px] text-[#64748b] font-medium">
+            <span className="text-[11px] text-[#aaa6c3] font-medium">
               Available for work
             </span>
           </div>
@@ -154,7 +161,7 @@ const FloatingPortraitCard = () => {
 
         {/* Corner accent */}
         <div
-          className="absolute bottom-0 right-0 w-16 h-16 opacity-20"
+          className="absolute bottom-0 right-0 w-16 h-16 opacity-20 pointer-events-none"
           style={{
             background:
               "radial-gradient(circle, #915EFF 0%, transparent 70%)",
@@ -229,7 +236,7 @@ const Hero = () => {
                 aria-hidden="true"
                 style={{
                   backgroundImage:
-                    "linear-gradient(to bottom, rgba(145,94,255,0.18), rgba(145,94,255,0.18))",
+                    "linear-gradient(to bottom, rgba(245, 202, 153, 0.5), rgba(245, 202, 153, 0.5))",
                   backgroundRepeat: "no-repeat",
                   backgroundSize: "100% 8px",
                   backgroundPosition: "0 100%",
@@ -248,7 +255,7 @@ const Hero = () => {
                 |
               </span>
               <br />
-              <b className="text-[#334155]">
+              <b>
                 Building modern digital solutions, scalable web applications,
                 and high-performance digital experiences.
               </b>
@@ -268,10 +275,7 @@ const Hero = () => {
 
       <div className="absolute xs:bottom-10 bottom-32 w-full flex justify-center items-center">
         <a href="#about">
-          <div
-            className="w-[35px] h-[64px] rounded-3xl border-4 flex justify-center items-start p-2"
-            style={{ borderColor: "#915EFF" }}
-          >
+          <div className="w-[35px] h-[64px] rounded-3xl border-4 border-secondary flex justify-center items-start p-2">
             <motion.div
               animate={{ y: [0, 24, 0] }}
               transition={{
@@ -279,8 +283,7 @@ const Hero = () => {
                 repeat: Infinity,
                 repeatType: "loop",
               }}
-              className="w-3 h-3 rounded-full mb-1"
-              style={{ background: "#915EFF" }}
+              className="w-3 h-3 rounded-full bg-secondary mb-1"
             />
           </div>
         </a>

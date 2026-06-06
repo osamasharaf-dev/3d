@@ -95,16 +95,16 @@ const Navbar = () => {
         className="relative flex items-center justify-between w-full max-w-6xl px-5 py-3 rounded-2xl border transition-all duration-500"
         style={{
           background: scrolled
-            ? "rgba(255, 255, 255, 0.92)"
-            : "rgba(255, 255, 255, 0.65)",
+            ? "rgba(7, 8, 13, 0.80)"
+            : "rgba(7, 8, 13, 0.45)",
           backdropFilter: "blur(24px)",
           WebkitBackdropFilter: "blur(24px)",
           borderColor: scrolled
-            ? "rgba(0, 0, 0, 0.10)"
-            : "rgba(0, 0, 0, 0.06)",
+            ? "rgba(255,255,255,0.09)"
+            : "rgba(255,255,255,0.05)",
           boxShadow: scrolled
-            ? "0 8px 32px rgba(0,0,0,0.10), 0 1px 0 rgba(255,255,255,0.9) inset"
-            : "0 4px 20px rgba(0,0,0,0.06)",
+            ? "0 8px 40px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.06)"
+            : "0 4px 20px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.03)",
         }}
       >
         {/* Brand */}
@@ -114,7 +114,7 @@ const Navbar = () => {
             transition={{ type: "spring", stiffness: 400, damping: 20 }}
             className="text-xs font-bold tracking-[0.18em] uppercase select-none"
           >
-            <span className="text-[#0f172a] group-hover:text-[#334155] transition-colors duration-300">
+            <span className="text-white group-hover:text-[#c8d8ff] transition-colors duration-300">
               OSAMA
             </span>
             <span className="text-[#915EFF] ml-1">SHARAF</span>
@@ -134,7 +134,7 @@ const Navbar = () => {
                 transition={{ type: "spring", stiffness: 500, damping: 25 }}
                 className="relative px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.1em] rounded-xl transition-colors duration-200"
                 style={{
-                  color: isActive ? "#0f172a" : "rgba(71, 85, 105, 0.85)",
+                  color: isActive ? "#fff" : "rgba(142, 173, 255, 0.75)",
                 }}
               >
                 {isActive && (
@@ -143,8 +143,8 @@ const Navbar = () => {
                     className="absolute inset-0 rounded-xl"
                     style={{
                       background:
-                        "linear-gradient(135deg, rgba(145,94,255,0.12), rgba(142,197,255,0.07))",
-                      border: "1px solid rgba(145,94,255,0.28)",
+                        "linear-gradient(135deg, rgba(145,94,255,0.22), rgba(142,197,255,0.12))",
+                      border: "1px solid rgba(145,94,255,0.35)",
                     }}
                     transition={{ type: "spring", bounce: 0.2, duration: 0.5 }}
                   />
@@ -168,9 +168,9 @@ const Navbar = () => {
                 whileHover={{ scale: 1.18, y: -2 }}
                 whileTap={{ scale: 0.9 }}
                 transition={{ type: "spring", stiffness: 500, damping: 22 }}
-                className="w-8 h-8 rounded-xl flex items-center justify-center border border-black/[0.07] hover:border-black/15 transition-all duration-300"
+                className="w-8 h-8 rounded-xl flex items-center justify-center border border-white/[0.07] hover:border-white/20 transition-all duration-300"
                 style={{
-                  background: "rgba(0,0,0,0.04)",
+                  background: "rgba(255,255,255,0.04)",
                   color,
                 }}
               >
@@ -183,22 +183,22 @@ const Navbar = () => {
           <button
             onClick={() => setMobileOpen((v) => !v)}
             aria-label="Toggle menu"
-            className="md:hidden ml-2 w-8 h-8 flex flex-col items-center justify-center gap-[5px] rounded-xl border border-black/[0.08] bg-black/[0.04] hover:bg-black/[0.08] transition-all duration-200"
+            className="md:hidden ml-2 w-8 h-8 flex flex-col items-center justify-center gap-[5px] rounded-xl border border-white/[0.08] bg-white/[0.04] hover:bg-white/[0.08] transition-all duration-200"
           >
             <motion.span
               animate={mobileOpen ? { rotate: 45, y: 5 } : { rotate: 0, y: 0 }}
               transition={{ duration: 0.3 }}
-              className="w-4 h-[1.5px] bg-[#0f172a] block"
+              className="w-4 h-[1.5px] bg-white block"
             />
             <motion.span
               animate={mobileOpen ? { opacity: 0 } : { opacity: 1 }}
               transition={{ duration: 0.2 }}
-              className="w-4 h-[1.5px] bg-[#0f172a] block"
+              className="w-4 h-[1.5px] bg-white block"
             />
             <motion.span
               animate={mobileOpen ? { rotate: -45, y: -5 } : { rotate: 0, y: 0 }}
               transition={{ duration: 0.3 }}
-              className="w-4 h-[1.5px] bg-[#0f172a] block"
+              className="w-4 h-[1.5px] bg-white block"
             />
           </button>
         </div>
@@ -212,12 +212,12 @@ const Navbar = () => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -10, scale: 0.97 }}
             transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-            className="absolute top-[68px] left-4 right-4 rounded-2xl border border-black/[0.08] overflow-hidden"
+            className="absolute top-[68px] left-4 right-4 rounded-2xl border border-white/[0.08] overflow-hidden"
             style={{
-              background: "rgba(255, 255, 255, 0.97)",
+              background: "rgba(7, 8, 13, 0.92)",
               backdropFilter: "blur(24px)",
               WebkitBackdropFilter: "blur(24px)",
-              boxShadow: "0 16px 48px rgba(0,0,0,0.12)",
+              boxShadow: "0 16px 48px rgba(0,0,0,0.5)",
             }}
           >
             <div className="flex flex-col p-3 gap-1">
@@ -234,11 +234,11 @@ const Navbar = () => {
                     className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold uppercase tracking-widest transition-colors duration-200"
                     style={{
                       background: isActive
-                        ? "rgba(145,94,255,0.10)"
+                        ? "rgba(145,94,255,0.15)"
                         : "transparent",
-                      color: isActive ? "#915EFF" : "rgba(71,85,105,0.85)",
+                      color: isActive ? "#fff" : "rgba(142,173,255,0.75)",
                       borderLeft: isActive
-                        ? "2px solid rgba(145,94,255,0.55)"
+                        ? "2px solid rgba(145,94,255,0.7)"
                         : "2px solid transparent",
                     }}
                   >

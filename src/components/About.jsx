@@ -16,12 +16,7 @@ const ServiceCard = ({ index, title, icon }) => (
     >
       <div
         options={{ max: 45, scale: 1, speed: 450 }}
-        className="rounded-[20px] py-5 px-12 min-h-[280px] flex justify-evenly items-center flex-col"
-        style={{
-          background: "rgba(255,255,255,0.82)",
-          backdropFilter: "blur(12px)",
-          WebkitBackdropFilter: "blur(12px)",
-        }}
+        className="bg-[#111522] rounded-[20px] py-5 px-12 min-h-[280px] flex justify-evenly items-center flex-col"
       >
         <img
           src={icon}
@@ -29,7 +24,7 @@ const ServiceCard = ({ index, title, icon }) => (
           className="w-16 h-16 object-contain"
           loading="lazy"
         />
-        <h3 className="text-[#0f172a] text-[20px] font-bold text-center">
+        <h3 className="text-white text-[20px] font-bold text-center">
           {title}
         </h3>
       </div>
@@ -52,7 +47,7 @@ const About = () => {
 
       <motion.p
         variants={fadeIn("", "", 0.1, 1)}
-        className="mt-4 text-[#475569] text-[17px] max-w-3xl leading-[30px]"
+        className="mt-4 text-secondary text-[17px] max-w-3xl leading-[30px]"
       >
         I am a Software Engineer and Full-Stack Web Developer passionate about
         building modern digital solutions, scalable web applications, and
