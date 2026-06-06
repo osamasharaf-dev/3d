@@ -22,7 +22,6 @@ const EasterEggs = () => {
       setTimeout(() => {
         console.clear();
 
-        // --- The Hook: Presented as a system alert or a direct message. ---
         console.log(
           "%c// SYSTEM_LOG: UNEXPECTED_ACCESS",
           "color: #888; font-family: 'Menlo', 'Consolas', monospace; font-size: 12px;"
@@ -46,7 +45,7 @@ const EasterEggs = () => {
           );
         }, 800);
 
-        ["jayant", "Jayant", "JAYANT"].forEach((name) => {
+        ["osama", "Osama", "OSAMA"].forEach((name) => {
           if (Object.hasOwn(window, name)) return;
           Object.defineProperty(window, name, {
             get() {
@@ -55,15 +54,12 @@ const EasterEggs = () => {
               soundEffects.playMagic();
 
               console.log(
-                "%c✨ UNLOCKED ✨\n\n%cWelcome, Admin. You now have the keys to the kingdom.",
+                "%c✨ UNLOCKED ✨\n\n%cWelcome. You now have the keys to the kingdom.",
                 "color: #00BFFF; font-size: 32px; font-weight: bold; text-shadow: 0 0 10px rgba(0, 191, 255, 0.5);",
                 "color: #444; font-size: 16px; font-family: 'Arial', sans-serif;"
               );
 
-              // ... inside the get() function for the Blueprint theme ...
-
               const warningTimeout = setTimeout(() => {
-                // THE FIX: Use two separate console.log calls.
                 console.log(
                   "%cJust be careful what you change in here...",
                   "background-color: #FFFBEA; color: #D97706; border-left: 5px solid #FBBF24; padding: 15px 15px 10px 15px; font-size: 16px; font-weight: bold; font-family: 'Arial', sans-serif; border-top-left-radius: 5px; border-top-right-radius: 5px;"
@@ -74,11 +70,10 @@ const EasterEggs = () => {
                 );
               }, 2500);
 
-              // ... rest of the code
               window.__easterEggUnlocked = true;
               const catTimeout = setTimeout(() => {
                 console.log(
-                  "%cAlright, enough with the serious stuff! Want to see my secret project?\n" +
+                  "%cAlright, enough with the serious stuff! Want to see a secret?\n" +
                     "It's a bit... flashy. And involves a cat.",
                   "background-color: #f4f4f4; color: #333; padding: 15px; border-left: 5px solid #9333EA; line-height: 1.6; font-family: 'Arial', sans-serif; font-size: 15px;"
                 );
@@ -99,9 +94,7 @@ const EasterEggs = () => {
               console.clear();
               console.log(
                 "%c💥 BANKAI!%c Katen Kyokotsu: Karamatsu Shinju 🗡️",
-                // Style for "BANKAI!"
                 "color: #FF1D1D; background-color: #111; font-size: 24px; font-weight: bold; padding: 8px 16px; border-radius: 8px; border: 2px solid #550000; text-shadow: 0 0 10px red;",
-                // Style for the technique name
                 "color: #00E5FF; background-color: #1c2b3e; font-size: 18px; font-style: italic; padding: 8px 12px; border-radius: 8px; font-family: 'Georgia', serif;"
               );
               return undefined;

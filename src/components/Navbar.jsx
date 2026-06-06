@@ -1,286 +1,256 @@
-import { AnimatePresence, motion } from "framer-motion";
-import React, { useEffect, useState } from "react";
-import {
-  about,
-  achievements,
-  project,
-  portfolio,
-  skills,
-  contact,
-  logo,
-} from "../assets";
-import useNavPeek from "../reactbits/hooks/useNavPeek";
+import { AnimatePresence, motion, useMotionValue, useSpring } from "framer-motion";
+import React, { useEffect, useRef, useState } from "react";
+import { FaFacebook, FaInstagram } from "react-icons/fa";
+import { FaWhatsapp } from "react-icons/fa6";
 
 const NAV_LINKS = [
-  { title: "home", href: "#hero", img: portfolio },
-  { title: "about", href: "#about", img: about },
-  { title: "skills", href: "#skills", img: skills },
-  { title: "certifications", href: "#achievements", img: achievements },
-  { title: "portfolio", href: "#projects", img: project },
-  { title: "contact", href: "#contact", img: contact },
+  { title: "Home", href: "#hero", id: "hero" },
+  { title: "About", href: "#about", id: "about" },
+  { title: "Skills", href: "#skills", id: "skills" },
+  { title: "Certifications", href: "#achievements", id: "achievements" },
+  { title: "Portfolio", href: "#projects", id: "projects" },
+  { title: "Contact", href: "#contact", id: "contact" },
 ];
 
-const opacity = {
-  initial: { opacity: 0 },
-  open: { opacity: 1, transition: { duration: 0.35 } },
-  closed: { opacity: 0, transition: { duration: 0.35 } },
-};
-const height = {
-  initial: { height: 0 },
-  enter: {
-    height: "auto",
-    transition: { duration: 1, ease: [0.76, 0, 0.24, 1] },
+const SOCIAL_LINKS = [
+  {
+    icon: FaFacebook,
+    href: "https://facebook.com/osamasharaf",
+    label: "Facebook",
+    color: "#1877F2",
   },
-  exit: { height: 0, transition: { duration: 1, ease: [0.76, 0, 0.24, 1] } },
-};
-const blur = {
-  initial: { filter: "blur(0px)", opacity: 1 },
-  open: { filter: "blur(4px)", opacity: 0.6, transition: { duration: 0.3 } },
-  closed: { filter: "blur(0px)", opacity: 1, transition: { duration: 0.3 } },
-};
-const translate = {
-  initial: { y: "100%", opacity: 0 },
-  enter: (i) => ({
-    y: 0,
-    opacity: 1,
-    transition: { duration: 1, ease: [0.76, 0, 0.24, 1], delay: i[0] },
-  }),
-  exit: (i) => ({
-    y: "100%",
-    opacity: 0,
-    transition: { duration: 0.7, ease: [0.76, 0, 0.24, 1], delay: i[1] },
-  }),
-};
-
-function getChars(word) {
-  return word.split("").map((char, i) => (
-    <motion.span
-      className="pointer-events-none"
-      custom={[i * 0.02, (word.length - i) * 0.01]}
-      variants={translate}
-      initial="initial"
-      animate="enter"
-      exit="exit"
-      key={char + i}
-      style={{ display: "inline-block" }}
-    >
-      {char}
-    </motion.span>
-  ));
-}
+  {
+    icon: FaWhatsapp,
+    href: "https://wa.me/963935562470",
+    label: "WhatsApp",
+    color: "#25D366",
+  },
+  {
+    icon: FaInstagram,
+    href: "https://instagram.com/osamasharaf",
+    label: "Instagram",
+    color: "#E4405F",
+  },
+];
 
 const Navbar = () => {
-  const [isActive, setIsActive] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const {
-    hoverIndex,
-    activeIndex,
-    isHovering,
-    preview,
-    focusedIndex,
-    handleEnter,
-    handleLeave,
-    handleClick,
-  } = useNavPeek(NAV_LINKS);
+  const [activeSection, setActiveSection] = useState("hero");
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const lastScrollY = useRef(0);
+
+  const floatY = useMotionValue(0);
+  const springFloatY = useSpring(floatY, { stiffness: 80, damping: 20 });
 
   useEffect(() => {
+    let ticking = false;
+
     const handleScroll = () => {
-      const scrollTop = window.scrollY;
-      if (scrollTop > 200) {
-        setScrolled(true);
-      } else {
-        setScrolled(false);
-      }
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        const scrollTop = window.scrollY;
+        setScrolled(scrollTop > 30);
+
+        const delta = scrollTop - lastScrollY.current;
+        floatY.set(Math.max(-5, Math.min(5, delta * 0.25)));
+        setTimeout(() => floatY.set(0), 400);
+        lastScrollY.current = scrollTop;
+        ticking = false;
+      });
     };
 
-    window.addEventListener("scroll", handleScroll);
-
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
+  }, [floatY]);
+
+  useEffect(() => {
+    const observers = [];
+
+    NAV_LINKS.forEach(({ id }) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const obs = new IntersectionObserver(
+        ([entry]) => {
+          if (entry.isIntersecting) setActiveSection(id);
+        },
+        { threshold: 0.2, rootMargin: "-60px 0px -55% 0px" }
+      );
+      obs.observe(el);
+      observers.push(obs);
+    });
+
+    return () => observers.forEach((obs) => obs.disconnect());
   }, []);
 
   return (
     <motion.header
-      className={`z-30 fixed top-0 left-0 w-full transition-colors duration-500 ease-in  ${
-        scrolled ? "backdrop-blur-xl" : ""
-      } `}
-      style={{
-        background: scrolled ? "rgba(10,10,20,0.8)" : "transparent",
-      }}
-      initial={{ y: -80 }}
-      animate={{ y: 0 }}
-      transition={{ duration: 0.8 }}
+      style={{ y: springFloatY }}
+      className="fixed top-0 left-0 right-0 z-30 flex justify-center px-4 pt-4"
     >
-      <div className="flex items-center justify-between max-w-8xl my-2 mx-4 relative">
-        <a href="#hero" className="flex mx-6 items-center justify-center">
-          <span className="text-md">
-            <img src={logo} alt="logo" className="h-16 object-contain" />
-          </span>
-        </a>
-        <button
-          onClick={() => setIsActive((v) => !v)}
-          className="flex items-center justify-center gap-3 m-0 p-0 h-6 bg-transparent text-base font-normal"
-          style={{ margin: window.innerWidth >= 600 ? "20px" : "15px" }}
-        >
-          <div
-            className="relative flex items-center text-[22px]"
-            style={{ minWidth: 60 }}
-          >
-            <motion.p
-              variants={opacity}
-              animate={!isActive ? "open" : "closed"}
-              className="transition-opacity"
-              style={{
-                margin: 0,
-                position: !isActive ? "static" : "absolute",
-                left: 0,
-              }}
-            >
-              Menu
-            </motion.p>
-            <motion.p
-              variants={opacity}
-              animate={isActive ? "open" : "closed"}
-              className="transition-opacity"
-              style={{
-                margin: 0,
-                position: isActive ? "static" : "absolute",
-                left: 0,
-              }}
-            >
-              Close
-            </motion.p>
-          </div>
-          <div className="relative w-[22.5px] h-[16px] flex flex-col justify-center items-center mx-2">
-            <motion.span
-              className="absolute left-0 w-full h-[1px] bg-white block"
-              style={{ top: 0 }}
-              animate={
-                isActive ? { rotate: 45, top: "7.5px" } : { rotate: 0, top: 0 }
-              }
-              transition={{ duration: 1, ease: [0.76, 0, 0.24, 1] }}
-            />
-            <motion.span
-              className="absolute left-0 w-full h-[1px] bg-white block"
-              style={{ top: "7.5px" }}
-              animate={
-                isActive
-                  ? { opacity: 0 }
-                  : { opacity: 1, rotate: 0, top: "7.5px" }
-              }
-              transition={{ duration: 1, ease: [0.76, 0, 0.24, 1] }}
-            />
-            <motion.span
-              className="absolute left-0 w-full h-[1px] bg-white block"
-              style={{ top: "15px" }}
-              animate={
-                isActive
-                  ? { rotate: -45, top: "7.5px" }
-                  : { rotate: 0, top: "15px" }
-              }
-              transition={{ duration: 1, ease: [0.76, 0, 0.24, 1] }}
-            />
-          </div>
-        </button>
-      </div>
-      <motion.div
-        variants={height}
-        initial="initial"
-        animate={isActive ? "enter" : "exit"}
-        className="w-full left-0 absolute"
-        style={{ zIndex: 20, background: "rgba(7,8,13,0.9)" }}
+      <motion.nav
+        initial={{ y: -90, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+        className="relative flex items-center justify-between w-full max-w-6xl px-5 py-3 rounded-2xl border transition-all duration-500"
+        style={{
+          background: scrolled
+            ? "rgba(7, 8, 13, 0.80)"
+            : "rgba(7, 8, 13, 0.45)",
+          backdropFilter: "blur(24px)",
+          WebkitBackdropFilter: "blur(24px)",
+          borderColor: scrolled
+            ? "rgba(255,255,255,0.09)"
+            : "rgba(255,255,255,0.05)",
+          boxShadow: scrolled
+            ? "0 8px 40px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.06)"
+            : "0 4px 20px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.03)",
+        }}
       >
-        <AnimatePresence>
-          {isActive && (
-            <motion.div
-              className="flex flex-row justify-between items-center w-full max-w-8xl mx-auto relative min-h-[60vh]"
-              style={{ minHeight: 600 }}
-            >
-              <div className="flex flex-wrap items-start gap-1 w-2/3 pl-8">
-                {NAV_LINKS.map((link, idx) => (
-                  <a
-                    key={link.title}
-                    href={link.href}
-                    className="group cursor-pointer rounded-lg px-3 py-2 text-5xl md:text-7xl font-extrabold uppercase transition-all duration-200 whitespace-nowrap text-left relative"
-                    style={{ minHeight: "4.5rem" }}
-                    onMouseOver={() => {
-                      handleEnter(idx);
+        {/* Brand */}
+        <a href="#hero" className="flex-shrink-0 group">
+          <motion.span
+            whileHover={{ scale: 1.03 }}
+            transition={{ type: "spring", stiffness: 400, damping: 20 }}
+            className="text-xs font-bold tracking-[0.18em] uppercase select-none"
+          >
+            <span className="text-white group-hover:text-[#c8d8ff] transition-colors duration-300">
+              OSAMA
+            </span>
+            <span className="text-[#915EFF] ml-1">SHARAF</span>
+          </motion.span>
+        </a>
+
+        {/* Desktop nav links — centered absolutely */}
+        <div className="hidden md:flex absolute left-1/2 -translate-x-1/2 items-center gap-0.5">
+          {NAV_LINKS.map((link) => {
+            const isActive = activeSection === link.id;
+            return (
+              <motion.a
+                key={link.id}
+                href={link.href}
+                whileHover={{ scale: 1.06 }}
+                whileTap={{ scale: 0.94 }}
+                transition={{ type: "spring", stiffness: 500, damping: 25 }}
+                className="relative px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.1em] rounded-xl transition-colors duration-200"
+                style={{
+                  color: isActive ? "#fff" : "rgba(142, 173, 255, 0.75)",
+                }}
+              >
+                {isActive && (
+                  <motion.span
+                    layoutId="navActive"
+                    className="absolute inset-0 rounded-xl"
+                    style={{
+                      background:
+                        "linear-gradient(135deg, rgba(145,94,255,0.22), rgba(142,197,255,0.12))",
+                      border: "1px solid rgba(145,94,255,0.35)",
                     }}
-                    onMouseLeave={handleLeave}
-                    onClick={() => {
-                      setIsActive(false);
-                      handleClick(idx);
+                    transition={{ type: "spring", bounce: 0.2, duration: 0.5 }}
+                  />
+                )}
+                <span className="relative z-10">{link.title}</span>
+              </motion.a>
+            );
+          })}
+        </div>
+
+        {/* Right side: social icons + mobile toggle */}
+        <div className="flex items-center gap-2">
+          {/* Social icons */}
+          <div className="flex items-center gap-1.5">
+            {SOCIAL_LINKS.map(({ icon: Icon, href, label, color }) => (
+              <motion.a
+                key={label}
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={label}
+                whileHover={{ scale: 1.18, y: -2 }}
+                whileTap={{ scale: 0.9 }}
+                transition={{ type: "spring", stiffness: 500, damping: 22 }}
+                className="w-8 h-8 rounded-xl flex items-center justify-center border border-white/[0.07] hover:border-white/20 transition-all duration-300"
+                style={{
+                  background: "rgba(255,255,255,0.04)",
+                  color,
+                }}
+              >
+                <Icon className="text-sm" />
+              </motion.a>
+            ))}
+          </div>
+
+          {/* Mobile hamburger */}
+          <button
+            onClick={() => setMobileOpen((v) => !v)}
+            aria-label="Toggle menu"
+            className="md:hidden ml-2 w-8 h-8 flex flex-col items-center justify-center gap-[5px] rounded-xl border border-white/[0.08] bg-white/[0.04] hover:bg-white/[0.08] transition-all duration-200"
+          >
+            <motion.span
+              animate={mobileOpen ? { rotate: 45, y: 5 } : { rotate: 0, y: 0 }}
+              transition={{ duration: 0.3 }}
+              className="w-4 h-[1.5px] bg-white block"
+            />
+            <motion.span
+              animate={mobileOpen ? { opacity: 0 } : { opacity: 1 }}
+              transition={{ duration: 0.2 }}
+              className="w-4 h-[1.5px] bg-white block"
+            />
+            <motion.span
+              animate={mobileOpen ? { rotate: -45, y: -5 } : { rotate: 0, y: 0 }}
+              transition={{ duration: 0.3 }}
+              className="w-4 h-[1.5px] bg-white block"
+            />
+          </button>
+        </div>
+      </motion.nav>
+
+      {/* Mobile dropdown */}
+      <AnimatePresence>
+        {mobileOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -10, scale: 0.97 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -10, scale: 0.97 }}
+            transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+            className="absolute top-[68px] left-4 right-4 rounded-2xl border border-white/[0.08] overflow-hidden"
+            style={{
+              background: "rgba(7, 8, 13, 0.92)",
+              backdropFilter: "blur(24px)",
+              WebkitBackdropFilter: "blur(24px)",
+              boxShadow: "0 16px 48px rgba(0,0,0,0.5)",
+            }}
+          >
+            <div className="flex flex-col p-3 gap-1">
+              {NAV_LINKS.map((link, i) => {
+                const isActive = activeSection === link.id;
+                return (
+                  <motion.a
+                    key={link.id}
+                    href={link.href}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: i * 0.04 }}
+                    onClick={() => setMobileOpen(false)}
+                    className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold uppercase tracking-widest transition-colors duration-200"
+                    style={{
+                      background: isActive
+                        ? "rgba(145,94,255,0.15)"
+                        : "transparent",
+                      color: isActive ? "#fff" : "rgba(142,173,255,0.75)",
+                      borderLeft: isActive
+                        ? "2px solid rgba(145,94,255,0.7)"
+                        : "2px solid transparent",
                     }}
                   >
-                    <motion.p
-                      variants={blur}
-                      animate={
-                        isHovering && focusedIndex !== idx ? "open" : "closed"
-                      }
-                      style={{
-                        display: "inline-block",
-                        margin: 0,
-                        color:
-                          focusedIndex === idx && isHovering
-                            ? "#fff"
-                            : "#8eadff",
-                        transition: "color 0.3s, text-shadow 0.3s",
-                        textShadow:
-                          focusedIndex === idx && isHovering
-                            ? "0 0 10px #fff, 0 0 100px #121212"
-                            : "none",
-                      }}
-                    >
-                      {getChars(link.title.toUpperCase())}
-                    </motion.p>
-                    <motion.div
-                      layoutId={`${isActive ? "" : "underline"}`}
-                      className="absolute left-0 bottom-0 h-[4px] rounded origin-left"
-                      style={{
-                        background:
-                          focusedIndex === idx && isHovering
-                            ? "#fff"
-                            : "#8eadff",
-                      }}
-                      initial={{ width: 0, opacity: 0 }}
-                      animate={
-                        focusedIndex === idx && isHovering
-                          ? { width: "100%", opacity: 1 }
-                          : { width: 0, opacity: 0 }
-                      }
-                      transition={{ duration: 0.3, ease: [0.76, 0, 0.24, 1] }}
-                    />
-                  </a>
-                ))}
-              </div>
-              {isActive && (
-                <motion.div
-                  variants={opacity}
-                  initial="initial"
-                  animate={isHovering ? "open" : "closed"}
-                  className="hidden md:flex items-center justify-start w-1/3 h-full"
-                  style={{ minHeight: 200 }}
-                >
-                  <img
-                    src={preview || NAV_LINKS[activeIndex].img}
-                    alt={
-                      NAV_LINKS[focusedIndex]?.title ||
-                      NAV_LINKS[activeIndex].title
-                    }
-                    className="object-cover rounded-lg shadow-lg border border-white/20"
-                    style={{
-                      width: "480px",
-                      height: "270px",
-                      aspectRatio: "16/9",
-                      maxWidth: "90vw",
-                      maxHeight: "60vh",
-                    }}
-                  />
-                </motion.div>
-              )}
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </motion.div>
+                    {link.title}
+                  </motion.a>
+                );
+              })}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.header>
   );
 };

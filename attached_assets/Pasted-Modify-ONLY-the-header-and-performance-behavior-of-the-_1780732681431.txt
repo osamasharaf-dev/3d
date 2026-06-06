@@ -1,0 +1,80 @@
+Modify ONLY the header and performance behavior of the existing portfolio website.
+
+Do NOT change the overall design, layout, 3D effects, animations, or sections. Only improve header UI/UX and performance.
+
+Redesign the navigation header into a premium centered modern developer UI.
+
+Layout:
+
+Center the navigation menu horizontally.
+Place the site name "OSAMA SHARAF" in a clean elegant style (either centered above or integrated into navbar).
+Navigation items centered:
+Home, About, Skills, Certifications, Portfolio, Contact
+
+Right side:
+Add ONLY social media icons:
+
+Facebook
+WhatsApp
+Instagram
+
+Design Requirements:
+
+Glassmorphism floating navbar
+Soft blur background
+Subtle transparency
+Smooth wave-like motion animation (very subtle, not distracting)
+Micro-interactions on hover
+Active section highlight indicator
+Sticky on scroll
+Elegant spacing and typography
+Premium minimalist cinematic style
+
+The header must feel:
+modern, floating, futuristic, and clean (Awwwards-level UI polish)
+
+Completely remove any of the following if they exist:
+
+Loading screen
+Intro animation screen
+Welcome screen
+Splash screen
+Preloader animation
+First-time landing animation blocking content
+
+The website must:
+
+Open directly on the homepage instantly
+Show content immediately without delay
+Not require any click to enter site
+
+Optimize the entire project without changing visuals:
+
+Remove unused code and components
+Remove unnecessary animations or duplicate animation triggers
+Optimize rendering performance
+Reduce heavy computations on scroll
+Enable lazy loading for images where possible
+Optimize assets and 3D rendering performance
+Reduce initial bundle size if applicable
+Improve Lighthouse performance score
+Ensure smooth 60fps scrolling
+Improve mobile performance
+
+DO NOT:
+
+Remove 3D effects
+Remove cinematic feel
+Remove animations
+Simplify UI design
+
+GOAL:
+Make the website faster, cleaner, and instantly loading while keeping premium visual quality.
+
+Centered elegant navbar
+Floating glass effect header
+Smooth wave-like motion
+Social icons on right only
+No intro screen at all
+Instant page load
+Same cinematic design preserved
