@@ -222,7 +222,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 📞 Contact
 
 - **Portfolio**: [https://osamasharaf.dev/]
-- **GitHub**: [@Jayant-1](https://github.com/osamasharaf-dev)
+- **GitHub**: [@osamasharaf-dev](https://github.com/osamasharaf-dev)
 -
 - **Email**: osamaabdulhalimsharaf@gmail.com
 
