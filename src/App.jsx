@@ -11,6 +11,10 @@ import {
   StarsCanvas,
 } from "./components";
 import Projects from "./components/Projects";
+import StatsSection from "./components/StatsSection";
+import CommandPalette from "./components/CommandPalette";
+import ScrollToTop from "./components/ScrollToTop";
+import CinematicIntro from "./components/CinematicIntro";
 import EasterEggs from "./components/EasterEggs";
 import ElasticCursor from "./components/ElasticCursor";
 import Footer from "./components/Footer";
@@ -21,22 +25,28 @@ import ReactBitsCursorProvider from "./reactbits/context/ReactBitsCursorProvider
 const PrivacyPolicy = lazy(() => import("./components/PrivacyPolicy"));
 
 const MainPage = () => (
-  <div
-    className="relative z-0"
-    style={{ backgroundColor: "hsl(222.2 84% 4.9%)" }}
-  >
+  <div className="relative z-0" style={{ backgroundColor: "hsl(222.2 84% 4.9%)" }}>
+    {/* Global UI layers */}
+    <CinematicIntro />
     <ElasticCursor />
     <EasterEggs />
+    <CommandPalette />
+    <ScrollToTop />
+
+    {/* Page content */}
     <div className="bg-hero-pattern bg-cover bg-no-repeat bg-center">
       <Navbar />
       <Hero />
     </div>
+
     <StarsCanvas />
     <About />
+    <StatsSection />
     <Projects />
     <Achievement />
     <SkillKeyboard />
     <Feedbacks />
+
     <div className="relative z-0">
       <Contact />
     </div>
@@ -53,11 +63,7 @@ const App = () => (
           <Route
             path="/privacy-policy"
             element={
-              <Suspense
-                fallback={
-                  <div style={{ background: "hsl(222.2 84% 4.9%)", minHeight: "100vh" }} />
-                }
-              >
+              <Suspense fallback={<div style={{ background: "hsl(222.2 84% 4.9%)", minHeight: "100vh" }} />}>
                 <PrivacyPolicy />
               </Suspense>
             }
