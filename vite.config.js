@@ -38,12 +38,19 @@ export default defineConfig({
     },
   },
 
+  ssr: {
+    noExternal: ['@splinetool/react-spline', '@react-three/drei', 'three-mesh-bvh'],
+  },
+
   optimizeDeps: {
     include: [
       'three',
       '@react-three/fiber',
       '@react-three/drei',
       'framer-motion',
+      // Ensure lodash.debounce (CJS) is pre-bundled so default import works
+      'lodash.debounce',
     ],
+    exclude: ['@splinetool/react-spline'],
   },
 })

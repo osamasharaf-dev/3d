@@ -2,9 +2,8 @@
 // This component renders an interactive 3D skill keyboard using Spline and GSAP animations.
 // Each key represents a skill, and the keyboard animates in response to user actions.
 
-import { Application } from "@splinetool/runtime";
 import gsap from "gsap";
-import React, { Suspense, useEffect, useRef, useState } from "react";
+import React, { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { SKILLS, SkillNames } from "../constants/skills";
 import { sleep } from "../utils/sleep";
 import useMediaQuery from "../utils/useMediaQuery";
@@ -117,23 +116,26 @@ const SkillKeyboard = () => {
   }, []);
 
   // Handle mouse hover events on the 3D keys
-  const handleMouseHover = (e) => {
-    if (!splineApp || selectedSkill?.name === e.target.name) return;
-    // If hovering over the keyboard body/platform, clear selection
-    if (e.target.name === "body" || e.target.name === "platform") {
-      setSelectedSkill(null);
-      if (splineApp.getVariable("heading") && splineApp.getVariable("desc")) {
-        splineApp.setVariable("heading", "");
-        splineApp.setVariable("desc", "");
+  const handleMouseHover = useCallback(
+    (e) => {
+      if (!splineApp || selectedSkill?.name === e.target.name) return;
+      // If hovering over the keyboard body/platform, clear selection
+      if (e.target.name === "body" || e.target.name === "platform") {
+        setSelectedSkill(null);
+        if (splineApp.getVariable("heading") && splineApp.getVariable("desc")) {
+          splineApp.setVariable("heading", "");
+          splineApp.setVariable("desc", "");
+        }
+      } else {
+        // Otherwise, set the selected skill based on the key name
+        if (!selectedSkill || selectedSkill.name !== e.target.name) {
+          const skill = SKILLS[e.target.name];
+          setSelectedSkill(skill);
+        }
       }
-    } else {
-      // Otherwise, set the selected skill based on the key name
-      if (!selectedSkill || selectedSkill.name !== e.target.name) {
-        const skill = SKILLS[e.target.name];
-        setSelectedSkill(skill);
-      }
-    }
-  };
+    },
+    [selectedSkill, splineApp]
+  );
 
   // Update the Spline scene when the selected skill changes
   useEffect(() => {
@@ -163,11 +165,36 @@ const SkillKeyboard = () => {
     }
   }, [splineApp, isMobile, activeSection]);
 
-  // Set up Spline event listeners and GSAP animations when the scene loads
   useEffect(() => {
-    handleSplineInteractions();
+    if (!splineApp) return;
+
+    const handleKeyUp = () => {
+      if (!splineApp) return;
+      splineApp.setVariable("heading", "");
+      splineApp.setVariable("desc", "");
+    };
+
+    const handleKeyDown = (e) => {
+      if (!splineApp) return;
+      const skill = SKILLS[e.target.name];
+      if (skill) setSelectedSkill(skill);
+      splineApp.setVariable("heading", skill?.label || "");
+      splineApp.setVariable("desc", skill?.shortDescription || "");
+      soundEffects.playClick();
+    };
+
+    splineApp.addEventListener("keyUp", handleKeyUp);
+    splineApp.addEventListener("keyDown", handleKeyDown);
+    splineApp.addEventListener("mouseHover", handleMouseHover);
+
     handleGsapAnimations();
-  }, [splineApp]);
+
+    return () => {
+      splineApp.removeEventListener("keyUp", handleKeyUp);
+      splineApp.removeEventListener("keyDown", handleKeyDown);
+      splineApp.removeEventListener("mouseHover", handleMouseHover);
+    };
+  }, [splineApp, handleMouseHover]);
 
   // Trigger the keyboard reveal animation when the scene is ready AND section is in view
   useEffect(() => {
@@ -231,27 +258,6 @@ const SkillKeyboard = () => {
     });
   };
 
-  // Set up Spline event listeners for key presses and hovers
-  const handleSplineInteractions = () => {
-    if (!splineApp) return;
-    // Clear skill info on key up
-    splineApp.addEventListener("keyUp", (e) => {
-      if (!splineApp) return;
-      splineApp.setVariable("heading", "");
-      splineApp.setVariable("desc", "");
-    });
-    // Show skill info on key down
-    splineApp.addEventListener("keyDown", (e) => {
-      if (!splineApp) return;
-      const skill = SKILLS[e.target.name];
-      if (skill) setSelectedSkill(skill);
-      splineApp.setVariable("heading", skill?.label || "");
-      splineApp.setVariable("desc", skill?.shortDescription || "");
-      soundEffects.playClick();
-    });
-    // Handle mouse hover on keys
-    splineApp.addEventListener("mouseHover", handleMouseHover);
-  };
 
   // Set up initial GSAP animations for the keyboard
   const handleGsapAnimations = () => {

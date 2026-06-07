@@ -8,6 +8,12 @@ const EasterEggs = () => {
 
   useEffect(() => {
     if (!isDevToolsOpen) return;
+
+    let initialTimeout;
+    let revealTimeout;
+    let warningTimeout;
+    let catTimeout;
+
     if (typeof console !== "undefined") {
       console.clear();
 
@@ -19,7 +25,8 @@ const EasterEggs = () => {
         "%cHold on a second... You weren't supposed to be in here. 👀",
         "color: #00BFFF; font-size: 22px; font-weight: bold; font-family: 'Arial', sans-serif;"
       );
-      setTimeout(() => {
+
+      initialTimeout = window.setTimeout(() => {
         console.clear();
 
         console.log(
@@ -31,7 +38,7 @@ const EasterEggs = () => {
           "color: #00BFFF; font-size: 22px; font-weight: bold; font-family: 'Arial', sans-serif;"
         );
 
-        const revealTimeout = setTimeout(() => {
+        revealTimeout = window.setTimeout(() => {
           console.log(
             "%cOkay, fine. You found the secret passage. Curious minds get rewarded, right?\n" +
               "There's a hidden command to unlock this site's true potential.\n" +
@@ -59,7 +66,7 @@ const EasterEggs = () => {
                 "color: #444; font-size: 16px; font-family: 'Arial', sans-serif;"
               );
 
-              const warningTimeout = setTimeout(() => {
+              warningTimeout = window.setTimeout(() => {
                 console.log(
                   "%cJust be careful what you change in here...",
                   "background-color: #FFFBEA; color: #D97706; border-left: 5px solid #FBBF24; padding: 15px 15px 10px 15px; font-size: 16px; font-weight: bold; font-family: 'Arial', sans-serif; border-top-left-radius: 5px; border-top-right-radius: 5px;"
@@ -71,7 +78,7 @@ const EasterEggs = () => {
               }, 2500);
 
               window.__easterEggUnlocked = true;
-              const catTimeout = setTimeout(() => {
+              catTimeout = window.setTimeout(() => {
                 console.log(
                   "%cAlright, enough with the serious stuff! Want to see a secret?\n" +
                     "It's a bit... flashy. And involves a cat.",
@@ -103,6 +110,13 @@ const EasterEggs = () => {
         }
       }, 3000);
     }
+
+    return () => {
+      window.clearTimeout(initialTimeout);
+      window.clearTimeout(revealTimeout);
+      window.clearTimeout(warningTimeout);
+      window.clearTimeout(catTimeout);
+    };
   }, [isDevToolsOpen]);
 
   return <NyanCat />;

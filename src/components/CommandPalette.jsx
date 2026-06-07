@@ -53,7 +53,11 @@ const CommandPalette = () => {
   }, []);
 
   useEffect(() => {
-    if (open) setTimeout(() => inputRef.current?.focus(), 50);
+    let focusTimer;
+    if (open) {
+      focusTimer = window.setTimeout(() => inputRef.current?.focus(), 50);
+    }
+    return () => window.clearTimeout(focusTimer);
   }, [open]);
 
   const runCommand = (cmd) => {

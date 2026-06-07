@@ -1,8 +1,6 @@
 // ReactBits Hooks
-export { default as useCardIntent } from "./hooks/useCardIntent";
 export { default as useEntryTiming } from "./hooks/useEntryTiming";
 export { default as useMagnetic } from "./hooks/useMagnetic";
-export { default as useNavPeek } from "./hooks/useNavPeek";
 export { default as useParallax } from "./hooks/useParallax";
 export { default as usePointerIntent } from "./hooks/usePointerIntent";
 export { default as usePreloaderBypass } from "./hooks/usePreloaderBypass";
