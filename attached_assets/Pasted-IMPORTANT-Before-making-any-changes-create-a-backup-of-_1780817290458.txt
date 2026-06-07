@@ -1,0 +1,256 @@
+IMPORTANT: Before making any changes, create a backup of the current implementation.
+
+The website is already working and has a strong visual identity. The goal is to refine and elevate it to a premium professional level WITHOUT removing existing functionality, animations, sections, styling architecture, or breaking any content.
+
+========================
+BRANDING UPDATE
+===============
+
+Change browser tab title to:
+
+Eng. Osama Sharaf | Full-Stack Developer
+
+Replace the current favicon with a professional developer/code icon:
+
+* Modern </> coding symbol
+* SVG favicon preferred
+* Sharp and professional appearance
+* Proper support for browser tabs, bookmarks and mobile devices
+
+Update all metadata:
+
+* Title
+* Favicon
+* Open Graph
+* Twitter/X metadata
+* Manifest
+* SEO metadata
+
+Remove any remaining references to previous branding.
+
+========================
+HERO SECTION REFINEMENT
+=======================
+
+Keep the existing Hero structure and animations.
+
+Remove:
+
+* Desktop PC
+* Monitor
+* Keyboard
+* Mouse
+* Speakers
+* Desk setup
+
+Replace with:
+
+* Premium floating tech-inspired visual elements
+* Abstract futuristic 3D shapes
+* Subtle glowing particles
+* Elegant depth effects
+* Lightweight animations
+
+Keep the existing 3D atmosphere.
+
+Improve:
+
+* Typography hierarchy
+* Spacing
+* Visual balance
+* CTA buttons
+* Responsive layout
+
+The Hero should feel cleaner, more luxurious and more focused on personal branding.
+
+========================
+COLOR SYSTEM REFINEMENT
+=======================
+
+Do NOT change the identity.
+
+Keep:
+
+* Dark theme
+* Purple accents
+* Blue-violet gradients
+
+Refine:
+
+* Slightly reduce excessive glow intensity
+* Improve contrast
+* Use smoother gradients
+* Create a more premium and modern appearance
+
+The final result should resemble high-end software agency websites.
+
+========================
+LIGHT / DARK MODE FIX
+=====================
+
+Audit the entire theme system.
+
+Create a proper design token system using variables.
+
+Ensure all components correctly support:
+
+* Backgrounds
+* Text
+* Cards
+* Borders
+* Shadows
+* Buttons
+* Forms
+* Navigation
+* Portfolio cards
+
+No color conflicts.
+
+No unreadable text.
+
+No broken sections.
+
+Theme switching must be fully consistent.
+
+========================
+PORTFOLIO SECTION
+=================
+
+Add a premium Portfolio section.
+
+Requirements:
+
+* Cinematic design
+* Responsive cards
+* Smooth hover effects
+* Glassmorphism
+* Project image
+* Project title
+* Short description
+* Technologies used
+* Action button
+
+Animations:
+
+* Smooth reveal on scroll
+* Lightweight performance-friendly transitions
+
+Keep visual consistency with the website.
+
+========================
+CURSOR IMPROVEMENT
+==================
+
+The current cursor feels slow.
+
+Improve:
+
+* Cursor responsiveness
+* Tracking accuracy
+* Smoothness
+* Hover interactions
+* Button interactions
+
+Add:
+
+* Premium magnetic effect
+* Modern developer portfolio style
+
+Must remain performant and lightweight.
+
+========================
+MOBILE OPTIMIZATION
+===================
+
+Perform a complete mobile audit.
+
+Improve:
+
+* Typography scaling
+* Touch interactions
+* Navigation usability
+* Section spacing
+* Hero responsiveness
+* Portfolio responsiveness
+
+Fix:
+
+* Overflow issues
+* Layout shifts
+* Misalignment
+
+Target:
+
+* Excellent mobile experience
+
+========================
+SEO OPTIMIZATION
+================
+
+Improve technical SEO.
+
+Add:
+
+* Proper metadata
+* Semantic HTML
+* Open Graph tags
+* Twitter metadata
+* Structured heading hierarchy
+* Image ALT attributes
+* Sitemap
+* Robots configuration
+* Schema markup where appropriate
+
+Target:
+
+* Higher Lighthouse SEO score
+
+========================
+PERFORMANCE OPTIMIZATION
+========================
+
+Optimize the entire website.
+
+Improve:
+
+* Page speed
+* Render performance
+* Animation efficiency
+* Asset loading
+* Routing performance
+
+Implement:
+
+* Lazy loading
+* Image optimization
+* Code cleanup
+* Bundle optimization
+* Removal of unused code
+
+Target:
+
+* Smooth 60fps interactions
+* Faster loading
+* Better Lighthouse Performance score
+
+========================
+CRITICAL REQUIREMENTS
+=====================
+
+DO NOT:
+
+* Remove existing sections
+* Break animations
+* Break navigation
+* Change branding identity
+* Change overall layout structure
+* Remove current effects that work properly
+
+DO:
+
+* Refine
+* Enhance
+* Optimize
+* Modernize
+
+Final result should feel like a premium cinematic software engineer portfolio built by a top-tier digital agency while preserving the current design language and functionality.

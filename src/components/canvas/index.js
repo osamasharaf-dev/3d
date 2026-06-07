@@ -1,5 +1,5 @@
-import ComputersCanvas from "./Computers";
 import EarthCanvas from "./Earth";
+import FloatingTechCanvas from "./FloatingTech";
 import StarsCanvas from "./Stars";
 
-export { ComputersCanvas, EarthCanvas, StarsCanvas };
+export { EarthCanvas, FloatingTechCanvas, StarsCanvas };
