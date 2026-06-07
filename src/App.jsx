@@ -10,6 +10,7 @@ import {
   Navbar,
   StarsCanvas,
 } from "./components";
+import Projects from "./components/Projects";
 import EasterEggs from "./components/EasterEggs";
 import ElasticCursor from "./components/ElasticCursor";
 import Footer from "./components/Footer";
@@ -32,6 +33,7 @@ const MainPage = () => (
     </div>
     <StarsCanvas />
     <About />
+    <Projects />
     <Achievement />
     <SkillKeyboard />
     <Feedbacks />
@@ -42,35 +44,28 @@ const MainPage = () => (
   </div>
 );
 
-const App = () => {
-  return (
-    <ReactBitsCursorProvider>
-      <ReactBitsAudioProvider>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<MainPage />} />
-            <Route
-              path="/privacy-policy"
-              element={
-                <Suspense
-                  fallback={
-                    <div
-                      style={{
-                        background: "hsl(222.2 84% 4.9%)",
-                        minHeight: "100vh",
-                      }}
-                    />
-                  }
-                >
-                  <PrivacyPolicy />
-                </Suspense>
-              }
-            />
-          </Routes>
-        </BrowserRouter>
-      </ReactBitsAudioProvider>
-    </ReactBitsCursorProvider>
-  );
-};
+const App = () => (
+  <ReactBitsCursorProvider>
+    <ReactBitsAudioProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<MainPage />} />
+          <Route
+            path="/privacy-policy"
+            element={
+              <Suspense
+                fallback={
+                  <div style={{ background: "hsl(222.2 84% 4.9%)", minHeight: "100vh" }} />
+                }
+              >
+                <PrivacyPolicy />
+              </Suspense>
+            }
+          />
+        </Routes>
+      </BrowserRouter>
+    </ReactBitsAudioProvider>
+  </ReactBitsCursorProvider>
+);
 
 export default App;

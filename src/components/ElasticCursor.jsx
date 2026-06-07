@@ -1,179 +1,182 @@
-import gsap from "gsap";
-import React, {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from "react";
-import { useCursorState } from "../reactbits/context/ReactBitsCursorProvider";
-import { useMouse } from "../utils/useMouse";
+import React, { useEffect, useRef, useState } from "react";
 
-// Gsap Ticker Function
-function useTicker(callback, paused) {
-  useEffect(() => {
-    if (!paused && callback) {
-      gsap.ticker.add(callback);
-    }
-    return () => {
-      gsap.ticker.remove(callback);
-    };
-  }, [callback, paused]);
+const BLOB_SIZE = 44;
+const DOT_SIZE = 6;
+const LERP_SPEED = 0.18;
+
+function lerp(a, b, t) {
+  return a + (b - a) * t;
 }
-
-function useInstance(value = {}) {
-  const ref = useRef();
-  if (ref.current === undefined) {
-    ref.current = typeof value === "function" ? value() : value;
-  }
-  return ref.current;
-}
-
-function getScale(diffX, diffY) {
-  const distance = Math.sqrt(Math.pow(diffX, 2) + Math.pow(diffY, 2));
-  return Math.min(distance / 1200, 0.18);
-}
-
-function getAngle(diffX, diffY) {
-  return (Math.atan2(diffY, diffX) * 180) / Math.PI;
-}
-
-function getRekt(el) {
-  if (el.classList && el.classList.contains("cursor-can-hover"))
-    return el.getBoundingClientRect();
-  else if (el.parentElement?.classList.contains("cursor-can-hover"))
-    return el.parentElement.getBoundingClientRect();
-  else if (
-    el.parentElement?.parentElement?.classList.contains("cursor-can-hover")
-  )
-    return el.parentElement.parentElement.getBoundingClientRect();
-  return null;
-}
-
-const CURSOR_DIAMETER = 50;
 
 function ElasticCursor() {
-  // Detect if mobile (simple check)
   const isMobile =
-    window.matchMedia && window.matchMedia("(max-width: 768px)").matches;
-  const jellyRef = useRef(null);
-  const [isHovering, setIsHovering] = useState(false);
-  const { x, y } = useMouse();
-  const { intent, setTargetBounds, setHoverTarget } = useCursorState();
-  const pos = useInstance(() => ({ x: 0, y: 0 }));
-  const vel = useInstance(() => ({ x: 0, y: 0 }));
-  const set = useInstance();
+    typeof window !== "undefined" &&
+    window.matchMedia("(max-width: 768px)").matches;
 
-  useLayoutEffect(() => {
-    set.x = gsap.quickSetter(jellyRef.current, "x", "px");
-    set.y = gsap.quickSetter(jellyRef.current, "y", "px");
-    set.r = gsap.quickSetter(jellyRef.current, "rotate", "deg");
-    set.sx = gsap.quickSetter(jellyRef.current, "scaleX");
-    set.sy = gsap.quickSetter(jellyRef.current, "scaleY");
-    set.width = gsap.quickSetter(jellyRef.current, "width", "px");
-  }, []);
+  const blobRef = useRef(null);
+  const dotRef = useRef(null);
+  const rafRef = useRef(null);
+  const [visible, setVisible] = useState(false);
 
-  const loop = useCallback(() => {
-    if (!set.width || !set.sx || !set.sy || !set.r) return;
-    var rotation = getAngle(+vel.x, +vel.y);
-    var scale = getScale(+vel.x, +vel.y);
-    if (!isHovering) {
-      set.x(pos.x);
-      set.y(pos.y);
-      set.width(CURSOR_DIAMETER + scale * 180);
-      set.r(rotation);
-      set.sx(1 + scale * 0.8);
-      set.sy(1 - scale * 1.2);
-    } else {
-      set.r(0);
-    }
-  }, [isHovering]);
-
-  const [cursorMoved, setCursorMoved] = useState(false);
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (isMobile) return;
-    const setFromEvent = (e) => {
-      if (!jellyRef.current) return;
-      if (!cursorMoved) {
-        setCursorMoved(true);
-      }
-      const el = e.target;
-      const hoverElemRect = getRekt(el);
-      if (hoverElemRect) {
-        const rect = el.getBoundingClientRect();
-        setIsHovering(true);
-        setTargetBounds(rect);
-        setHoverTarget(el);
-        gsap.to(jellyRef.current, {
-          rotate: 0,
-          duration: 0,
-        });
-        gsap.to(jellyRef.current, {
-          width: el.offsetWidth + 12,
-          height: el.offsetHeight + 12,
-          x: rect.left + rect.width / 2,
-          y: rect.top + rect.height / 2,
-          borderRadius: 10,
-          duration: 0.9,
-          ease: "elastic.out(1, 0.4)",
-        });
-      } else {
-        gsap.to(jellyRef.current, {
-          borderRadius: 50,
-          width: CURSOR_DIAMETER,
-          height: CURSOR_DIAMETER,
-        });
-        setIsHovering(false);
-        setTargetBounds(null);
-        setHoverTarget(null);
-      }
-      const x = e.clientX;
-      const y = e.clientY;
-      gsap.to(pos, {
-        x: x,
-        y: y,
-        duration: 0.9,
-        ease: "power3.out",
-        onUpdate: () => {
-          vel.x = (x - pos.x) * 1.2;
-          vel.y = (y - pos.y) * 1.2;
-        },
-      });
-      loop();
+
+    const state = {
+      rawX: 0, rawY: 0,
+      curX: 0, curY: 0,
+      hoverEl: null,
+      isHover: false,
     };
-    window.addEventListener("mousemove", setFromEvent);
+
+    const blob = blobRef.current;
+    const dot = dotRef.current;
+    if (!blob || !dot) return;
+
+    const snap = (el) => {
+      if (!el) return false;
+      if (el.classList?.contains("cursor-can-hover")) return true;
+      if (el.parentElement?.classList?.contains("cursor-can-hover")) return true;
+      if (el.parentElement?.parentElement?.classList?.contains("cursor-can-hover")) return true;
+      const tag = el.tagName;
+      if (tag === "A" || tag === "BUTTON") return true;
+      if (el.parentElement?.tagName === "A" || el.parentElement?.tagName === "BUTTON") return true;
+      return false;
+    };
+
+    const getRect = (el) => {
+      if (el.classList?.contains("cursor-can-hover")) return el.getBoundingClientRect();
+      if (el.parentElement?.classList?.contains("cursor-can-hover")) return el.parentElement.getBoundingClientRect();
+      if (el.parentElement?.parentElement?.classList?.contains("cursor-can-hover")) return el.parentElement.parentElement.getBoundingClientRect();
+      const tag = el.tagName;
+      if (tag === "A" || tag === "BUTTON") return el.getBoundingClientRect();
+      if (el.parentElement?.tagName === "A") return el.parentElement.getBoundingClientRect();
+      if (el.parentElement?.tagName === "BUTTON") return el.parentElement.getBoundingClientRect();
+      return null;
+    };
+
+    const onMouseMove = (e) => {
+      state.rawX = e.clientX;
+      state.rawY = e.clientY;
+
+      if (!visible) setVisible(true);
+
+      const el = e.target;
+      const shouldSnap = snap(el);
+
+      if (shouldSnap && el !== state.hoverEl) {
+        const rect = getRect(el);
+        if (rect) {
+          state.isHover = true;
+          state.hoverEl = el;
+          blob.style.transition = "width 0.35s cubic-bezier(0.16,1,0.3,1), height 0.35s cubic-bezier(0.16,1,0.3,1), border-radius 0.35s cubic-bezier(0.16,1,0.3,1), background 0.25s";
+          blob.style.width = `${rect.width + 12}px`;
+          blob.style.height = `${rect.height + 12}px`;
+          blob.style.borderRadius = "10px";
+          blob.style.background = "rgba(255,255,255,0.12)";
+          state.curX = rect.left + rect.width / 2;
+          state.curY = rect.top + rect.height / 2;
+        }
+      } else if (!shouldSnap && state.isHover) {
+        state.isHover = false;
+        state.hoverEl = null;
+        blob.style.transition = "width 0.3s cubic-bezier(0.16,1,0.3,1), height 0.3s cubic-bezier(0.16,1,0.3,1), border-radius 0.3s cubic-bezier(0.16,1,0.3,1), background 0.25s";
+        blob.style.width = `${BLOB_SIZE}px`;
+        blob.style.height = `${BLOB_SIZE}px`;
+        blob.style.borderRadius = "50%";
+        blob.style.background = "rgba(255,255,255,0.15)";
+      }
+    };
+
+    let prevX = 0, prevY = 0;
+
+    const tick = () => {
+      if (!state.isHover) {
+        state.curX = lerp(state.curX, state.rawX, LERP_SPEED);
+        state.curY = lerp(state.curY, state.rawY, LERP_SPEED);
+      } else {
+        const el = state.hoverEl;
+        if (el) {
+          const rect = getRect(el);
+          if (rect) {
+            const tx = rect.left + rect.width / 2;
+            const ty = rect.top + rect.height / 2;
+            state.curX = lerp(state.curX, tx, 0.14);
+            state.curY = lerp(state.curY, ty, 0.14);
+          }
+        }
+      }
+
+      const vx = state.curX - prevX;
+      const vy = state.curY - prevY;
+      prevX = state.curX;
+      prevY = state.curY;
+
+      const dist = Math.sqrt(vx * vx + vy * vy);
+      const scaleAmt = Math.min(dist / 80, 0.22);
+      const angle = Math.atan2(vy, vx) * (180 / Math.PI);
+
+      blob.style.transform = state.isHover
+        ? `translate(calc(${state.curX}px - 50%), calc(${state.curY}px - 50%))`
+        : `translate(calc(${state.curX}px - 50%), calc(${state.curY}px - 50%)) rotate(${angle}deg) scaleX(${1 + scaleAmt * 0.9}) scaleY(${1 - scaleAmt * 1.1})`;
+
+      dot.style.transform = `translate(calc(${state.rawX}px - 50%), calc(${state.rawY}px - 50%))`;
+
+      rafRef.current = requestAnimationFrame(tick);
+    };
+
+    window.addEventListener("mousemove", onMouseMove, { passive: true });
+    rafRef.current = requestAnimationFrame(tick);
+
     return () => {
-      window.removeEventListener("mousemove", setFromEvent);
+      window.removeEventListener("mousemove", onMouseMove);
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
     };
   }, [isMobile]);
 
-  useTicker(loop, !cursorMoved || isMobile);
   if (isMobile) return null;
+
   return (
     <>
+      {/* Jelly blob */}
       <div
-        ref={jellyRef}
-        id={"jelly-id"}
-        className="jelly-blob fixed left-0 top-0 rounded-lg z-[999] pointer-events-none will-change-transform translate-x-[-50%] translate-y-[-50%]"
+        ref={blobRef}
+        aria-hidden="true"
         style={{
-          width: CURSOR_DIAMETER,
-          height: CURSOR_DIAMETER,
-          borderRadius: 50,
-          border: "2px solid #000",
-          background: "rgba(255,255,255,0.2)",
+          position: "fixed",
+          top: 0,
+          left: 0,
+          width: BLOB_SIZE,
+          height: BLOB_SIZE,
+          borderRadius: "50%",
+          background: "rgba(255,255,255,0.15)",
+          border: "1.5px solid rgba(255,255,255,0.35)",
           mixBlendMode: "exclusion",
           pointerEvents: "none",
-          backdropFilter: "invert(100%)",
+          zIndex: 9999,
+          willChange: "transform",
+          opacity: visible ? 1 : 0,
+          transition: "opacity 0.3s ease",
+          backfaceVisibility: "hidden",
         }}
       />
-      {/* Small dot at mouse position with invert effect */}
+      {/* Precise dot — zero latency */}
       <div
-        className="w-3 h-3 rounded-full fixed translate-x-[-50%] translate-y-[-50%] pointer-events-none transition-none duration-300"
+        ref={dotRef}
+        aria-hidden="true"
         style={{
-          top: y,
-          left: x,
-          backdropFilter: "invert(100%)",
-          zIndex: 1000,
+          position: "fixed",
+          top: 0,
+          left: 0,
+          width: DOT_SIZE,
+          height: DOT_SIZE,
+          borderRadius: "50%",
+          background: "rgba(255,255,255,0.9)",
+          mixBlendMode: "exclusion",
+          pointerEvents: "none",
+          zIndex: 10000,
+          willChange: "transform",
+          opacity: visible ? 1 : 0,
+          transition: "opacity 0.3s ease",
         }}
       />
     </>

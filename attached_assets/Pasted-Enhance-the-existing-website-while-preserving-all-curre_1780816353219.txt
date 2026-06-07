@@ -1,0 +1,90 @@
+Enhance the existing website while preserving all current sections, branding, colors, animations, layouts, functionality, and visual identity. Do NOT remove or break anything currently working.
+
+### Portfolio / Projects Section
+
+Add a premium "Portfolio" section showcasing projects in a modern cinematic style.
+
+Requirements:
+
+* High-end project showcase cards.
+* Smooth hover effects.
+* Glassmorphism and subtle 3D depth.
+* Project image, title, description, technologies, and project link.
+* Elegant reveal animations on scroll.
+* Fully responsive on desktop, tablet, and mobile.
+* Consistent with the current design language.
+
+### Custom Cursor Upgrade
+
+The current custom cursor feels slow and not premium.
+
+Improve it by:
+
+* Reducing cursor latency.
+* Making cursor tracking extremely smooth and responsive.
+* Adding subtle magnetic effects on buttons.
+* Adding elegant hover interactions.
+* Keeping performance optimized.
+* Creating a premium modern agency-style cursor.
+
+### Hero Section Enhancement
+
+Improve the hero section while keeping its existing concept.
+
+Requirements:
+
+* Better spacing and visual hierarchy.
+* More premium typography.
+* More balanced composition.
+* Improve CTA buttons.
+* Enhance animations and transitions.
+* Keep the existing 3D visual but make it feel more professional and polished.
+* Ensure perfect responsiveness.
+
+### Website Performance Optimization
+
+Optimize the entire website for maximum speed.
+
+Requirements:
+
+* Reduce unnecessary re-renders.
+* Optimize animations for smooth 60fps performance.
+* Lazy load heavy assets.
+* Compress and optimize images.
+* Remove unused code and assets.
+* Improve page transition speed.
+* Optimize JavaScript execution.
+* Improve Lighthouse performance score.
+
+### Mobile Optimization
+
+Improve the mobile experience significantly.
+
+Requirements:
+
+* Better spacing and readability.
+* Faster loading.
+* Responsive typography.
+* Better touch interactions.
+* No overflow issues.
+* No layout shifts.
+* Perfect responsiveness across all devices.
+
+### SEO Optimization
+
+Improve technical SEO across the entire website.
+
+Requirements:
+
+* Proper meta titles and descriptions.
+* Open Graph tags.
+* Structured heading hierarchy (H1-H6).
+* Semantic HTML.
+* Image alt attributes.
+* Schema markup where appropriate.
+* Sitemap and robots configuration.
+* Improve Lighthouse SEO score.
+
+### Final Goal
+
+Transform the website into a premium cinematic portfolio experience with smoother interactions, faster performance, stronger SEO, a professional custom cursor, an impressive portfolio section, enhanced hero section, and excellent mobile responsiveness while preserving everything that already exists.
