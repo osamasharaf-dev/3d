@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import React, { memo, useCallback, useRef, useState } from "react";
 
-import { achievements } from "../constants";
+import { useCertifications } from "../lib/useCertifications";
 import { SectionWrapper } from "../hoc";
 import { styles } from "../styles";
 import { textVariant } from "../utils/motion";
@@ -30,6 +30,11 @@ const CertCard = memo(({ Achievement, index }) => {
   const title = Array.isArray(Achievement.title)
     ? Achievement.title[0]
     : Achievement.title;
+
+  const iconBg    = Achievement.icon_bg || Achievement.iconBg || "rgba(145,94,255,0.15)";
+  const iconSrc   = Achievement.icon_url || Achievement.icon || null;
+  const dateLabel = Achievement.date_range || Achievement.date || "";
+  const creds     = Achievement.credentials || Achievement.credential || [];
 
   return (
     <motion.div
@@ -79,17 +84,23 @@ const CertCard = memo(({ Achievement, index }) => {
           <div
             className="flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center overflow-hidden"
             style={{
-              background: Achievement.iconBg || "rgba(145,94,255,0.15)",
+              background: iconBg,
               border: "1.5px solid rgba(255,255,255,0.08)",
             }}
           >
-            <img
-              src={Achievement.icon}
-              alt={title}
-              className="w-8 h-8 object-contain"
-              loading="lazy"
-              decoding="async"
-            />
+            {iconSrc ? (
+              <img
+                src={iconSrc}
+                alt={title}
+                className="w-8 h-8 object-contain"
+                loading="lazy"
+                decoding="async"
+              />
+            ) : (
+              <span className="text-white font-bold text-lg">
+                {title?.[0]?.toUpperCase()}
+              </span>
+            )}
           </div>
 
           <div className="flex-1 min-w-0">
@@ -103,7 +114,7 @@ const CertCard = memo(({ Achievement, index }) => {
             )}
           </div>
 
-          {Achievement.date && (
+          {dateLabel && (
             <div
               className="flex-shrink-0 px-2.5 py-1 rounded-lg text-[11px] font-semibold whitespace-nowrap"
               style={{
@@ -112,7 +123,7 @@ const CertCard = memo(({ Achievement, index }) => {
                 border: "1px solid rgba(145,94,255,0.25)",
               }}
             >
-              {Achievement.date}
+              {dateLabel}
             </div>
           )}
         </div>
@@ -124,7 +135,7 @@ const CertCard = memo(({ Achievement, index }) => {
 
         {/* Points */}
         <ul className="space-y-2.5">
-          {Achievement.points.map((point, i) => (
+          {(Achievement.points || []).map((point, i) => (
             <li key={i} className="flex items-start gap-2.5">
               <div
                 className="flex-shrink-0 w-1.5 h-1.5 rounded-full mt-[6px]"
@@ -134,9 +145,9 @@ const CertCard = memo(({ Achievement, index }) => {
                 <p className="text-[#aaa6c3] text-[13px] leading-relaxed">
                   {point}
                 </p>
-                {Achievement.credential?.[i] && (
+                {creds?.[i] && (
                   <a
-                    href={Achievement.credential[i]}
+                    href={creds[i]}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-1 mt-1 text-[11px] font-semibold text-blue-400 hover:text-blue-300 transition-colors duration-200"
@@ -169,6 +180,8 @@ const CertCard = memo(({ Achievement, index }) => {
 CertCard.displayName = "CertCard";
 
 const Achievement = () => {
+  const { data: certifications } = useCertifications();
+
   return (
     <>
       <motion.div variants={textVariant()}>
@@ -181,8 +194,8 @@ const Achievement = () => {
       </motion.div>
 
       <div className="mt-16 grid grid-cols-1 md:grid-cols-2 gap-6">
-        {achievements.map((achievement, index) => (
-          <CertCard key={index} Achievement={achievement} index={index} />
+        {certifications.map((cert, index) => (
+          <CertCard key={cert.id || index} Achievement={cert} index={index} />
         ))}
       </div>
 

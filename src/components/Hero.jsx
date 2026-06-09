@@ -5,13 +5,7 @@ import useParallax from "../reactbits/hooks/useParallax";
 import { styles } from "../styles";
 import useMediaQuery from "../utils/useMediaQuery";
 import { FloatingTechCanvas } from "./canvas";
-
-const TYPED_ITEMS = [
-  "Full-Stack Developer",
-  "Software Engineer",
-  "Web Architect",
-  "Problem Solver",
-];
+import { useHero, HERO_FALLBACK } from "../lib/useHero";
 
 /* ── Identity card ──────────────────────────────────────── */
 const FloatingPortraitCard = memo(() => {
@@ -181,6 +175,9 @@ FloatingPortraitCard.displayName = "FloatingPortraitCard";
 
 /* ── Hero ───────────────────────────────────────────────── */
 const Hero = () => {
+  const { data: heroData } = useHero();
+  const typedItemsRef = useRef(HERO_FALLBACK.typed_items);
+
   const [typedText, setTypedText] = useState("");
   const [itemIndex, setItemIndex] = useState(0);
   const [charIndex, setCharIndex] = useState(0);
@@ -192,9 +189,17 @@ const Hero = () => {
     enabled: !isMobile,
   });
 
+  /* Sync typed items from DB */
+  useEffect(() => {
+    if (Array.isArray(heroData?.typed_items) && heroData.typed_items.length > 0) {
+      typedItemsRef.current = heroData.typed_items;
+    }
+  }, [heroData]);
+
   /* Typing effect */
   useEffect(() => {
-    const current = TYPED_ITEMS[itemIndex];
+    const items = typedItemsRef.current;
+    const current = items[itemIndex % items.length] || "";
     if (charIndex < current.length) {
       const t = setTimeout(() => {
         setTypedText((p) => p + current[charIndex]);
@@ -203,7 +208,7 @@ const Hero = () => {
       return () => clearTimeout(t);
     }
     const t = setTimeout(() => {
-      setItemIndex((i) => (i + 1) % TYPED_ITEMS.length);
+      setItemIndex((i) => (i + 1) % items.length);
       setCharIndex(0);
       setTypedText("");
     }, 1400);

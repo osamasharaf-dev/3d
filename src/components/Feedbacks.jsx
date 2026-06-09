@@ -4,44 +4,7 @@ import { motion } from "framer-motion";
 import { styles } from "../styles";
 import { SectionWrapper } from "../hoc";
 import { fadeIn, textVariant } from "../utils/motion";
-
-const professionalSkills = [
-  {
-    category: "Communication & Teamwork",
-    icon: "🤝",
-    color: "#8ec5ff",
-    skills: [
-      "Effective Communication",
-      "Team Collaboration",
-      "Client Interaction",
-      "Leadership & Coordination",
-    ],
-  },
-  {
-    category: "Problem Solving",
-    icon: "🧠",
-    color: "#a78bfa",
-    skills: [
-      "Analytical Thinking",
-      "Technical Troubleshooting",
-      "Strategic Planning",
-      "Decision Making",
-    ],
-  },
-  {
-    category: "Work Excellence",
-    icon: "⚡",
-    color: "#34d399",
-    skills: [
-      "Time Management",
-      "Adaptability",
-      "Working Under Pressure",
-      "Attention to Detail",
-      "Continuous Learning",
-      "Fast Problem Resolution",
-    ],
-  },
-];
+import { useProfessionalSkills } from "../lib/useProfessionalSkills";
 
 const SkillCategoryCard = memo(({ index, category, icon, color, skills }) => (
   <motion.div
@@ -55,7 +18,7 @@ const SkillCategoryCard = memo(({ index, category, icon, color, skills }) => (
       </h3>
     </div>
     <ul className="mt-4 space-y-2">
-      {skills.map((skill, i) => (
+      {(skills || []).map((skill, i) => (
         <li key={i} className="flex items-center gap-2 text-secondary text-[15px]">
           <span
             className="w-1.5 h-1.5 rounded-full flex-shrink-0"
@@ -71,6 +34,8 @@ const SkillCategoryCard = memo(({ index, category, icon, color, skills }) => (
 SkillCategoryCard.displayName = "SkillCategoryCard";
 
 const Feedbacks = () => {
+  const { data: professionalSkills } = useProfessionalSkills();
+
   return (
     <div className="mt-12 bg-[#0a0c14] rounded-[20px]">
       <div className={`bg-[#111522] rounded-2xl ${styles.padding} min-h-[300px]`}>
@@ -83,7 +48,7 @@ const Feedbacks = () => {
       </div>
       <div className={`-mt-20 pb-14 ${styles.paddingX} flex flex-wrap gap-7`}>
         {professionalSkills.map((item, index) => (
-          <SkillCategoryCard key={item.category} index={index} {...item} />
+          <SkillCategoryCard key={item.id || item.category} index={index} {...item} />
         ))}
       </div>
     </div>

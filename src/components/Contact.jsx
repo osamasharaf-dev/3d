@@ -6,9 +6,11 @@ import {
   FaGithub,
   FaFacebook,
   FaInstagram,
+  FaWhatsapp,
   FaEnvelope,
   FaPhone,
 } from "react-icons/fa";
+import { useContactInfo } from "../lib/useContactInfo";
 
 import { SectionWrapper } from "../hoc";
 import useMagnetic from "../reactbits/hooks/useMagnetic";
@@ -18,35 +20,17 @@ import { slideIn } from "../utils/motion";
 import { EarthCanvas } from "./canvas";
 import Toast from "./ui/toast";
 
-const SOCIAL_LINKS = [
-  {
-    icon: FaLinkedin,
-    label: "LinkedIn",
-    href: "https://linkedin.com/in/osamasharaf",
-    color: "#0A66C2",
-  },
-  {
-    icon: FaGithub,
-    label: "GitHub",
-    href: "https://github.com/osamasharaf",
-    color: "#ffffff",
-  },
-  {
-    icon: FaFacebook,
-    label: "Facebook",
-    href: "https://facebook.com/osamasharaf",
-    color: "#1877F2",
-  },
-  {
-    icon: FaInstagram,
-    label: "Instagram",
-    href: "https://instagram.com/osamasharaf",
-    color: "#E4405F",
-  },
-];
-
 const Contact = () => {
   const formRef = useRef();
+  const { data: contactInfo } = useContactInfo();
+
+  const socialLinks = [
+    contactInfo.linkedin  && { icon: FaLinkedin,  label: "LinkedIn",  href: contactInfo.linkedin,  color: "#0A66C2" },
+    contactInfo.github    && { icon: FaGithub,    label: "GitHub",    href: contactInfo.github,    color: "#ffffff" },
+    contactInfo.facebook  && { icon: FaFacebook,  label: "Facebook",  href: contactInfo.facebook,  color: "#1877F2" },
+    contactInfo.instagram && { icon: FaInstagram, label: "Instagram", href: contactInfo.instagram, color: "#E4405F" },
+    contactInfo.whatsapp  && { icon: FaWhatsapp,  label: "WhatsApp",  href: contactInfo.whatsapp,  color: "#25D366" },
+  ].filter(Boolean);
   const [form, setForm] = useState({ name: "", email: "", message: "" });
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState({ open: false, message: "", type: "success" });
@@ -119,25 +103,29 @@ const Contact = () => {
 
         {/* Contact info bar */}
         <div className="flex flex-wrap justify-center gap-6 mt-6 mb-2 px-4">
-          <a
-            href="mailto:osamaabdulhalimsharaf@gmail.com"
-            className="flex items-center gap-2 text-[#8ec5ff] hover:text-white transition-colors duration-200 text-sm sm:text-base"
-          >
-            <FaEnvelope className="text-lg" />
-            <span>osamaabdulhalimsharaf@gmail.com</span>
-          </a>
-          <a
-            href="tel:+963935562470"
-            className="flex items-center gap-2 text-[#8ec5ff] hover:text-white transition-colors duration-200 text-sm sm:text-base"
-          >
-            <FaPhone className="text-lg" />
-            <span>+963 935 562 470</span>
-          </a>
+          {contactInfo.email && (
+            <a
+              href={`mailto:${contactInfo.email}`}
+              className="flex items-center gap-2 text-[#8ec5ff] hover:text-white transition-colors duration-200 text-sm sm:text-base"
+            >
+              <FaEnvelope className="text-lg" />
+              <span>{contactInfo.email}</span>
+            </a>
+          )}
+          {contactInfo.phone && (
+            <a
+              href={`tel:${contactInfo.phone.replace(/\s/g, "")}`}
+              className="flex items-center gap-2 text-[#8ec5ff] hover:text-white transition-colors duration-200 text-sm sm:text-base"
+            >
+              <FaPhone className="text-lg" />
+              <span>{contactInfo.phone}</span>
+            </a>
+          )}
         </div>
 
         {/* Social media links */}
         <div className="flex justify-center gap-4 mt-4 mb-6">
-          {SOCIAL_LINKS.map(({ icon: Icon, label, href, color }) => (
+          {socialLinks.map(({ icon: Icon, label, href, color }) => (
             <motion.a
               key={label}
               href={href}
