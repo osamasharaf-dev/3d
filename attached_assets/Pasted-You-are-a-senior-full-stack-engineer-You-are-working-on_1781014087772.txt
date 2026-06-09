@@ -1,0 +1,145 @@
+You are a senior full-stack engineer.
+
+You are working on an existing React + TypeScript + Vite portfolio project that already uses Supabase and is imported from GitHub.
+
+Your task is NOT to rebuild the project, but to FULLY FIX, COMPLETE, and PRODUCTIONIZE it into a working portfolio + admin CMS system.
+
+==================================================
+CRITICAL RULES
+==================================================
+1. DO NOT delete existing project structure.
+2. DO NOT restart the project from scratch.
+3. ONLY fix, improve, and complete missing parts.
+4. Keep Supabase as the ONLY backend.
+5. Ensure Netlify deployment compatibility.
+6. Use TypeScript strictly.
+7. No mock data allowed.
+
+==================================================
+MAIN OBJECTIVE
+==================================================
+Turn this project into a fully working production system:
+
+- Public portfolio website
+- Admin dashboard (/admin)
+- Authentication system (Supabase Auth)
+- Full CMS (projects + skills)
+- Proper routing
+- Fully working Supabase integration
+- Netlify deployment ready
+
+==================================================
+1. FIX SUPABASE CONNECTION (CRITICAL)
+==================================================
+- Ensure correct Supabase client setup:
+  - VITE_SUPABASE_URL must NOT include /rest/v1/
+  - VITE_SUPABASE_ANON_KEY must be used correctly
+- Fix any broken API calls or invalid paths
+- Ensure all queries use correct table names
+
+==================================================
+2. AUTH SYSTEM FIX
+==================================================
+- Fix login at /admin/login using Supabase Auth
+- Ensure signInWithPassword works correctly
+- Fix redirect after login → /admin
+- Fix session persistence on refresh
+- Implement auth state listener (onAuthStateChange)
+- Ensure no infinite redirect loops
+
+==================================================
+3. ADMIN DASHBOARD (/admin)
+==================================================
+Build or fix a fully functional admin panel:
+
+Sections:
+- Dashboard overview (stats)
+- Projects management (CRUD)
+- Skills management (CRUD)
+- Logout system
+
+Must include:
+- Create project
+- Edit project
+- Delete project
+- Upload image via Supabase Storage
+- Store only URLs in database
+
+==================================================
+4. SKILLS SYSTEM (IMPORTANT UPDATE)
+==================================================
+Replace any old or broken skills UI with a clean system:
+
+Database-driven skills:
+Categories:
+- Frontend
+- Backend
+- Database
+- Tools
+
+Each skill:
+- name
+- icon
+- category
+
+Public site must fetch skills dynamically from Supabase.
+
+Admin must be able to:
+- Add skill
+- Delete skill
+- Assign category
+
+==================================================
+5. PUBLIC PORTFOLIO FIX
+==================================================
+- Replace all static data with Supabase data
+- Projects must be fetched dynamically
+- Skills must be fetched dynamically
+- No hardcoded content allowed
+
+==================================================
+6. ROUTING FIX
+==================================================
+- Fix /admin route protection
+- Fix /admin/login route access
+- Ensure SPA routing works properly
+- Ensure Netlify redirect compatibility
+
+Add necessary fallback:
+- _redirects or netlify config if needed
+
+==================================================
+7. SUPABASE STORAGE
+==================================================
+- Create/ensure bucket: project-images
+- Fix image upload if broken
+- Store public URLs only in DB
+
+==================================================
+8. SECURITY (IMPORTANT)
+==================================================
+- Ensure Row Level Security (RLS) is properly set:
+  - Public can READ projects & skills
+  - Only admin can CREATE/UPDATE/DELETE
+- Ensure admin-only access to dashboard actions
+
+==================================================
+9. PERFORMANCE + CLEANUP
+==================================================
+- Remove broken or unused code
+- Fix console errors
+- Improve folder structure if needed
+- Ensure clean production build
+
+==================================================
+EXPECTED RESULT
+==================================================
+After completion:
+
+- /admin login works perfectly
+- Dashboard loads correctly
+- You can add/edit/delete projects
+- Skills system works dynamically
+- All changes reflect instantly on public site
+- Supabase is fully integrated and secure
+- Project deploys successfully on Netlify
