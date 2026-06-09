@@ -36,7 +36,7 @@ const ServiceCard = memo(({ index, title, icon }) => (
 ServiceCard.displayName = "ServiceCard";
 
 const About = () => {
-  const { ref: resumeButtonRef, style: magneticStyle } = useMagnetic({
+  const { ref: resumeButtonRef } = useMagnetic({
     radius: 100,
     strength: 0.3,
   });
@@ -69,7 +69,6 @@ const About = () => {
 
       <button
         ref={resumeButtonRef}
-        style={magneticStyle}
         className="mt-10 px-6 py-3 text-white bg-gradient-to-r from-cyan-500 to-indigo-500 rounded-md shadow-md hover:from-cyan-600 hover:to-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 transition-all duration-200"
         onClick={() =>
           window.open("mailto:osamaabdulhalimsharaf@gmail.com", "_blank")

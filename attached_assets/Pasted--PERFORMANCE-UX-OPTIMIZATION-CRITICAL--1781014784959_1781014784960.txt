@@ -1,0 +1,63 @@
+==================================================
+PERFORMANCE & UX OPTIMIZATION (CRITICAL)
+==================================================
+
+The website currently feels slow, laggy, and unresponsive.
+
+You MUST optimize the entire frontend for performance and smooth UX.
+
+==================================================
+1. FRONTEND PERFORMANCE FIX
+==================================================
+- Reduce unnecessary React re-renders
+- Memoize components where needed (React.memo, useMemo, useCallback)
+- Prevent state updates on mouse movement or scroll unless necessary
+- Optimize component structure
+
+==================================================
+2. ANIMATION OPTIMIZATION
+==================================================
+- Reduce heavy animations
+- Ensure animations are smooth (60fps)
+- Remove unnecessary or overly complex motion effects
+- Keep subtle transitions only
+
+==================================================
+3. API OPTIMIZATION (SUPABASE)
+==================================================
+- Avoid multiple repeated API calls
+- Use centralized data fetching
+- Cache fetched data where possible
+- Prevent refetch on every render
+
+==================================================
+4. IMAGE OPTIMIZATION
+==================================================
+- Compress images or use optimized URLs
+- Avoid large raw images
+- Lazy load images
+
+==================================================
+5. LAZY LOADING
+==================================================
+- Implement lazy loading for:
+  - /admin routes
+  - heavy components
+- Split code using React.lazy if needed
+
+==================================================
+6. UI PERFORMANCE FEEL
+==================================================
+- Ensure smooth hover effects (not laggy)
+- Reduce mousemove listeners
+- Ensure scrolling is smooth
+- No UI blocking or freezing
+
+==================================================
+EXPECTED RESULT
+==================================================
+- Website feels fast and responsive
+- Smooth animations (not heavy)
+- No lag on mouse movement
+- Admin dashboard is fast and responsive
+- Public site loads instantly

@@ -210,47 +210,54 @@ ProjectModal.displayName = "ProjectModal";
 
 /* ── Project Card ─────────────────────────────────────────── */
 const ProjectCard = memo(({ project, index, onClick }) => {
-  const cardRef = useRef(null);
-  const [tilt, setTilt] = useState({ x: 0, y: 0 });
+  const tiltRef = useRef(null);
   const [hovered, setHovered] = useState(false);
 
   const handleMouseMove = useCallback((e) => {
-    if (!cardRef.current) return;
-    const rect = cardRef.current.getBoundingClientRect();
-    setTilt({
-      x:  ((e.clientY - rect.top  - rect.height / 2) / rect.height) * 7,
-      y: -((e.clientX - rect.left - rect.width  / 2) / rect.width)  * 7,
-    });
+    const el = tiltRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const x =  ((e.clientY - rect.top  - rect.height / 2) / rect.height) * 7;
+    const y = -((e.clientX - rect.left - rect.width  / 2) / rect.width)  * 7;
+    el.style.transform = `perspective(1100px) rotateX(${x.toFixed(2)}deg) rotateY(${y.toFixed(2)}deg) translateZ(6px)`;
+  }, []);
+
+  const handleMouseEnter = useCallback(() => {
+    if (tiltRef.current) tiltRef.current.style.transition = "transform 0.08s ease-out";
+    setHovered(true);
   }, []);
 
   const handleMouseLeave = useCallback(() => {
-    setTilt({ x: 0, y: 0 });
+    const el = tiltRef.current;
+    if (el) {
+      el.style.transition = "transform 0.55s cubic-bezier(0.16,1,0.3,1)";
+      el.style.transform = "perspective(1100px) rotateX(0deg) rotateY(0deg) translateZ(0px)";
+    }
     setHovered(false);
   }, []);
 
   return (
     <motion.article
-      ref={cardRef}
       initial={{ opacity: 0, y: 60 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.12 }}
       transition={{ duration: 0.65, delay: index * 0.09, ease: [0.16, 1, 0.3, 1] }}
-      onMouseMove={handleMouseMove}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={handleMouseLeave}
       onClick={onClick}
       role="button"
       tabIndex={0}
       aria-label={`Open ${project.name} details`}
       onKeyDown={e => { if (e.key === "Enter" || e.key === " ") onClick(); }}
-      style={{
-        transform: `perspective(1100px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg) translateZ(${hovered ? 6 : 0}px)`,
-        transition: hovered ? "transform 0.08s ease-out" : "transform 0.55s cubic-bezier(0.16,1,0.3,1)",
-        transformStyle: "preserve-3d",
-        cursor: "pointer",
-      }}
-      className="group relative rounded-2xl overflow-hidden"
+      style={{ cursor: "pointer" }}
+      className="group relative rounded-2xl"
     >
+      <div
+        ref={tiltRef}
+        onMouseMove={handleMouseMove}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        className="rounded-2xl overflow-hidden"
+        style={{ transformStyle: "preserve-3d" }}
+      >
       {/* Image */}
       <div className="relative h-[200px] overflow-hidden">
         <img
@@ -321,9 +328,10 @@ const ProjectCard = memo(({ project, index, onClick }) => {
         />
       </div>
 
-      <div aria-hidden="true" className="absolute inset-0 rounded-2xl pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-        style={{ boxShadow: "0 0 44px rgba(145,94,255,0.12) inset" }}
-      />
+        <div aria-hidden="true" className="absolute inset-0 rounded-2xl pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+          style={{ boxShadow: "0 0 44px rgba(145,94,255,0.12) inset" }}
+        />
+      </div>
     </motion.article>
   );
 });

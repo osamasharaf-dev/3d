@@ -186,7 +186,7 @@ const Hero = () => {
   const [charIndex, setCharIndex] = useState(0);
 
   const isMobile = useMediaQuery("(max-width: 768px)");
-  const { style: parallaxStyle } = useParallax({
+  const { ref: parallaxRef } = useParallax({
     strength: 0.03,
     maxOffset: 15,
     enabled: !isMobile,
@@ -246,8 +246,8 @@ const Hero = () => {
 
         {/* Content */}
         <div
+          ref={parallaxRef}
           className="flex-1 flex flex-col lg:flex-row items-start lg:items-center gap-8 lg:gap-12"
-          style={parallaxStyle}
         >
           <div className="flex-1">
             {/* Heading */}

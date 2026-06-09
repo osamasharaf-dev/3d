@@ -1,76 +1,76 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 
 const useMagnetic = ({ radius = 80, strength = 0.4 } = {}) => {
-  const [offset, setOffset] = useState({ x: 0, y: 0 });
-  const [pressDepth, setPressDepth] = useState(0);
-  const [isNear, setIsNear] = useState(false);
   const elementRef = useRef(null);
+  const stateRef = useRef({ nearEl: false, animating: false, targetX: 0, targetY: 0, curX: 0, curY: 0 });
+  const rafRef = useRef(null);
 
   useEffect(() => {
     const element = elementRef.current;
     if (!element) return;
 
+    const s = stateRef.current;
+
+    const applyTransform = () => {
+      s.curX += (s.targetX - s.curX) * 0.22;
+      s.curY += (s.targetY - s.curY) * 0.22;
+
+      const dx = Math.abs(s.curX - s.targetX);
+      const dy = Math.abs(s.curY - s.targetY);
+
+      element.style.transform = `translate(${s.curX.toFixed(2)}px, ${s.curY.toFixed(2)}px)`;
+
+      if (dx > 0.05 || dy > 0.05) {
+        rafRef.current = requestAnimationFrame(applyTransform);
+      } else {
+        s.animating = false;
+        element.style.transform = `translate(${s.targetX}px, ${s.targetY}px)`;
+      }
+    };
+
+    const startAnimation = () => {
+      if (s.animating) return;
+      s.animating = true;
+      rafRef.current = requestAnimationFrame(applyTransform);
+    };
+
     const handlePointerMove = (e) => {
       const rect = element.getBoundingClientRect();
       const centerX = rect.left + rect.width / 2;
       const centerY = rect.top + rect.height / 2;
-
       const dx = e.clientX - centerX;
       const dy = e.clientY - centerY;
-      const distance = Math.sqrt(dx ** 2 + dy ** 2);
+      const distance = Math.sqrt(dx * dx + dy * dy);
 
       if (distance < radius) {
         const pull = 1 - distance / radius;
-        setOffset({
-          x: dx * strength * pull,
-          y: dy * strength * pull,
-        });
-        setIsNear(true);
-      } else {
-        setOffset({ x: 0, y: 0 });
-        setIsNear(false);
+        s.targetX = dx * strength * pull;
+        s.targetY = dy * strength * pull;
+        startAnimation();
+      } else if (s.targetX !== 0 || s.targetY !== 0) {
+        s.targetX = 0;
+        s.targetY = 0;
+        startAnimation();
       }
     };
 
-    const handlePointerDown = () => {
-      setPressDepth(0.95);
+    const handleLeave = () => {
+      s.targetX = 0;
+      s.targetY = 0;
+      startAnimation();
     };
 
-    const handlePointerUp = () => {
-      setPressDepth(0);
-    };
-
-    const handlePointerLeave = () => {
-      setOffset({ x: 0, y: 0 });
-      setIsNear(false);
-      setPressDepth(0);
-    };
-
-    window.addEventListener("pointermove", handlePointerMove);
-    element.addEventListener("pointerdown", handlePointerDown);
-    element.addEventListener("pointerup", handlePointerUp);
-    element.addEventListener("pointerleave", handlePointerLeave);
+    window.addEventListener("pointermove", handlePointerMove, { passive: true });
+    element.addEventListener("pointerleave", handleLeave);
 
     return () => {
       window.removeEventListener("pointermove", handlePointerMove);
-      element.removeEventListener("pointerdown", handlePointerDown);
-      element.removeEventListener("pointerup", handlePointerUp);
-      element.removeEventListener("pointerleave", handlePointerLeave);
+      element.removeEventListener("pointerleave", handleLeave);
+      cancelAnimationFrame(rafRef.current);
     };
   }, [radius, strength]);
 
-  return {
-    ref: elementRef,
-    offset,
-    pressDepth,
-    isNear,
-    style: {
-      transform: `translate(${offset.x}px, ${offset.y}px) scale(${
-        1 - pressDepth * 0.05
-      })`,
-      transition: pressDepth > 0 ? "transform 0.1s" : "transform 0.3s ease-out",
-    },
-  };
+  return { ref: elementRef, style: {} };
 };
 
 export default useMagnetic;

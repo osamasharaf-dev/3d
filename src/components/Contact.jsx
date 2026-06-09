@@ -51,7 +51,7 @@ const Contact = () => {
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState({ open: false, message: "", type: "success" });
   const { play } = useSoundCue("notification");
-  const { ref: submitButtonRef, style: magneticStyle } = useMagnetic({
+  const { ref: submitButtonRef } = useMagnetic({
     radius: 90,
     strength: 0.35,
   });
@@ -216,7 +216,6 @@ const Contact = () => {
               <button
                 ref={submitButtonRef}
                 type="submit"
-                style={magneticStyle}
                 className="bg-[#07080d] py-3 px-6 sm:px-8 rounded-xl outline-none w-fit text-white font-bold shadow-md shadow-primary text-sm sm:text-base hover:bg-[#0a0b12] transition-colors duration-200"
               >
                 {loading ? "Sending..." : "Send Message"}
