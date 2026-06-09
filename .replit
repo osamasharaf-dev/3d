@@ -39,3 +39,9 @@ deploymentTarget = "autoscale"
 build = ["npm", "run", "build"]
 publicDir = "dist"
 run = ["node", "./dist/index.cjs"]
+
+[userenv]
+
+[userenv.shared]
+VITE_SUPABASE_URL = "https://mlfwkubwlgdwinbrmqrj.supabase.co"
+VITE_SUPABASE_ANON_KEY = "sb_publishable_SKSl94xKd5TUNs_VCkdTtw_d2HK05ZA"
