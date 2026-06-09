@@ -2,7 +2,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import React, { memo, useCallback, useEffect, useRef, useState } from "react";
 import { FiExternalLink, FiGithub, FiX, FiChevronLeft, FiChevronRight } from "react-icons/fi";
 
-import { projects } from "../constants";
+import { useProjects } from "../lib/useProjects";
 import { SectionWrapper } from "../hoc";
 import { styles } from "../styles";
 import { textVariant } from "../utils/motion";
@@ -332,6 +332,7 @@ ProjectCard.displayName = "ProjectCard";
 /* ── Projects Section ──────────────────────────────────────── */
 const Projects = () => {
   const [selected, setSelected] = useState(null);
+  const { projects, loading } = useProjects();
 
   return (
     <>
@@ -352,16 +353,22 @@ const Projects = () => {
         <span className="text-[#915EFF]/60 text-[13px] ml-2">Click any card to explore.</span>
       </motion.p>
 
-      <div className="mt-14 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {projects.map((project, index) => (
-          <ProjectCard
-            key={project.name}
-            project={project}
-            index={index}
-            onClick={() => setSelected(project)}
-          />
-        ))}
-      </div>
+      {loading ? (
+        <div className="mt-14 flex justify-center">
+          <div className="w-8 h-8 rounded-full border-2 border-[#915EFF] border-t-transparent animate-spin" />
+        </div>
+      ) : (
+        <div className="mt-14 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {projects.map((project, index) => (
+            <ProjectCard
+              key={project.id || project.name}
+              project={project}
+              index={index}
+              onClick={() => setSelected(project)}
+            />
+          ))}
+        </div>
+      )}
 
       {/* Modal */}
       <AnimatePresence>

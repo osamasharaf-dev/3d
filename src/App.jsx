@@ -20,9 +20,12 @@ import ElasticCursor from "./components/ElasticCursor";
 import Footer from "./components/Footer";
 import ReactBitsAudioProvider from "./reactbits/context/ReactBitsAudioProvider";
 import ReactBitsCursorProvider from "./reactbits/context/ReactBitsCursorProvider";
+import AdminLogin from "./admin/AdminLogin";
+import AdminProtectedRoute from "./admin/AdminProtectedRoute";
 
 const PrivacyPolicy = lazy(() => import("./components/PrivacyPolicy"));
 const SkillKeyboard = lazy(() => import("./components/SkillKeyboard"));
+const AdminDashboard = lazy(() => import("./admin/AdminDashboard"));
 
 const MainPage = () => (
   <div className="relative z-0" style={{ backgroundColor: "hsl(222.2 84% 4.9%)" }}>
@@ -56,6 +59,12 @@ const MainPage = () => (
   </div>
 );
 
+const AdminFallback = () => (
+  <div className="min-h-screen flex items-center justify-center" style={{ background: "hsl(222.2 84% 4.9%)" }}>
+    <div className="w-8 h-8 rounded-full border-2 border-[#915EFF] border-t-transparent animate-spin" />
+  </div>
+);
+
 const App = () => (
   <ReactBitsCursorProvider>
     <ReactBitsAudioProvider>
@@ -68,6 +77,17 @@ const App = () => (
               <Suspense fallback={<div style={{ background: "hsl(222.2 84% 4.9%)", minHeight: "100vh" }} />}>
                 <PrivacyPolicy />
               </Suspense>
+            }
+          />
+          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route
+            path="/admin"
+            element={
+              <AdminProtectedRoute>
+                <Suspense fallback={<AdminFallback />}>
+                  <AdminDashboard />
+                </Suspense>
+              </AdminProtectedRoute>
             }
           />
         </Routes>
