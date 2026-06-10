@@ -6,9 +6,9 @@ import { invalidateCertificationsCache } from "../lib/useCertifications";
 import { invalidateProfessionalSkillsCache } from "../lib/useProfessionalSkills";
 import { invalidateContactCache } from "../lib/useContactInfo";
 
+/* ── Theme tokens ─────────────────────────────────────────── */
 const C = {
   sidebarBg:     "#2C5EAD",
-  headerBg:      "#2C5EAD",
   bodyBg:        "#f0f7ff",
   cardBg:        "#ffffff",
   cardBorder:    "#C4E2F5",
@@ -26,7 +26,6 @@ const C = {
   errorBorder:   "rgba(239,68,68,0.3)",
   errorColor:    "#dc2626",
 };
-
 const IS = {
   style: {
     background: C.inputBg, border: `1.5px solid ${C.inputBorder}`,
@@ -34,9 +33,10 @@ const IS = {
     fontSize: 14, width: "100%", outline: "none", transition: "border-color .2s",
   },
 };
-const LS = { display:"block", fontSize:12, fontWeight:700, color:C.labelColor, letterSpacing:".04em", textTransform:"uppercase", marginBottom:5 };
-const CS = { background:C.cardBg, border:`1.5px solid ${C.cardBorder}`, borderRadius:16, padding:"24px", marginBottom:20 };
+const LS  = { display:"block",fontSize:12,fontWeight:700,color:C.labelColor,letterSpacing:".04em",textTransform:"uppercase",marginBottom:5 };
+const CS  = { background:C.cardBg,border:`1.5px solid ${C.cardBorder}`,borderRadius:16,padding:"24px",marginBottom:20 };
 
+/* ── Shared UI ────────────────────────────────────────────── */
 function Spinner() {
   return (
     <div style={{ display:"flex",justifyContent:"center",padding:"32px" }}>
@@ -44,20 +44,18 @@ function Spinner() {
     </div>
   );
 }
-
 function Toast({ msg, type }) {
   if (!msg) return null;
   const ok = type==="success";
   return (
-    <div style={{ position:"fixed",top:20,right:20,zIndex:9999,padding:"12px 20px",borderRadius:12,
+    <div style={{ position:"fixed",top:20,right:20,zIndex:99999,padding:"12px 20px",borderRadius:12,
       background:ok?C.successBg:C.errorBg,border:`1.5px solid ${ok?C.successBorder:C.errorBorder}`,
       color:ok?C.successColor:C.errorColor,fontSize:14,fontWeight:600,
-      boxShadow:"0 4px 24px rgba(0,0,0,0.08)" }}>
+      boxShadow:"0 4px 24px rgba(0,0,0,0.08)",maxWidth:"90vw" }}>
       {ok?"✓ ":"✕ "}{msg}
     </div>
   );
 }
-
 function SaveBtn({ loading, label="Save Changes" }) {
   return (
     <button type="submit" disabled={loading}
@@ -68,7 +66,6 @@ function SaveBtn({ loading, label="Save Changes" }) {
     </button>
   );
 }
-
 function AddBtn({ onClick, label }) {
   return (
     <button type="button" onClick={onClick}
@@ -78,53 +75,127 @@ function AddBtn({ onClick, label }) {
     </button>
   );
 }
-
 function RemoveBtn({ onClick }) {
   return (
     <button type="button" onClick={onClick}
       style={{ background:"rgba(239,68,68,0.08)",color:"#dc2626",border:"1.5px solid rgba(239,68,68,0.22)",
-        borderRadius:7,padding:"4px 12px",fontSize:12,fontWeight:600,cursor:"pointer" }}>
-      Remove
+        borderRadius:7,padding:"4px 12px",fontSize:12,fontWeight:600,cursor:"pointer",flexShrink:0 }}>
+      ✕
     </button>
   );
 }
 
-// ── Overview ─────────────────────────────────────────────────
+/* ── Image Upload Button ─────────────────────────────────── */
+function ImageUploadBtn({ currentUrl, onUrl, folder = "images", label = "Upload Image" }) {
+  const fileRef  = useRef();
+  const [uploading, setUploading] = useState(false);
 
+  const upload = async (file) => {
+    if (!file) return;
+    setUploading(true);
+    const ext  = file.name.split(".").pop().toLowerCase();
+    const path = `${folder}/${Date.now()}.${ext}`;
+    const { error } = await supabase.storage
+      .from("assets")
+      .upload(path, file, { upsert: true, contentType: file.type });
+    if (error) {
+      alert("Upload failed: " + error.message);
+      setUploading(false);
+      return;
+    }
+    const { data: { publicUrl } } = supabase.storage.from("assets").getPublicUrl(path);
+    onUrl(publicUrl);
+    setUploading(false);
+  };
+
+  return (
+    <div>
+      {/* Preview */}
+      {currentUrl && (
+        <div style={{ display:"flex",alignItems:"center",gap:12,marginBottom:10 }}>
+          <img
+            src={currentUrl}
+            alt="Preview"
+            style={{ width:56,height:56,borderRadius:10,objectFit:"cover",border:`1.5px solid ${C.cardBorder}`,background:"#f0f7ff" }}
+            onError={e => { e.target.style.display="none"; }}
+          />
+          <span style={{ fontSize:12,color:C.textSecondary,wordBreak:"break-all",flex:1 }}>{currentUrl.split("/").pop()}</span>
+          <button type="button" onClick={() => onUrl("")}
+            style={{ fontSize:11,color:C.errorColor,background:"none",border:"none",cursor:"pointer",padding:"2px 6px" }}>
+            Remove
+          </button>
+        </div>
+      )}
+
+      {/* Drag-drop / click area */}
+      <div
+        onClick={() => fileRef.current?.click()}
+        style={{
+          border: `2px dashed ${uploading ? C.labelColor : C.cardBorder}`,
+          borderRadius: 12, padding: "18px 16px", textAlign: "center",
+          cursor: uploading ? "not-allowed" : "pointer",
+          background: uploading ? "rgba(21,145,220,0.04)" : "rgba(196,226,245,0.10)",
+          transition: "all .2s",
+        }}
+        onMouseEnter={e => e.currentTarget.style.borderColor = C.labelColor}
+        onMouseLeave={e => e.currentTarget.style.borderColor = uploading ? C.labelColor : C.cardBorder}
+      >
+        <div style={{ fontSize: 28, marginBottom: 6 }}>{uploading ? "⏳" : "📷"}</div>
+        <div style={{ fontSize: 13, fontWeight: 600, color: C.textPrimary, marginBottom: 3 }}>
+          {uploading ? "Uploading…" : label}
+        </div>
+        <div style={{ fontSize: 11, color: C.textSecondary }}>
+          {uploading ? "Please wait" : "Click to pick a file — PNG, JPG, WebP, GIF"}
+        </div>
+      </div>
+      <input
+        ref={fileRef}
+        type="file"
+        accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml"
+        style={{ display:"none" }}
+        onChange={e => upload(e.target.files?.[0])}
+      />
+    </div>
+  );
+}
+
+/* ── Overview ─────────────────────────────────────────────── */
 function OverviewPanel() {
   const [counts, setCounts] = useState({});
   useEffect(()=>{
-    const tables=["certifications","professional_skills","contact_info","about_info","hero_info","skills"];
+    const tables=["certifications","professional_skills","contact_info","about_info","hero_info","skills","projects"];
     Promise.all(tables.map(t=>supabase.from(t).select("*",{count:"exact",head:true}).then(({count})=>({t,count}))))
       .then(res=>setCounts(Object.fromEntries(res.map(({t,count})=>[t,count??0]))));
   },[]);
   const items=[
-    {label:"Hero Info",key:"hero_info",icon:"🏠"},
-    {label:"About Info",key:"about_info",icon:"👤"},
-    {label:"Certifications",key:"certifications",icon:"📜"},
-    {label:"Soft Skills",key:"professional_skills",icon:"🧠"},
-    {label:"Technical Skills",key:"skills",icon:"⚙️"},
-    {label:"Contact Info",key:"contact_info",icon:"📬"},
+    {label:"Hero Info",     key:"hero_info",          icon:"🏠"},
+    {label:"About Info",    key:"about_info",          icon:"👤"},
+    {label:"Certifications",key:"certifications",      icon:"📜"},
+    {label:"Soft Skills",   key:"professional_skills", icon:"🧠"},
+    {label:"Tech Skills",   key:"skills",              icon:"⚙️"},
+    {label:"Projects",      key:"projects",            icon:"🚀"},
+    {label:"Contact Info",  key:"contact_info",        icon:"📬"},
   ];
   return (
     <div>
       <h2 style={{ fontSize:22,fontWeight:800,color:C.textPrimary,marginBottom:20 }}>Dashboard Overview</h2>
-      <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(160px,1fr))",gap:16 }}>
+      <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(140px,1fr))",gap:12 }}>
         {items.map(({label,key,icon})=>(
-          <div key={key} style={{ ...CS,marginBottom:0,textAlign:"center",padding:"20px 16px" }}>
-            <div style={{ fontSize:32,marginBottom:10 }}>{icon}</div>
-            <div style={{ fontSize:26,fontWeight:800,color:C.textPrimary }}>{counts[key]??"—"}</div>
-            <div style={{ fontSize:13,color:C.textSecondary,fontWeight:500,marginTop:4 }}>{label}</div>
+          <div key={key} style={{ ...CS,marginBottom:0,textAlign:"center",padding:"16px 12px" }}>
+            <div style={{ fontSize:28,marginBottom:8 }}>{icon}</div>
+            <div style={{ fontSize:24,fontWeight:800,color:C.textPrimary }}>{counts[key]??"—"}</div>
+            <div style={{ fontSize:12,color:C.textSecondary,fontWeight:500,marginTop:4 }}>{label}</div>
           </div>
         ))}
       </div>
-      <div style={{ ...CS,marginTop:24 }}>
+      <div style={{ ...CS,marginTop:20 }}>
         <h3 style={{ fontWeight:700,color:C.textPrimary,marginBottom:12,fontSize:15 }}>Quick Guide</h3>
-        <ul style={{ color:C.textSecondary,fontSize:14,lineHeight:1.8,paddingLeft:18 }}>
+        <ul style={{ color:C.textSecondary,fontSize:14,lineHeight:2,paddingLeft:18,margin:0 }}>
           <li>Edit <strong>Hero Section</strong> to update your name, headline, and typed roles.</li>
-          <li>Edit <strong>About &amp; Resume</strong> to update your bio and attach your resume PDF.</li>
-          <li>Edit <strong>Certifications</strong> to manage your credentials and badges.</li>
-          <li>Edit <strong>Technical Skills</strong> to manage skill cards by category — changes appear instantly.</li>
+          <li>Edit <strong>About &amp; Resume</strong> to update your bio and upload your resume PDF.</li>
+          <li>Edit <strong>Certifications</strong> to manage credentials — upload badge images directly.</li>
+          <li>Edit <strong>Projects</strong> to add/edit portfolio projects with uploaded cover images.</li>
+          <li>Edit <strong>Technical Skills</strong> to manage skill cards by category.</li>
           <li>Edit <strong>Soft Skills</strong> to manage professional skill categories.</li>
           <li>Edit <strong>Contact Info</strong> to update your social links and contact details.</li>
         </ul>
@@ -133,31 +204,29 @@ function OverviewPanel() {
   );
 }
 
-// ── Hero Panel ────────────────────────────────────────────────
-
+/* ── Hero Panel ──────────────────────────────────────────── */
 function HeroPanel() {
   const [form, setForm] = useState({name:"",greeting:"",subtitle:"",cta_primary:"",cta_secondary:"",typed_items:[""]});
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [toast, setToast] = useState(null);
+  const [loading,setLoading] = useState(true);
+  const [saving,setSaving]   = useState(false);
+  const [toast,setToast]     = useState(null);
+  const showToast=(msg,type)=>{setToast({msg,type});setTimeout(()=>setToast(null),3000);};
 
   useEffect(()=>{
     supabase.from("hero_info").select("*").limit(1).single().then(({data})=>{
-      if (data) setForm({...data,typed_items:Array.isArray(data.typed_items)?data.typed_items:[""]});
+      if(data)setForm({...data,typed_items:Array.isArray(data.typed_items)?data.typed_items:[""]});
       setLoading(false);
     });
   },[]);
 
-  const showToast=(msg,type)=>{setToast({msg,type});setTimeout(()=>setToast(null),3000);};
-
   const save=async(e)=>{
-    e.preventDefault(); setSaving(true);
-    const {error}=await supabase.from("hero_info").upsert({...form,updated_at:new Date().toISOString()});
+    e.preventDefault();setSaving(true);
+    const{error}=await supabase.from("hero_info").upsert({...form,updated_at:new Date().toISOString()});
     setSaving(false);
     error?showToast(error.message,"error"):(invalidateHeroCache(),showToast("Hero saved!","success"));
   };
 
-  if (loading) return <Spinner />;
+  if(loading)return <Spinner />;
   return (
     <form onSubmit={save}>
       {toast&&<Toast {...toast}/>}
@@ -173,7 +242,8 @@ function HeroPanel() {
           <label style={LS}>Typed Items</label>
           {(form.typed_items||[""]).map((item,i)=>(
             <div key={i} style={{display:"flex",gap:8,marginBottom:8,alignItems:"center"}}>
-              <input {...IS} style={{...IS.style,flex:1}} value={item} onChange={e=>{const a=[...form.typed_items];a[i]=e.target.value;setForm(p=>({...p,typed_items:a}));}} />
+              <input {...IS} style={{...IS.style,flex:1}} value={item}
+                onChange={e=>{const a=[...form.typed_items];a[i]=e.target.value;setForm(p=>({...p,typed_items:a}));}} />
               <RemoveBtn onClick={()=>{const a=form.typed_items.filter((_,j)=>j!==i);setForm(p=>({...p,typed_items:a.length?a:[""]}));}} />
             </div>
           ))}
@@ -185,51 +255,42 @@ function HeroPanel() {
   );
 }
 
-// ── About Panel ───────────────────────────────────────────────
-
+/* ── About Panel ─────────────────────────────────────────── */
 function AboutPanel() {
-  const [form, setForm] = useState({bio_paragraphs:[""],services:[],hire_email:"",resume_url:""});
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [uploading, setUploading] = useState(false);
-  const [toast, setToast] = useState(null);
+  const [form,setForm]       = useState({bio_paragraphs:[""],services:[],hire_email:"",resume_url:""});
+  const [loading,setLoading] = useState(true);
+  const [saving,setSaving]   = useState(false);
+  const [uploading,setUploading] = useState(false);
+  const [toast,setToast]     = useState(null);
   const fileRef = useRef();
+  const showToast=(msg,type)=>{setToast({msg,type});setTimeout(()=>setToast(null),3000);};
 
   useEffect(()=>{
     supabase.from("about_info").select("*").limit(1).single().then(({data})=>{
-      if (data) setForm({
-        ...data,
-        bio_paragraphs:Array.isArray(data.bio_paragraphs)?data.bio_paragraphs:[""],
-        services:Array.isArray(data.services)?data.services:[],
-        resume_url:data.resume_url||"",
-      });
+      if(data)setForm({...data,bio_paragraphs:Array.isArray(data.bio_paragraphs)?data.bio_paragraphs:[""],services:Array.isArray(data.services)?data.services:[],resume_url:data.resume_url||""});
       setLoading(false);
     });
   },[]);
 
-  const showToast=(msg,type)=>{setToast({msg,type});setTimeout(()=>setToast(null),3000);};
-
   const uploadResume=async(file)=>{
-    if(!file)return;
-    setUploading(true);
+    if(!file)return;setUploading(true);
     const ext=file.name.split(".").pop();
     const path=`resumes/resume-${Date.now()}.${ext}`;
-    const {error}=await supabase.storage.from("assets").upload(path,file,{upsert:true,contentType:file.type});
+    const{error}=await supabase.storage.from("assets").upload(path,file,{upsert:true,contentType:file.type});
     if(error){showToast("Upload failed: "+error.message,"error");setUploading(false);return;}
-    const {data:{publicUrl}}=supabase.storage.from("assets").getPublicUrl(path);
+    const{data:{publicUrl}}=supabase.storage.from("assets").getPublicUrl(path);
     setForm(p=>({...p,resume_url:publicUrl}));
-    setUploading(false);
-    showToast("Resume uploaded!","success");
+    setUploading(false);showToast("Resume uploaded!","success");
   };
 
   const save=async(e)=>{
-    e.preventDefault(); setSaving(true);
-    const {error}=await supabase.from("about_info").upsert({...form,updated_at:new Date().toISOString()});
+    e.preventDefault();setSaving(true);
+    const{error}=await supabase.from("about_info").upsert({...form,updated_at:new Date().toISOString()});
     setSaving(false);
     error?showToast(error.message,"error"):(invalidateAboutCache(),showToast("About saved!","success"));
   };
 
-  if (loading) return <Spinner />;
+  if(loading)return <Spinner />;
   return (
     <form onSubmit={save}>
       {toast&&<Toast {...toast}/>}
@@ -238,8 +299,8 @@ function AboutPanel() {
         <label style={LS}>Bio Paragraphs</label>
         {(form.bio_paragraphs||[""]).map((p,i)=>(
           <div key={i} style={{marginBottom:12}}>
-            <textarea style={{...IS.style,minHeight:80,resize:"vertical"}}
-              value={p} onChange={e=>{const a=[...form.bio_paragraphs];a[i]=e.target.value;setForm(f=>({...f,bio_paragraphs:a}));}} />
+            <textarea style={{...IS.style,minHeight:80,resize:"vertical"}} value={p}
+              onChange={e=>{const a=[...form.bio_paragraphs];a[i]=e.target.value;setForm(f=>({...f,bio_paragraphs:a}));}} />
             <div style={{marginTop:4}}><RemoveBtn onClick={()=>{const a=form.bio_paragraphs.filter((_,j)=>j!==i);setForm(f=>({...f,bio_paragraphs:a.length?a:[""]}));}} /></div>
           </div>
         ))}
@@ -251,23 +312,19 @@ function AboutPanel() {
           <input {...IS} type="email" value={form.hire_email||""} onChange={e=>setForm(p=>({...p,hire_email:e.target.value}))} />
         </div>
         <div>
-          <label style={LS}>Resume URL</label>
+          <label style={LS}>Resume (PDF)</label>
           <div style={{display:"flex",gap:8,alignItems:"center",flexWrap:"wrap",marginBottom:8}}>
-            <input {...IS} style={{...IS.style,flex:1}} type="url" placeholder="https://drive.google.com/…"
+            <input {...IS} style={{...IS.style,flex:1,minWidth:0}} type="url" placeholder="https://…"
               value={form.resume_url||""} onChange={e=>setForm(p=>({...p,resume_url:e.target.value}))} />
             <button type="button" onClick={()=>fileRef.current?.click()} disabled={uploading}
               style={{background:C.accentLight,color:C.textPrimary,border:`1.5px solid ${C.cardBorder}`,
-                borderRadius:9,padding:"9px 16px",fontSize:13,fontWeight:600,cursor:uploading?"not-allowed":"pointer",whiteSpace:"nowrap"}}>
+                borderRadius:9,padding:"9px 14px",fontSize:13,fontWeight:600,cursor:uploading?"not-allowed":"pointer",whiteSpace:"nowrap",flexShrink:0}}>
               {uploading?"Uploading…":"📤 Upload PDF"}
             </button>
             <input ref={fileRef} type="file" accept=".pdf,.doc,.docx" style={{display:"none"}}
               onChange={e=>uploadResume(e.target.files?.[0])} />
           </div>
-          {form.resume_url&&(
-            <p style={{fontSize:12,color:C.textSecondary,wordBreak:"break-all"}}>
-              Current: <a href={form.resume_url} target="_blank" rel="noreferrer" style={{color:C.labelColor}}>{form.resume_url}</a>
-            </p>
-          )}
+          {form.resume_url&&<p style={{fontSize:12,color:C.textSecondary,wordBreak:"break-all"}}>Current: <a href={form.resume_url} target="_blank" rel="noreferrer" style={{color:C.labelColor}}>View</a></p>}
         </div>
         <SaveBtn loading={saving} />
       </div>
@@ -275,9 +332,9 @@ function AboutPanel() {
         <label style={LS}>Services / What I Do</label>
         {(form.services||[]).map((svc,i)=>(
           <div key={i} style={{display:"flex",gap:8,marginBottom:8,alignItems:"center",flexWrap:"wrap"}}>
-            <input {...IS} style={{...IS.style,flex:2,minWidth:140}} placeholder="Title"
+            <input {...IS} style={{...IS.style,flex:2,minWidth:120}} placeholder="Title"
               value={svc.title||""} onChange={e=>{const a=[...form.services];a[i]={...a[i],title:e.target.value};setForm(f=>({...f,services:a}));}} />
-            <input {...IS} style={{...IS.style,flex:1,minWidth:100}} placeholder="icon_name"
+            <input {...IS} style={{...IS.style,flex:1,minWidth:80}} placeholder="Icon name"
               value={svc.icon_name||""} onChange={e=>{const a=[...form.services];a[i]={...a[i],icon_name:e.target.value};setForm(f=>({...f,services:a}));}} />
             <RemoveBtn onClick={()=>setForm(f=>({...f,services:f.services.filter((_,j)=>j!==i)}))} />
           </div>
@@ -289,22 +346,19 @@ function AboutPanel() {
   );
 }
 
-// ── Certifications Panel ──────────────────────────────────────
-
+/* ── Certifications Panel ────────────────────────────────── */
 function CertificationsPanel() {
-  const [certs, setCerts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [toast, setToast] = useState(null);
+  const [certs,setCerts]     = useState([]);
+  const [loading,setLoading] = useState(true);
+  const [saving,setSaving]   = useState(false);
+  const [toast,setToast]     = useState(null);
+  const showToast=(msg,type)=>{setToast({msg,type});setTimeout(()=>setToast(null),3000);};
 
   useEffect(()=>{
     supabase.from("certifications").select("*").order("order_index").then(({data})=>{
-      if(data)setCerts(data);
-      setLoading(false);
+      if(data)setCerts(data);setLoading(false);
     });
   },[]);
-
-  const showToast=(msg,type)=>{setToast({msg,type});setTimeout(()=>setToast(null),3000);};
 
   const save=async(e)=>{
     e.preventDefault();setSaving(true);
@@ -324,21 +378,35 @@ function CertificationsPanel() {
       <h2 style={{fontSize:22,fontWeight:800,color:C.textPrimary,marginBottom:20}}>Certifications</h2>
       {certs.map((cert,i)=>(
         <div key={cert.id||i} style={CS}>
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16,flexWrap:"wrap",gap:8}}>
             <span style={{fontWeight:700,color:C.textPrimary,fontSize:15}}>{cert.title||`Cert #${i+1}`}</span>
             <RemoveBtn onClick={()=>setCerts(p=>p.filter((_,j)=>j!==i))} />
           </div>
-          {[["Title","title"],["Company","company_name"],["Date Range","date_range"],["Icon BG (#hex)","icon_bg"],["Icon URL","icon_url"]].map(([lbl,field])=>(
+
+          {[["Title","title"],["Company","company_name"],["Date Range","date_range"],["Icon BG (#hex)","icon_bg"]].map(([lbl,field])=>(
             <div key={field} style={{marginBottom:12}}>
               <label style={LS}>{lbl}</label>
               <input {...IS} value={cert[field]||""} onChange={e=>upd(i,field,e.target.value)} />
             </div>
           ))}
+
+          {/* Image upload for icon */}
+          <div style={{marginBottom:12}}>
+            <label style={LS}>Badge / Icon Image</label>
+            <ImageUploadBtn
+              currentUrl={cert.icon_url||""}
+              onUrl={url=>upd(i,"icon_url",url)}
+              folder="cert-icons"
+              label="Upload Badge Image"
+            />
+          </div>
+
           <div style={{marginBottom:12}}>
             <label style={LS}>Points</label>
             {(cert.points||[""]).map((pt,j)=>(
               <div key={j} style={{display:"flex",gap:8,marginBottom:6,alignItems:"center"}}>
-                <input {...IS} style={{...IS.style,flex:1}} value={pt||""} onChange={e=>{const a=[...(cert.points||[])];a[j]=e.target.value;upd(i,"points",a);}} />
+                <input {...IS} style={{...IS.style,flex:1}} value={pt||""}
+                  onChange={e=>{const a=[...(cert.points||[])];a[j]=e.target.value;upd(i,"points",a);}} />
                 <RemoveBtn onClick={()=>upd(i,"points",(cert.points||[]).filter((_,k)=>k!==j))} />
               </div>
             ))}
@@ -357,167 +425,249 @@ function CertificationsPanel() {
           </div>
         </div>
       ))}
-      <AddBtn onClick={()=>setCerts(p=>[...p,{title:"",company_name:"",date_range:"",icon_bg:"#383E56",points:[""],credentials:[null],order_index:p.length}])} label="Add Certification" />
+      <AddBtn onClick={()=>setCerts(p=>[...p,{title:"",company_name:"",date_range:"",icon_bg:"#e0f2fe",icon_url:"",points:[""],credentials:[null],order_index:p.length}])} label="Add Certification" />
       <div><SaveBtn loading={saving} /></div>
     </form>
   );
 }
 
-// ── Technical Skills Panel (NEW) ──────────────────────────────
+/* ── Projects Panel ──────────────────────────────────────── */
+function ProjectsPanel() {
+  const [projects,setProjects] = useState([]);
+  const [loading,setLoading]   = useState(true);
+  const [saving,setSaving]     = useState(false);
+  const [toast,setToast]       = useState(null);
+  const showToast=(msg,type)=>{setToast({msg,type});setTimeout(()=>setToast(null),3000);};
 
-function SkillsPanel() {
-  const [skills, setSkills] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [toast, setToast] = useState(null);
+  useEffect(()=>{
+    supabase.from("projects").select("*").order("order_index",{ascending:true}).then(({data})=>{
+      if(data)setProjects(data.map(p=>({...p,tags:Array.isArray(p.tags)?p.tags:[],features:Array.isArray(p.features)?p.features:[]})));
+      setLoading(false);
+    });
+  },[]);
 
-  const CATEGORIES = ["Frontend", "Backend", "Database", "Cloud & DevOps", "Tools", "AI & Modern", "Frameworks", "Technologies", "Other"];
+  const upd=(i,f,v)=>setProjects(p=>{const a=[...p];a[i]={...a[i],[f]:v};return a;});
 
-  useEffect(() => {
-    supabase.from("skills").select("*").order("category").order("order_index", { ascending: true })
-      .then(({ data }) => {
-        if (data) setSkills(data);
-        setLoading(false);
-      });
-  }, []);
-
-  const showToast = (msg, type) => { setToast({ msg, type }); setTimeout(() => setToast(null), 3000); };
-
-  const save = async (e) => {
-    e.preventDefault();
-    setSaving(true);
-    for (const skill of skills) {
-      if (skill._deleted) {
-        if (skill.id && !String(skill.id).startsWith("new_")) {
-          await supabase.from("skills").delete().eq("id", skill.id);
-        }
-        continue;
-      }
-      const payload = { category: skill.category, name: skill.name, icon: skill.icon || null, order_index: skill.order_index ?? 0 };
-      if (skill.id && !String(skill.id).startsWith("new_")) {
-        const { error } = await supabase.from("skills").update(payload).eq("id", skill.id);
-        if (error) { showToast(error.message, "error"); setSaving(false); return; }
+  const save=async(e)=>{
+    e.preventDefault();setSaving(true);
+    for(const proj of projects){
+      const payload={
+        name:proj.name,description:proj.description,
+        image_url:proj.image_url||null,
+        source_code_link:proj.source_code_link||null,
+        live_demo_link:proj.live_demo_link||null,
+        tags:proj.tags||[],
+        features:proj.features||[],
+        order_index:proj.order_index??0,
+      };
+      let error;
+      if(proj.id&&!String(proj.id).startsWith("new_")){
+        ({error}=await supabase.from("projects").update(payload).eq("id",proj.id));
       } else {
-        const { error } = await supabase.from("skills").insert(payload);
-        if (error) { showToast(error.message, "error"); setSaving(false); return; }
+        ({error}=await supabase.from("projects").insert(payload));
       }
+      if(error){showToast(error.message,"error");setSaving(false);return;}
     }
-    setSkills(prev => prev.filter(s => !s._deleted));
-    setSaving(false);
-    showToast("Technical skills saved!", "success");
+    setSaving(false);showToast("Projects saved!","success");
   };
 
-  const upd = (id, field, value) => setSkills(prev => prev.map(s => s.id === id ? { ...s, [field]: value } : s));
-  const del = (id) => setSkills(prev => prev.map(s => s.id === id ? { ...s, _deleted: true } : s));
-  const add = () => {
-    const newId = `new_${Date.now()}`;
-    setSkills(prev => [...prev, { id: newId, category: "Frontend", name: "", icon: "💡", order_index: prev.length }]);
-  };
-
-  const grouped = CATEGORIES.map(cat => ({
-    category: cat,
-    items: skills.filter(s => s.category === cat && !s._deleted),
-  })).filter(g => g.items.length > 0);
-
-  const uncategorized = skills.filter(s => !CATEGORIES.includes(s.category) && !s._deleted);
-  if (uncategorized.length > 0) grouped.push({ category: "Other", items: uncategorized });
-
-  if (loading) return <Spinner />;
+  if(loading)return <Spinner />;
   return (
     <form onSubmit={save}>
-      {toast && <Toast {...toast} />}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
-        <h2 style={{ fontSize: 22, fontWeight: 800, color: C.textPrimary }}>Technical Skills</h2>
-        <AddBtn onClick={add} label="Add Skill" />
+      {toast&&<Toast {...toast}/>}
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20,flexWrap:"wrap",gap:8}}>
+        <h2 style={{fontSize:22,fontWeight:800,color:C.textPrimary}}>Projects</h2>
+        <AddBtn onClick={()=>setProjects(p=>[...p,{id:`new_${Date.now()}`,name:"",description:"",image_url:"",source_code_link:"",live_demo_link:"",tags:[],features:[],order_index:p.length}])} label="Add Project" />
       </div>
 
-      {/* New / unassigned skills */}
-      {skills.filter(s => String(s.id).startsWith("new_") && !s._deleted).length > 0 && (
-        <div style={CS}>
-          <label style={{ ...LS, marginBottom: 12 }}>New Skills (not yet saved)</label>
-          {skills.filter(s => String(s.id).startsWith("new_") && !s._deleted).map((skill) => (
-            <SkillRow key={skill.id} skill={skill} upd={upd} del={del} CATEGORIES={CATEGORIES} IS={IS} LS={LS} C={C} />
-          ))}
-        </div>
-      )}
-
-      {/* Grouped by category */}
-      {grouped.map(({ category, items }) => (
-        <div key={category} style={CS}>
-          <div style={{ fontWeight: 700, color: C.textPrimary, fontSize: 15, marginBottom: 16, paddingBottom: 8, borderBottom: `1px solid ${C.cardBorder}` }}>
-            {category} <span style={{ fontSize: 12, color: C.textSecondary, fontWeight: 500 }}>({items.length} skills)</span>
+      {projects.map((proj,i)=>(
+        <div key={proj.id||i} style={CS}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16,flexWrap:"wrap",gap:8}}>
+            <span style={{fontWeight:700,color:C.textPrimary,fontSize:15}}>{proj.name||`Project #${i+1}`}</span>
+            <RemoveBtn onClick={()=>setProjects(p=>p.filter((_,j)=>j!==i))} />
           </div>
-          {items.map((skill) => (
-            <SkillRow key={skill.id} skill={skill} upd={upd} del={del} CATEGORIES={CATEGORIES} IS={IS} LS={LS} C={C} />
-          ))}
+
+          <div style={{marginBottom:12}}>
+            <label style={LS}>Project Name</label>
+            <input {...IS} value={proj.name||""} onChange={e=>upd(i,"name",e.target.value)} required />
+          </div>
+          <div style={{marginBottom:12}}>
+            <label style={LS}>Description</label>
+            <textarea style={{...IS.style,minHeight:80,resize:"vertical"}} value={proj.description||""}
+              onChange={e=>upd(i,"description",e.target.value)} />
+          </div>
+
+          {/* Cover image upload */}
+          <div style={{marginBottom:12}}>
+            <label style={LS}>Cover Image</label>
+            <ImageUploadBtn
+              currentUrl={proj.image_url||""}
+              onUrl={url=>upd(i,"image_url",url)}
+              folder="project-covers"
+              label="Upload Project Cover"
+            />
+          </div>
+
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:12}}>
+            <div>
+              <label style={LS}>GitHub URL</label>
+              <input {...IS} type="url" placeholder="https://github.com/…" value={proj.source_code_link||""}
+                onChange={e=>upd(i,"source_code_link",e.target.value)} />
+            </div>
+            <div>
+              <label style={LS}>Live Demo URL</label>
+              <input {...IS} type="url" placeholder="https://…" value={proj.live_demo_link||""}
+                onChange={e=>upd(i,"live_demo_link",e.target.value)} />
+            </div>
+          </div>
+
+          <div style={{display:"grid",gridTemplateColumns:"1fr 80px",gap:12,marginBottom:16}}>
+            <div>
+              <label style={LS}>Tags (one per line, format: name|#color)</label>
+              <textarea
+                style={{...IS.style,minHeight:70,resize:"vertical",fontFamily:"monospace",fontSize:13}}
+                value={(proj.tags||[]).map(t=>typeof t==="object"?`${t.name}|${t.color||"#0ea5e9"}`:(t||"")).join("\n")}
+                onChange={e=>{
+                  const tags=e.target.value.split("\n").filter(Boolean).map(line=>{
+                    const[name,color]=line.split("|");
+                    return{name:(name||"").trim(),color:(color||"#0ea5e9").trim()};
+                  });
+                  upd(i,"tags",tags);
+                }}
+                placeholder={"React.js|#0ea5e9\nNode.js|#22c55e\nMongoDB|#4f46e5"}
+              />
+            </div>
+            <div>
+              <label style={LS}>Order</label>
+              <input {...IS} type="number" value={proj.order_index??i}
+                onChange={e=>upd(i,"order_index",parseInt(e.target.value)||0)} />
+            </div>
+          </div>
+
+          <div>
+            <label style={LS}>Key Features</label>
+            {(proj.features||[]).map((ft,j)=>(
+              <div key={j} style={{display:"flex",gap:8,marginBottom:6,alignItems:"center"}}>
+                <input {...IS} style={{...IS.style,flex:1}} value={ft||""}
+                  onChange={e=>{const a=[...(proj.features||[])];a[j]=e.target.value;upd(i,"features",a);}} />
+                <RemoveBtn onClick={()=>upd(i,"features",(proj.features||[]).filter((_,k)=>k!==j))} />
+              </div>
+            ))}
+            <AddBtn onClick={()=>upd(i,"features",[...(proj.features||[]),""])} label="Add Feature" />
+          </div>
         </div>
       ))}
 
-      {skills.filter(s => !s._deleted).length === 0 && (
-        <div style={{ ...CS, textAlign: "center", color: C.textSecondary, fontSize: 14, padding: 40 }}>
-          No skills yet. Click "+ Add Skill" to get started.
+      {projects.length===0&&(
+        <div style={{...CS,textAlign:"center",color:C.textSecondary,fontSize:14,padding:40}}>
+          No projects yet. Click "+ Add Project" to get started.
         </div>
       )}
-
-      <div style={{ marginTop: 8 }}><SaveBtn loading={saving} label="Save All Skills" /></div>
+      <div><SaveBtn loading={saving} /></div>
     </form>
   );
 }
 
-function SkillRow({ skill, upd, del, CATEGORIES, IS, LS, C }) {
+/* ── Technical Skills Panel ──────────────────────────────── */
+const CATEGORIES = ["Frontend","Backend","Database","Cloud & DevOps","Tools","AI & Modern","Frameworks","Technologies","Other"];
+
+function SkillRow({ skill, upd, del }) {
   return (
-    <div style={{ display: "flex", gap: 8, marginBottom: 10, alignItems: "center", flexWrap: "wrap", padding: "8px", background: "rgba(196,226,245,0.15)", borderRadius: 8 }}>
-      <div style={{ flex: "0 0 48px" }}>
-        <input
-          {...IS}
-          style={{ ...IS.style, textAlign: "center", fontSize: 20, padding: "6px" }}
-          value={skill.icon || ""}
-          onChange={e => upd(skill.id, "icon", e.target.value)}
-          placeholder="💡"
-          title="Icon (emoji)"
-        />
-      </div>
-      <div style={{ flex: "1 1 160px", minWidth: 120 }}>
-        <input
-          {...IS}
-          value={skill.name || ""}
-          onChange={e => upd(skill.id, "name", e.target.value)}
-          placeholder="Skill name (e.g. React.js)"
-          required
-        />
-      </div>
-      <div style={{ flex: "1 1 140px", minWidth: 120 }}>
-        <select
-          style={{ ...IS.style }}
-          value={skill.category || "Frontend"}
-          onChange={e => upd(skill.id, "category", e.target.value)}
-        >
-          {CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
-        </select>
-      </div>
-      <div style={{ flex: "0 0 70px" }}>
-        <input
-          {...IS}
-          style={{ ...IS.style, textAlign: "center" }}
-          type="number"
-          value={skill.order_index ?? 0}
-          onChange={e => upd(skill.id, "order_index", parseInt(e.target.value) || 0)}
-          placeholder="Order"
-          title="Display order"
-        />
-      </div>
-      <RemoveBtn onClick={() => del(skill.id)} />
+    <div style={{display:"flex",gap:8,marginBottom:10,alignItems:"center",flexWrap:"wrap",padding:"8px",background:"rgba(196,226,245,0.15)",borderRadius:8}}>
+      <input {...IS} style={{...IS.style,width:52,textAlign:"center",fontSize:20,padding:"6px",flexShrink:0}}
+        value={skill.icon||""} onChange={e=>upd(skill.id,"icon",e.target.value)} placeholder="💡" title="Emoji icon" />
+      <input {...IS} style={{...IS.style,flex:"1 1 140px",minWidth:100}}
+        value={skill.name||""} onChange={e=>upd(skill.id,"name",e.target.value)} placeholder="Skill name" required />
+      <select style={{...IS.style,flex:"1 1 130px",minWidth:100}}
+        value={skill.category||"Frontend"} onChange={e=>upd(skill.id,"category",e.target.value)}>
+        {CATEGORIES.map(cat=><option key={cat} value={cat}>{cat}</option>)}
+      </select>
+      <input {...IS} style={{...IS.style,width:62,textAlign:"center",flexShrink:0}} type="number"
+        value={skill.order_index??0} onChange={e=>upd(skill.id,"order_index",parseInt(e.target.value)||0)} title="Order" />
+      <RemoveBtn onClick={()=>del(skill.id)} />
     </div>
   );
 }
 
-// ── Soft Skills Panel ─────────────────────────────────────────
+function SkillsPanel() {
+  const [skills,setSkills]   = useState([]);
+  const [loading,setLoading] = useState(true);
+  const [saving,setSaving]   = useState(false);
+  const [toast,setToast]     = useState(null);
+  const showToast=(msg,type)=>{setToast({msg,type});setTimeout(()=>setToast(null),3000);};
 
+  useEffect(()=>{
+    supabase.from("skills").select("*").order("category").order("order_index",{ascending:true})
+      .then(({data})=>{if(data)setSkills(data);setLoading(false);});
+  },[]);
+
+  const save=async(e)=>{
+    e.preventDefault();setSaving(true);
+    for(const skill of skills){
+      if(skill._deleted){
+        if(skill.id&&!String(skill.id).startsWith("new_"))await supabase.from("skills").delete().eq("id",skill.id);
+        continue;
+      }
+      const payload={category:skill.category,name:skill.name,icon:skill.icon||null,order_index:skill.order_index??0};
+      let error;
+      if(skill.id&&!String(skill.id).startsWith("new_")){
+        ({error}=await supabase.from("skills").update(payload).eq("id",skill.id));
+      } else {
+        ({error}=await supabase.from("skills").insert(payload));
+      }
+      if(error){showToast(error.message,"error");setSaving(false);return;}
+    }
+    setSkills(prev=>prev.filter(s=>!s._deleted));
+    setSaving(false);showToast("Technical skills saved!","success");
+  };
+
+  const upd=(id,field,value)=>setSkills(prev=>prev.map(s=>s.id===id?{...s,[field]:value}:s));
+  const del=(id)=>setSkills(prev=>prev.map(s=>s.id===id?{...s,_deleted:true}:s));
+  const add=()=>setSkills(prev=>[...prev,{id:`new_${Date.now()}`,category:"Frontend",name:"",icon:"💡",order_index:prev.length}]);
+
+  const grouped=CATEGORIES.map(cat=>({category:cat,items:skills.filter(s=>s.category===cat&&!s._deleted)})).filter(g=>g.items.length>0);
+  const uncat=skills.filter(s=>!CATEGORIES.includes(s.category)&&!s._deleted);
+  if(uncat.length>0)grouped.push({category:"Other",items:uncat});
+
+  if(loading)return <Spinner />;
+  return (
+    <form onSubmit={save}>
+      {toast&&<Toast {...toast}/>}
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20,flexWrap:"wrap",gap:8}}>
+        <h2 style={{fontSize:22,fontWeight:800,color:C.textPrimary}}>Technical Skills</h2>
+        <AddBtn onClick={add} label="Add Skill" />
+      </div>
+      {skills.filter(s=>String(s.id).startsWith("new_")&&!s._deleted).length>0&&(
+        <div style={CS}>
+          <label style={{...LS,marginBottom:12}}>New Skills (unsaved)</label>
+          {skills.filter(s=>String(s.id).startsWith("new_")&&!s._deleted).map(skill=>(
+            <SkillRow key={skill.id} skill={skill} upd={upd} del={del} />
+          ))}
+        </div>
+      )}
+      {grouped.map(({category,items})=>(
+        <div key={category} style={CS}>
+          <div style={{fontWeight:700,color:C.textPrimary,fontSize:15,marginBottom:16,paddingBottom:8,borderBottom:`1px solid ${C.cardBorder}`}}>
+            {category} <span style={{fontSize:12,color:C.textSecondary,fontWeight:500}}>({items.length})</span>
+          </div>
+          {items.map(skill=><SkillRow key={skill.id} skill={skill} upd={upd} del={del} />)}
+        </div>
+      ))}
+      {skills.filter(s=>!s._deleted).length===0&&(
+        <div style={{...CS,textAlign:"center",color:C.textSecondary,fontSize:14,padding:40}}>No skills yet. Click "+ Add Skill".</div>
+      )}
+      <div style={{marginTop:8}}><SaveBtn loading={saving} label="Save All Skills" /></div>
+    </form>
+  );
+}
+
+/* ── Soft Skills Panel ───────────────────────────────────── */
 function SoftSkillsPanel() {
-  const [groups, setGroups] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [toast, setToast] = useState(null);
+  const [groups,setGroups]   = useState([]);
+  const [loading,setLoading] = useState(true);
+  const [saving,setSaving]   = useState(false);
+  const [toast,setToast]     = useState(null);
+  const showToast=(msg,type)=>{setToast({msg,type});setTimeout(()=>setToast(null),3000);};
 
   useEffect(()=>{
     supabase.from("professional_skills").select("*").order("order_index").then(({data})=>{
@@ -525,8 +675,6 @@ function SoftSkillsPanel() {
       setLoading(false);
     });
   },[]);
-
-  const showToast=(msg,type)=>{setToast({msg,type});setTimeout(()=>setToast(null),3000);};
 
   const save=async(e)=>{
     e.preventDefault();setSaving(true);
@@ -536,7 +684,6 @@ function SoftSkillsPanel() {
     }
     invalidateProfessionalSkillsCache();setSaving(false);showToast("Soft skills saved!","success");
   };
-
   const upd=(i,f,v)=>setGroups(p=>{const a=[...p];a[i]={...a[i],[f]:v};return a;});
 
   if(loading)return <Spinner />;
@@ -560,7 +707,8 @@ function SoftSkillsPanel() {
             <label style={LS}>Skills</label>
             {(g.skills||[]).map((sk,j)=>(
               <div key={j} style={{display:"flex",gap:8,marginBottom:6,alignItems:"center"}}>
-                <input {...IS} style={{...IS.style,flex:1}} value={sk||""} onChange={e=>{const a=[...g.skills];a[j]=e.target.value;upd(i,"skills",a);}} />
+                <input {...IS} style={{...IS.style,flex:1}} value={sk||""}
+                  onChange={e=>{const a=[...g.skills];a[j]=e.target.value;upd(i,"skills",a);}} />
                 <RemoveBtn onClick={()=>upd(i,"skills",(g.skills||[]).filter((_,k)=>k!==j))} />
               </div>
             ))}
@@ -574,22 +722,19 @@ function SoftSkillsPanel() {
   );
 }
 
-// ── Contact Panel ─────────────────────────────────────────────
-
+/* ── Contact Panel ───────────────────────────────────────── */
 function ContactPanel() {
-  const [form, setForm] = useState({email:"",phone:"",linkedin:"",github:"",facebook:"",instagram:"",whatsapp:""});
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [toast, setToast] = useState(null);
+  const [form,setForm]       = useState({email:"",phone:"",linkedin:"",github:"",facebook:"",instagram:"",whatsapp:""});
+  const [loading,setLoading] = useState(true);
+  const [saving,setSaving]   = useState(false);
+  const [toast,setToast]     = useState(null);
+  const showToast=(msg,type)=>{setToast({msg,type});setTimeout(()=>setToast(null),3000);};
 
   useEffect(()=>{
     supabase.from("contact_info").select("*").limit(1).single().then(({data})=>{
-      if(data)setForm(data);
-      setLoading(false);
+      if(data)setForm(data);setLoading(false);
     });
   },[]);
-
-  const showToast=(msg,type)=>{setToast({msg,type});setTimeout(()=>setToast(null),3000);};
 
   const save=async(e)=>{
     e.preventDefault();setSaving(true);
@@ -616,38 +761,84 @@ function ContactPanel() {
   );
 }
 
-// ── Sidebar nav ───────────────────────────────────────────────
-
+/* ── Nav config ──────────────────────────────────────────── */
 const NAV = [
-  {id:"overview",   label:"Overview",           icon:"📊"},
-  {id:"hero",       label:"Hero Section",       icon:"🏠"},
-  {id:"about",      label:"About & Resume",     icon:"👤"},
-  {id:"certs",      label:"Certifications",     icon:"📜"},
-  {id:"skills",     label:"Technical Skills",   icon:"⚙️"},
-  {id:"softskills", label:"Soft Skills",        icon:"🧠"},
-  {id:"contact",    label:"Contact Info",       icon:"📬"},
+  {id:"overview",   label:"Overview",         icon:"📊"},
+  {id:"hero",       label:"Hero Section",     icon:"🏠"},
+  {id:"about",      label:"About & Resume",   icon:"👤"},
+  {id:"certs",      label:"Certifications",   icon:"📜"},
+  {id:"projects",   label:"Projects",         icon:"🚀"},
+  {id:"skills",     label:"Technical Skills", icon:"⚙️"},
+  {id:"softskills", label:"Soft Skills",      icon:"🧠"},
+  {id:"contact",    label:"Contact Info",     icon:"📬"},
 ];
 
-// ── Main ──────────────────────────────────────────────────────
+/* ── Sidebar ─────────────────────────────────────────────── */
+function Sidebar({ active, setActive, onSignOut, onClose }) {
+  return (
+    <div style={{ display:"flex",flexDirection:"column",height:"100%",overflow:"hidden" }}>
+      <div style={{ padding:"20px 16px 14px",borderBottom:"1px solid rgba(255,255,255,0.1)",display:"flex",alignItems:"center",justifyContent:"space-between" }}>
+        <div>
+          <div style={{ color:"#fff",fontWeight:800,fontSize:15,letterSpacing:".04em" }}>Portfolio CMS</div>
+          <div style={{ color:"rgba(255,255,255,0.55)",fontSize:11,marginTop:3 }}>Admin Dashboard</div>
+        </div>
+        {onClose&&(
+          <button onClick={onClose} style={{ background:"rgba(255,255,255,0.12)",border:"none",color:"#fff",borderRadius:8,width:30,height:30,cursor:"pointer",fontSize:16,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0 }}>✕</button>
+        )}
+      </div>
+      <nav style={{ flex:1,overflowY:"auto",padding:"10px" }}>
+        {NAV.map(({id,label,icon})=>{
+          const isActive=active===id;
+          return (
+            <button key={id} onClick={()=>{setActive(id);onClose&&onClose();}}
+              style={{ display:"flex",alignItems:"center",gap:10,width:"100%",padding:"10px 12px",borderRadius:10,
+                background:isActive?"rgba(255,255,255,0.18)":"transparent",
+                color:isActive?"#fff":"rgba(255,255,255,0.72)",
+                border:"none",cursor:"pointer",fontSize:14,fontWeight:isActive?700:500,
+                marginBottom:2,textAlign:"left",transition:"all .15s" }}>
+              <span style={{fontSize:15}}>{icon}</span>{label}
+            </button>
+          );
+        })}
+      </nav>
+      <div style={{ padding:"12px 10px",borderTop:"1px solid rgba(255,255,255,0.1)" }}>
+        <button onClick={onSignOut}
+          style={{ display:"flex",alignItems:"center",gap:8,width:"100%",padding:"9px 12px",borderRadius:10,
+            background:"rgba(239,68,68,0.15)",color:"#fca5a5",border:"1px solid rgba(239,68,68,0.25)",
+            cursor:"pointer",fontSize:13,fontWeight:600,marginBottom:6 }}>
+          🚪 Sign Out
+        </button>
+        <a href="/" target="_blank" rel="noreferrer"
+          style={{ display:"flex",alignItems:"center",justifyContent:"center",gap:6,width:"100%",padding:"9px 12px",borderRadius:10,
+            background:"rgba(255,255,255,0.08)",color:"rgba(255,255,255,0.72)",
+            textDecoration:"none",fontSize:13,fontWeight:500 }}>
+          🌐 View Site
+        </a>
+      </div>
+    </div>
+  );
+}
 
+/* ── Main ────────────────────────────────────────────────── */
 export default function AdminDashboard() {
-  const [active, setActive] = useState("overview");
-  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [active,setActive]         = useState("overview");
+  const [drawerOpen,setDrawerOpen] = useState(false);
 
-  const signOut = async () => {
+  const signOut=async()=>{
     await supabase.auth.signOut();
-    window.location.href = "/admin/login";
+    window.location.href="/admin/login";
   };
 
-  const panel = {
+  const panel={
     overview:   <OverviewPanel />,
     hero:       <HeroPanel />,
     about:      <AboutPanel />,
     certs:      <CertificationsPanel />,
+    projects:   <ProjectsPanel />,
     skills:     <SkillsPanel />,
     softskills: <SoftSkillsPanel />,
     contact:    <ContactPanel />,
-  }[active] ?? <OverviewPanel />;
+  }[active]??<OverviewPanel />;
 
   return (
     <>
@@ -658,63 +849,62 @@ export default function AdminDashboard() {
           border-color:#4BB8FA !important;
           box-shadow:0 0 0 3px rgba(75,184,250,0.15) !important;
         }
-        ::-webkit-scrollbar { width:6px; }
+        ::-webkit-scrollbar { width:5px; }
         ::-webkit-scrollbar-thumb { background:#C4E2F5; border-radius:8px; }
+        @media (max-width: 768px) {
+          .admin-sidebar-desktop { display: none !important; }
+          .admin-mobile-header   { display: flex !important; }
+        }
+        @media (min-width: 769px) {
+          .admin-sidebar-desktop { display: flex !important; }
+          .admin-mobile-header   { display: none !important; }
+          .admin-drawer-overlay  { display: none !important; }
+        }
       `}</style>
 
-      <div style={{ display:"flex",minHeight:"100vh",background:C.bodyBg,fontFamily:"'Inter',system-ui,sans-serif" }}>
+      <div style={{ display:"flex",minHeight:"100vh",background:C.bodyBg,fontFamily:"'Inter',system-ui,sans-serif",position:"relative" }}>
 
-        {/* Sidebar */}
-        <aside style={{
-          width:240,flexShrink:0,background:C.sidebarBg,
-          display:"flex",flexDirection:"column",
-          position:"sticky",top:0,height:"100vh",overflow:"hidden",
-          boxShadow:"4px 0 24px rgba(0,0,0,0.15)"
-        }}>
-          <div style={{ padding:"24px 20px 16px",borderBottom:"1px solid rgba(255,255,255,0.1)" }}>
-            <div style={{ color:"#fff",fontWeight:800,fontSize:16,letterSpacing:".04em" }}>Portfolio CMS</div>
-            <div style={{ color:"rgba(255,255,255,0.6)",fontSize:12,marginTop:4 }}>Admin Dashboard</div>
-          </div>
-          <nav style={{ flex:1,overflowY:"auto",padding:"12px 12px" }}>
-            {NAV.map(({id,label,icon})=>{
-              const isActive=active===id;
-              return (
-                <button key={id} onClick={()=>setActive(id)}
-                  style={{
-                    display:"flex",alignItems:"center",gap:10,width:"100%",padding:"10px 12px",borderRadius:10,
-                    background:isActive?"rgba(255,255,255,0.15)":"transparent",
-                    color:isActive?"#fff":"rgba(255,255,255,0.7)",
-                    border:"none",cursor:"pointer",fontSize:14,fontWeight:isActive?700:500,
-                    marginBottom:2,textAlign:"left",transition:"all .15s",
-                  }}>
-                  <span style={{fontSize:16}}>{icon}</span>
-                  {label}
-                </button>
-              );
-            })}
-          </nav>
-          <div style={{ padding:"16px 12px",borderTop:"1px solid rgba(255,255,255,0.1)" }}>
-            <button onClick={signOut}
-              style={{ display:"flex",alignItems:"center",gap:8,width:"100%",padding:"10px 12px",borderRadius:10,
-                background:"rgba(239,68,68,0.15)",color:"#fca5a5",border:"1px solid rgba(239,68,68,0.25)",
-                cursor:"pointer",fontSize:13,fontWeight:600 }}>
-              🚪 Sign Out
-            </button>
-            <a href="/" target="_blank" rel="noreferrer"
-              style={{ display:"flex",alignItems:"center",gap:8,width:"100%",padding:"10px 12px",borderRadius:10,
-                background:"rgba(255,255,255,0.08)",color:"rgba(255,255,255,0.7)",
-                textDecoration:"none",fontSize:13,fontWeight:500,marginTop:6,justifyContent:"center" }}>
-              🌐 View Site
-            </a>
-          </div>
+        {/* ── Desktop sidebar ── */}
+        <aside className="admin-sidebar-desktop"
+          style={{ width:232,flexShrink:0,background:C.sidebarBg,flexDirection:"column",position:"sticky",top:0,height:"100vh",boxShadow:"4px 0 20px rgba(0,0,0,0.12)" }}>
+          <Sidebar active={active} setActive={setActive} onSignOut={signOut} />
         </aside>
 
-        {/* Main content */}
-        <main style={{ flex:1,overflowY:"auto",padding:"32px",maxWidth:"calc(100vw - 240px)" }}>
-          <div style={{ maxWidth:760,margin:"0 auto" }}>
-            {panel}
+        {/* ── Mobile drawer overlay ── */}
+        {drawerOpen&&(
+          <div className="admin-drawer-overlay"
+            onClick={()=>setDrawerOpen(false)}
+            style={{ position:"fixed",inset:0,zIndex:200,background:"rgba(0,0,0,0.45)" }}>
+            <aside
+              onClick={e=>e.stopPropagation()}
+              style={{ width:230,height:"100%",background:C.sidebarBg,boxShadow:"4px 0 24px rgba(0,0,0,0.25)" }}>
+              <Sidebar active={active} setActive={setActive} onSignOut={signOut} onClose={()=>setDrawerOpen(false)} />
+            </aside>
           </div>
-        </main>
+        )}
+
+        {/* ── Main content ── */}
+        <div style={{ flex:1,minWidth:0,display:"flex",flexDirection:"column" }}>
+
+          {/* Mobile top bar */}
+          <div className="admin-mobile-header"
+            style={{ display:"none",alignItems:"center",gap:12,padding:"12px 16px",background:C.sidebarBg,boxShadow:"0 2px 12px rgba(0,0,0,0.12)",position:"sticky",top:0,zIndex:100 }}>
+            <button onClick={()=>setDrawerOpen(true)}
+              style={{ background:"rgba(255,255,255,0.15)",border:"none",color:"#fff",borderRadius:9,width:38,height:38,cursor:"pointer",fontSize:18,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0 }}>
+              ☰
+            </button>
+            <div style={{ color:"#fff",fontWeight:700,fontSize:15 }}>Portfolio CMS</div>
+            <div style={{ marginLeft:"auto",color:"rgba(255,255,255,0.7)",fontSize:13 }}>
+              {NAV.find(n=>n.id===active)?.icon} {NAV.find(n=>n.id===active)?.label}
+            </div>
+          </div>
+
+          <main style={{ flex:1,overflowY:"auto",padding:"24px 16px" }}>
+            <div style={{ maxWidth:760,margin:"0 auto" }}>
+              {panel}
+            </div>
+          </main>
+        </div>
       </div>
     </>
   );

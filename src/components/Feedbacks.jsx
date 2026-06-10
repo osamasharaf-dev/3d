@@ -9,7 +9,7 @@ import { useProfessionalSkills } from "../lib/useProfessionalSkills";
 const SkillCategoryCard = memo(({ index, category, icon, color, skills }) => (
   <motion.div
     variants={fadeIn("", "spring", index * 0.5, 0.75)}
-    className="bg-white p-10 rounded-3xl xs:w-[320px] w-full transition-all duration-300"
+    className="bg-white p-6 sm:p-8 rounded-3xl w-full transition-all duration-300"
     style={{
       border: `1.5px solid ${color}22`,
       boxShadow: `0 4px 24px rgba(0,0,0,0.05), 0 0 0 1px ${color}11`,
@@ -54,7 +54,7 @@ const Feedbacks = () => {
           </h2>
         </motion.div>
       </div>
-      <div className={`-mt-20 pb-14 ${styles.paddingX} flex flex-wrap gap-7`}>
+      <div className={`-mt-20 pb-14 ${styles.paddingX} grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6`}>
         {professionalSkills.map((item, index) => (
           <SkillCategoryCard key={item.id || item.category} index={index} {...item} />
         ))}

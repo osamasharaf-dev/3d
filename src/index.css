@@ -240,7 +240,43 @@ body {
   }
 }
 
-/* Dev background floating animation */
+/* ── Responsive base fixes ───────────────────────────── */
+html {
+  overflow-x: hidden;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  overflow-x: hidden;
+  min-width: 320px;
+}
+
+/* Prevent horizontal scroll from wide 3D elements */
+canvas {
+  max-width: 100%;
+}
+
+/* Hero text scaling on tiny screens */
+@media (max-width: 400px) {
+  .heroHeadText,
+  [class*="heroHeadText"] {
+    font-size: clamp(2rem, 10vw, 3rem) !important;
+  }
+  .heroSubText,
+  [class*="heroSubText"] {
+    font-size: clamp(1rem, 5vw, 1.3rem) !important;
+  }
+}
+
+/* Certifications grid — 1 col on mobile */
+@media (max-width: 640px) {
+  .certs-grid { grid-template-columns: 1fr !important; }
+}
+
+/* Ensure images never overflow */
+img { max-width: 100%; height: auto; }
+
+/* ── Dev background floating animation ──────────────── */
 @keyframes devFloat {
   0%, 100% { transform: translateY(0px) rotate(0deg); }
   33% { transform: translateY(-8px) rotate(1deg); }

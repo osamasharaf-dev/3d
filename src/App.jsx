@@ -28,7 +28,7 @@ const SkillKeyboard = lazy(() => import("./components/SkillKeyboard"));
 const AdminDashboard = lazy(() => import("./admin/AdminDashboard"));
 
 const MainPage = () => (
-  <div className="relative z-0" style={{ backgroundColor: "#f8faff", minHeight: "100vh" }}>
+  <div className="relative z-0" style={{ backgroundColor: "#f8faff", minHeight: "100vh", overflowX: "hidden" }}>
     <DevBackground />
 
     {/* Global UI layers */}
