@@ -7,11 +7,120 @@ import useMediaQuery from "../utils/useMediaQuery";
 import { FloatingTechCanvas } from "./canvas";
 import { useHero, HERO_FALLBACK } from "../lib/useHero";
 
-/* ── Identity card ──────────────────────────────────────── */
-const FloatingPortraitCard = memo(() => {
+/* ─────────────────────────────────────────────────────────────
+   ENTRANCE ANIMATION
+   Photo starts large + centered → shrinks into its card frame.
+   Only transform + opacity are animated → 100% GPU-composited.
+───────────────────────────────────────────────────────────── */
+const ENTRANCE_PX = 360; // starting photo diameter in px
+
+const PhotoEntrance = memo(({ onDone }) => {
+  useEffect(() => {
+    const img    = document.getElementById("hero-entrance-img");
+    const circle = document.getElementById("portrait-circle");
+
+    if (!img || !circle) { onDone(); return; }
+
+    // Wait two rAF frames so the DOM has fully laid out
+    let r1, r2;
+    r1 = requestAnimationFrame(() => {
+      r2 = requestAnimationFrame(() => {
+        const rect = circle.getBoundingClientRect();
+        const vw   = window.innerWidth;
+        const vh   = window.innerHeight;
+
+        // Where does the circle sit relative to the viewport centre?
+        const targetCX = rect.left + rect.width  / 2;
+        const targetCY = rect.top  + rect.height / 2;
+        const dx       = targetCX - vw / 2;
+        const dy       = targetCY - vh / 2;
+        const scale    = rect.width / ENTRANCE_PX;
+
+        // Animate ONLY transform + opacity → compositor thread, zero jank
+        const anim = img.animate(
+          [
+            {
+              transform: "translate(-50%,-50%) scale(1)",
+              opacity:   1,
+              borderRadius: "50%",
+            },
+            {
+              transform: `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) scale(${scale})`,
+              opacity:   0,
+              borderRadius: "50%",
+            },
+          ],
+          {
+            duration:  820,
+            easing:    "cubic-bezier(0.77, 0, 0.18, 1)",
+            fill:      "forwards",
+          }
+        );
+
+        anim.onfinish = onDone;
+      });
+    });
+
+    return () => {
+      cancelAnimationFrame(r1);
+      cancelAnimationFrame(r2);
+    };
+  }, [onDone]);
+
+  return (
+    /* Fixed overlay — pointer-events: none so page is still interactive */
+    <div
+      aria-hidden="true"
+      style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 9999,
+        pointerEvents: "none",
+      }}
+    >
+      {/* Frosted backdrop */}
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          background: "rgba(248,250,255,0.70)",
+          backdropFilter: "blur(2px)",
+          WebkitBackdropFilter: "blur(2px)",
+        }}
+      />
+
+      {/* The large entrance photo */}
+      <img
+        id="hero-entrance-img"
+        src="/my-photo.jpg"
+        alt=""
+        style={{
+          position:       "fixed",
+          top:            "50%",
+          left:           "50%",
+          width:          ENTRANCE_PX,
+          height:         ENTRANCE_PX,
+          borderRadius:   "50%",
+          objectFit:      "cover",
+          objectPosition: "top center",
+          willChange:     "transform, opacity",
+          boxShadow:
+            "0 0 0 5px rgba(255,255,255,0.7), 0 0 0 7px rgba(14,165,233,0.35), 0 28px 72px rgba(14,165,233,0.28)",
+        }}
+      />
+    </div>
+  );
+});
+
+PhotoEntrance.displayName = "PhotoEntrance";
+
+/* ─────────────────────────────────────────────────────────────
+   PORTRAIT CARD  (right side of hero)
+───────────────────────────────────────────────────────────── */
+const FloatingPortraitCard = memo(({ visible, floating }) => {
   const cardRef = useRef(null);
-  const rawX = useMotionValue(0);
-  const rawY = useMotionValue(0);
+  const rawX    = useMotionValue(0);
+  const rawY    = useMotionValue(0);
   const springX = useSpring(rawX, { stiffness: 130, damping: 20 });
   const springY = useSpring(rawY, { stiffness: 130, damping: 20 });
 
@@ -25,35 +134,51 @@ const FloatingPortraitCard = memo(() => {
     [rawX, rawY]
   );
 
-  const handleMouseLeave = useCallback(() => { rawX.set(0); rawY.set(0); }, [rawX, rawY]);
+  const handleMouseLeave = useCallback(() => {
+    rawX.set(0);
+    rawY.set(0);
+  }, [rawX, rawY]);
 
   return (
     <motion.div
       ref={cardRef}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
-      animate={{ y: [0, -12, 0] }}
-      transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut" }}
-      style={{ rotateX: springX, rotateY: springY, transformStyle: "preserve-3d", perspective: 1000 }}
+      /* Only start floating after entrance completes */
+      animate={floating ? { y: [0, -12, 0] } : { y: 0 }}
+      transition={floating ? { duration: 4.5, repeat: Infinity, ease: "easeInOut" } : {}}
+      style={{
+        rotateX:        springX,
+        rotateY:        springY,
+        transformStyle: "preserve-3d",
+        perspective:    1000,
+        /* Fade in after entrance */
+        opacity:    visible ? 1 : 0,
+        transition: "opacity 0.3s ease",
+      }}
       className="relative cursor-pointer select-none"
     >
       {/* Glow */}
       <div
         aria-hidden="true"
         className="absolute -inset-6 rounded-full opacity-30 blur-3xl pointer-events-none"
-        style={{ background: "radial-gradient(ellipse, rgba(14,165,233,0.4) 0%, rgba(79,70,229,0.15) 60%, transparent 80%)" }}
+        style={{
+          background:
+            "radial-gradient(ellipse, rgba(14,165,233,0.4) 0%, rgba(79,70,229,0.15) 60%, transparent 80%)",
+        }}
       />
 
       {/* Card */}
       <div
         className="relative rounded-3xl overflow-hidden"
         style={{
-          background: "rgba(255,255,255,0.92)",
-          backdropFilter: "blur(20px)",
+          background:           "rgba(255,255,255,0.92)",
+          backdropFilter:       "blur(20px)",
           WebkitBackdropFilter: "blur(20px)",
-          border: "1.5px solid rgba(14,165,233,0.2)",
-          boxShadow: "0 20px 60px rgba(14,165,233,0.15), 0 4px 16px rgba(79,70,229,0.10), inset 0 1px 0 rgba(255,255,255,0.9)",
-          width: "220px",
+          border:               "1.5px solid rgba(14,165,233,0.2)",
+          boxShadow:
+            "0 20px 60px rgba(14,165,233,0.15), 0 4px 16px rgba(79,70,229,0.10), inset 0 1px 0 rgba(255,255,255,0.9)",
+          width:   "220px",
           padding: "28px 24px 24px",
         }}
       >
@@ -61,18 +186,28 @@ const FloatingPortraitCard = memo(() => {
         <div
           aria-hidden="true"
           className="absolute top-0 left-0 right-0 h-px"
-          style={{ background: "linear-gradient(90deg, transparent, rgba(14,165,233,0.6), rgba(79,70,229,0.4), transparent)" }}
+          style={{
+            background:
+              "linear-gradient(90deg, transparent, rgba(14,165,233,0.6), rgba(79,70,229,0.4), transparent)",
+          }}
         />
 
         <div className="flex flex-col items-center gap-4">
-          {/* Avatar */}
+          {/* ── Photo circle ── */}
           <div className="relative">
+            {/* Gradient ring behind the photo */}
             <div
               aria-hidden="true"
               className="absolute -inset-1.5 rounded-full"
-              style={{ background: "linear-gradient(135deg, #0ea5e9, #4f46e5, #0ea5e9)" }}
+              style={{
+                background: "linear-gradient(135deg, #0ea5e9, #4f46e5, #0ea5e9)",
+              }}
             />
-            <div className="relative w-24 h-24 rounded-full overflow-hidden">
+            {/* THE TARGET FRAME the entrance animates toward */}
+            <div
+              id="portrait-circle"
+              className="relative w-24 h-24 rounded-full overflow-hidden"
+            >
               <img
                 src="/my-photo.jpg"
                 alt="Osama Sharaf"
@@ -81,6 +216,7 @@ const FloatingPortraitCard = memo(() => {
                 decoding="async"
               />
             </div>
+            {/* Online dot */}
             <div
               className="absolute bottom-1 right-1 w-4 h-4 rounded-full border-2"
               style={{ background: "#22c55e", borderColor: "rgba(255,255,255,0.9)" }}
@@ -89,8 +225,12 @@ const FloatingPortraitCard = memo(() => {
 
           {/* Name */}
           <div className="text-center">
-            <p className="text-slate-800 font-bold text-[15px] tracking-wide">OSAMA SHARAF</p>
-            <p className="text-sky-500 text-[11px] font-semibold tracking-wider uppercase mt-0.5">Software Engineer</p>
+            <p className="text-slate-800 font-bold text-[15px] tracking-wide">
+              OSAMA SHARAF
+            </p>
+            <p className="text-sky-500 text-[11px] font-semibold tracking-wider uppercase mt-0.5">
+              Software Engineer
+            </p>
           </div>
 
           {/* Tags */}
@@ -99,19 +239,33 @@ const FloatingPortraitCard = memo(() => {
               <span
                 key={tag}
                 className="text-[10px] font-semibold px-2 py-0.5 rounded-full"
-                style={{ background: "rgba(14,165,233,0.10)", color: "#0ea5e9", border: "1px solid rgba(14,165,233,0.25)" }}
+                style={{
+                  background: "rgba(14,165,233,0.10)",
+                  color:      "#0ea5e9",
+                  border:     "1px solid rgba(14,165,233,0.25)",
+                }}
               >
                 {tag}
               </span>
             ))}
           </div>
 
-          <div aria-hidden="true" className="w-full h-px" style={{ background: "rgba(14,165,233,0.12)" }} />
+          <div
+            aria-hidden="true"
+            className="w-full h-px"
+            style={{ background: "rgba(14,165,233,0.12)" }}
+          />
 
           {/* Status */}
           <div className="flex items-center gap-2">
-            <div aria-hidden="true" className="w-2 h-2 rounded-full animate-pulse" style={{ background: "#22c55e" }} />
-            <span className="text-[11px] text-slate-500 font-medium">Available for work</span>
+            <div
+              aria-hidden="true"
+              className="w-2 h-2 rounded-full animate-pulse"
+              style={{ background: "#22c55e" }}
+            />
+            <span className="text-[11px] text-slate-500 font-medium">
+              Available for work
+            </span>
           </div>
         </div>
 
@@ -127,17 +281,28 @@ const FloatingPortraitCard = memo(() => {
 
 FloatingPortraitCard.displayName = "FloatingPortraitCard";
 
-/* ── Hero ───────────────────────────────────────────────── */
+/* ─────────────────────────────────────────────────────────────
+   HERO
+───────────────────────────────────────────────────────────── */
 const Hero = () => {
-  const { data: heroData } = useHero();
-  const typedItemsRef = useRef(HERO_FALLBACK.typed_items);
+  const { data: heroData }  = useHero();
+  const typedItemsRef        = useRef(HERO_FALLBACK.typed_items);
 
-  const [typedText, setTypedText] = useState("");
-  const [itemIndex, setItemIndex] = useState(0);
-  const [charIndex, setCharIndex] = useState(0);
+  const [typedText,  setTypedText]  = useState("");
+  const [itemIndex,  setItemIndex]  = useState(0);
+  const [charIndex,  setCharIndex]  = useState(0);
 
-  const isMobile = useMediaQuery("(max-width: 768px)");
+  /* Entrance state */
+  const [entranceDone,    setEntranceDone]    = useState(false);
+  const [entranceVisible, setEntranceVisible] = useState(true);
+
+  const isMobile = useMediaQuery("(max-width: 1023px)"); // lg breakpoint
   const { ref: parallaxRef } = useParallax({ strength: 0.03, maxOffset: 15, enabled: !isMobile });
+
+  const handleEntranceDone = useCallback(() => {
+    setEntranceVisible(false);
+    setEntranceDone(true);
+  }, []);
 
   useEffect(() => {
     if (Array.isArray(heroData?.typed_items) && heroData.typed_items.length > 0) {
@@ -146,13 +311,20 @@ const Hero = () => {
   }, [heroData]);
 
   useEffect(() => {
-    const items = typedItemsRef.current;
+    const items   = typedItemsRef.current;
     const current = items[itemIndex % items.length] || "";
     if (charIndex < current.length) {
-      const t = setTimeout(() => { setTypedText((p) => p + current[charIndex]); setCharIndex((c) => c + 1); }, 100);
+      const t = setTimeout(() => {
+        setTypedText((p) => p + current[charIndex]);
+        setCharIndex((c) => c + 1);
+      }, 100);
       return () => clearTimeout(t);
     }
-    const t = setTimeout(() => { setItemIndex((i) => (i + 1) % items.length); setCharIndex(0); setTypedText(""); }, 1400);
+    const t = setTimeout(() => {
+      setItemIndex((i) => (i + 1) % items.length);
+      setCharIndex(0);
+      setTypedText("");
+    }, 1400);
     return () => clearTimeout(t);
   }, [charIndex, itemIndex]);
 
@@ -162,7 +334,12 @@ const Hero = () => {
       id="hero"
       aria-label="Hero — Osama Sharaf, Full-Stack Developer"
     >
-      {/* 3D background — reduced opacity for light theme */}
+      {/* Entrance animation — only on desktop where the card is visible */}
+      {!isMobile && entranceVisible && (
+        <PhotoEntrance onDone={handleEntranceDone} />
+      )}
+
+      {/* 3D background */}
       <div className="absolute inset-0 opacity-30" aria-hidden="true">
         <FloatingTechCanvas />
       </div>
@@ -171,15 +348,23 @@ const Hero = () => {
       <div
         aria-hidden="true"
         className="absolute inset-0 pointer-events-none"
-        style={{ background: "radial-gradient(ellipse 80% 90% at 50% 50%, rgba(248,250,255,0.3) 0%, rgba(240,247,255,0.6) 100%)" }}
+        style={{
+          background:
+            "radial-gradient(ellipse 80% 90% at 50% 50%, rgba(248,250,255,0.3) 0%, rgba(240,247,255,0.6) 100%)",
+        }}
       />
 
       {/* Content */}
-      <div className={`absolute inset-0 top-[110px] max-w-7xl mx-auto ${styles.paddingX} flex flex-row items-start gap-5 z-10`}>
-        {/* Left accent */}
+      <div
+        className={`absolute inset-0 top-[110px] max-w-7xl mx-auto ${styles.paddingX} flex flex-row items-start gap-5 z-10`}
+      >
+        {/* Left accent line */}
         <div aria-hidden="true" className="flex flex-col justify-center items-center mt-5">
           <div className="w-5 h-5 rounded-full bg-sky-500" />
-          <div className="w-1 sm:h-80 h-40" style={{ background: "linear-gradient(to bottom, #0ea5e9, transparent)" }} />
+          <div
+            className="w-1 sm:h-80 h-40"
+            style={{ background: "linear-gradient(to bottom, #0ea5e9, transparent)" }}
+          />
         </div>
 
         {/* Text + card */}
@@ -194,11 +379,17 @@ const Hero = () => {
               transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
             >
               <p className="text-sky-500 text-[13px] sm:text-[14px] font-semibold tracking-[0.2em] uppercase mb-2">
-                Software Engineer & Full-Stack Developer
+                Software Engineer &amp; Full-Stack Developer
               </p>
               <h1 className={styles.heroHeadText}>
                 {heroData.greeting || "Hi, I'm"}{" "}
-                <span style={{ background: "linear-gradient(135deg, #0ea5e9 0%, #4f46e5 60%, #06b6d4 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+                <span
+                  style={{
+                    background:            "linear-gradient(135deg, #0ea5e9 0%, #4f46e5 60%, #06b6d4 100%)",
+                    WebkitBackgroundClip:  "text",
+                    WebkitTextFillColor:   "transparent",
+                  }}
+                >
                   {heroData.name || "Osama Sharaf"}
                 </span>
               </h1>
@@ -211,17 +402,29 @@ const Hero = () => {
             >
               <p className={`${styles.heroSubText} mt-2`} aria-live="polite">
                 I'm{" "}
-                <span style={{ color: "#0ea5e9", fontWeight: "bold", borderBottom: "2px solid rgba(14,165,233,0.4)", paddingBottom: "2px", minWidth: "1ch", display: "inline-block" }}>
+                <span
+                  style={{
+                    color:         "#0ea5e9",
+                    fontWeight:    "bold",
+                    borderBottom:  "2px solid rgba(14,165,233,0.4)",
+                    paddingBottom: "2px",
+                    minWidth:      "1ch",
+                    display:       "inline-block",
+                  }}
+                >
                   {typedText}
                 </span>
-                <span aria-hidden="true" style={{ color: "#0ea5e9", opacity: 0.7 }}>|</span>
+                <span aria-hidden="true" style={{ color: "#0ea5e9", opacity: 0.7 }}>
+                  |
+                </span>
               </p>
               <p className="mt-3 text-slate-500 text-[14px] sm:text-[15px] max-w-[480px] leading-[1.75] font-medium">
-                {heroData.subtitle || "Building modern digital solutions, scalable web applications, and high-performance digital experiences."}
+                {heroData.subtitle ||
+                  "Building modern digital solutions, scalable web applications, and high-performance digital experiences."}
               </p>
             </motion.div>
 
-            {/* CTA */}
+            {/* CTA buttons */}
             <motion.div
               initial={{ opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
@@ -234,7 +437,10 @@ const Hero = () => {
                   whileTap={{ scale: 0.96 }}
                   transition={{ type: "spring", stiffness: 420, damping: 24 }}
                   className="relative px-6 py-2.5 rounded-xl text-[13px] font-bold tracking-wide text-white overflow-hidden"
-                  style={{ background: "linear-gradient(135deg, #0ea5e9 0%, #4f46e5 100%)", boxShadow: "0 4px 22px rgba(14,165,233,0.30), inset 0 1px 0 rgba(255,255,255,0.2)" }}
+                  style={{
+                    background:  "linear-gradient(135deg, #0ea5e9 0%, #4f46e5 100%)",
+                    boxShadow:   "0 4px 22px rgba(14,165,233,0.30), inset 0 1px 0 rgba(255,255,255,0.2)",
+                  }}
                 >
                   <span className="flex items-center gap-2">
                     {heroData.cta_primary || "View My Work"}
@@ -259,15 +465,21 @@ const Hero = () => {
             </motion.div>
           </div>
 
-          {/* Portrait card — large screens */}
+          {/* Portrait card — desktop only */}
           <div className="hidden lg:flex items-center justify-center flex-shrink-0 mr-8 mt-4">
-            <FloatingPortraitCard />
+            <FloatingPortraitCard
+              visible={isMobile || entranceDone}
+              floating={entranceDone}
+            />
           </div>
         </div>
       </div>
 
       {/* Scroll indicator */}
-      <div className="absolute xs:bottom-10 bottom-32 w-full flex justify-center items-center z-10" aria-hidden="true">
+      <div
+        className="absolute xs:bottom-10 bottom-32 w-full flex justify-center items-center z-10"
+        aria-hidden="true"
+      >
         <a href="#about" aria-label="Scroll to About section">
           <div className="w-[34px] h-[60px] rounded-3xl border-4 border-sky-300 flex justify-center items-start p-2">
             <motion.div
