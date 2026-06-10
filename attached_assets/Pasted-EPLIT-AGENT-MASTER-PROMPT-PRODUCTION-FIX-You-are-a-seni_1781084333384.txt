@@ -1,0 +1,194 @@
+EPLIT AGENT MASTER PROMPT (PRODUCTION FIX)
+
+You are a senior full-stack engineer (React + Vite + TypeScript), Supabase expert, UI/UX designer, and performance optimization engineer.
+
+Your task is to convert this project into a fully production-ready portfolio website.
+
+You MUST preserve:
+
+All existing pages
+All routes
+All CMS/Admin functionality
+All content structure
+All branding
+
+DO NOT remove features unless required for fixing critical bugs.
+
+❗ CRITICAL ISSUE (HIGHEST PRIORITY)
+CMS LIVE SYNC IS BROKEN
+
+Admin Dashboard updates are successfully saved in Supabase
+BUT changes are NOT reflected instantly on the website.
+
+🎯 REQUIRED BEHAVIOR
+
+You MUST ensure:
+
+Any Admin Dashboard change instantly updates UI
+No manual refresh required
+Skills update instantly
+Projects update instantly
+Edits appear instantly
+Deletes remove instantly
+New items appear instantly
+🧠 REQUIRED FIX STRATEGY
+
+Audit and fix:
+
+1. Frontend Data Flow
+React hooks (useEffect, custom hooks)
+State management (server state vs local state)
+Props caching or memoization issues
+2. Data Fetching Layer
+Supabase queries
+Ensure fresh reads from DB
+Fix stale data issues
+3. Caching Problems (CRITICAL)
+React caching
+browser caching
+Vite build cache
+Netlify/Replit caching if applicable
+🔥 REQUIRED SOLUTION (YOU MUST IMPLEMENT ONE)
+
+Choose the most reliable approach:
+
+OPTION A (PREFERRED):
+
+Supabase Realtime subscriptions for all CMS tables
+
+OPTION B:
+
+React Query / SWR with:
+
+invalidateQueries after mutations
+refetchOnWindowFocus enabled
+OPTION C:
+
+Manual global state update system after CRUD operations
+
+👉 Choose ONE and implement properly.
+
+🎨 UI REDESIGN (LIGHT MODE PREMIUM)
+
+Convert UI into a premium light-mode portfolio.
+
+Colors:
+
+Primary: Sky Blue
+Secondary: Indigo Blue
+Accent: Soft Cyan
+
+Design:
+
+Clean white/light gray background
+Modern agency-level design
+Subtle gradients only
+No dark theme
+🌌 BACKGROUND EFFECTS
+
+Add subtle decorative elements:
+
+Arabic letters
+</> code symbols
+{} brackets
+programming fragments
+
+Requirements:
+
+very subtle opacity
+no distraction
+performance-friendly
+lightweight only
+🧩 SKILLS SECTION REBUILD
+
+Replace current Skills section with CMS-driven cards.
+
+Categories:
+
+Frontend
+Backend
+Databases
+Cloud
+DevOps
+AI Tools
+Frameworks
+Technologies
+
+Each card must include:
+
+Icon
+Title
+Description
+Skill list
+
+Requirements:
+
+Fully CRUD via Admin Dashboard
+Add / Edit / Delete / Reorder
+Instant live updates
+⚡ PERFORMANCE OPTIMIZATION (VERY IMPORTANT)
+
+Target metrics:
+
+FCP < 1.8s
+LCP < 2.5s
+TBT < 200ms
+
+You MUST:
+
+Remove unused code
+Remove unused dependencies
+Lazy load routes
+Use dynamic imports
+Optimize images (WebP)
+Reduce bundle size
+Remove heavy animations
+Clean CSS
+
+Performance is HIGHER priority than visuals.
+
+🧪 SUPABASE AUDIT
+
+Verify and fix:
+
+Tables structure
+RLS policies
+Auth flow
+CRUD permissions
+Admin access control
+
+Ensure all CMS operations are secure and working.
+
+🚀 DEPLOYMENT READINESS
+
+Before finishing:
+
+No TypeScript errors
+No runtime errors
+Build must succeed
+No broken routes
+No missing env variables
+CMS must fully work
+
+Project must be ready for production deployment.
+
+📦 FINAL OUTPUT REQUIRED
+
+After completing all work, provide:
+
+List of modified files
+List of deleted files
+Explanation of CMS live update fix
+Performance improvements summary
+Supabase status confirmation
+Deployment readiness confirmation
+Confirmation that all sections are preserved
+🎯 SUCCESS CRITERIA
+
+Project is ONLY successful if:
+
+CMS updates are instant (NO refresh needed)
+Supabase fully synced
+No broken features
+Performance improved
+Fully deploy-ready

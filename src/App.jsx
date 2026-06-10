@@ -8,7 +8,6 @@ import {
   Feedbacks,
   Hero,
   Navbar,
-  StarsCanvas,
 } from "./components";
 import Projects from "./components/Projects";
 import StatsSection from "./components/StatsSection";
@@ -18,6 +17,7 @@ import CinematicIntro from "./components/CinematicIntro";
 import EasterEggs from "./components/EasterEggs";
 import ElasticCursor from "./components/ElasticCursor";
 import Footer from "./components/Footer";
+import DevBackground from "./components/DevBackground";
 import ReactBitsAudioProvider from "./reactbits/context/ReactBitsAudioProvider";
 import ReactBitsCursorProvider from "./reactbits/context/ReactBitsCursorProvider";
 import AdminLogin from "./admin/AdminLogin";
@@ -28,7 +28,9 @@ const SkillKeyboard = lazy(() => import("./components/SkillKeyboard"));
 const AdminDashboard = lazy(() => import("./admin/AdminDashboard"));
 
 const MainPage = () => (
-  <div className="relative z-0" style={{ backgroundColor: "hsl(222.2 84% 4.9%)" }}>
+  <div className="relative z-0" style={{ backgroundColor: "#f8faff", minHeight: "100vh" }}>
+    <DevBackground />
+
     {/* Global UI layers */}
     <CinematicIntro />
     <ElasticCursor />
@@ -36,18 +38,17 @@ const MainPage = () => (
     <CommandPalette />
     <ScrollToTop />
 
-    {/* Page content */}
-    <div className="bg-hero-pattern bg-cover bg-no-repeat bg-center">
+    {/* Hero */}
+    <div style={{ background: "linear-gradient(135deg, #f0f7ff 0%, #eef0ff 50%, #f5f0ff 100%)" }}>
       <Navbar />
       <Hero />
     </div>
 
-    <StarsCanvas />
     <About />
     <StatsSection />
     <Projects />
     <Achievement />
-    <Suspense fallback={<div style={{ background: "hsl(222.2 84% 4.9%)", minHeight: "320px" }} />}>
+    <Suspense fallback={<div style={{ background: "#f8faff", minHeight: "320px" }} />}>
       <SkillKeyboard />
     </Suspense>
     <Feedbacks />
@@ -60,8 +61,8 @@ const MainPage = () => (
 );
 
 const AdminFallback = () => (
-  <div className="min-h-screen flex items-center justify-center" style={{ background: "hsl(222.2 84% 4.9%)" }}>
-    <div className="w-8 h-8 rounded-full border-2 border-[#915EFF] border-t-transparent animate-spin" />
+  <div className="min-h-screen flex items-center justify-center" style={{ background: "#f0f7ff" }}>
+    <div className="w-8 h-8 rounded-full border-2 border-sky-500 border-t-transparent animate-spin" />
   </div>
 );
 
@@ -74,7 +75,7 @@ const App = () => (
           <Route
             path="/privacy-policy"
             element={
-              <Suspense fallback={<div style={{ background: "hsl(222.2 84% 4.9%)", minHeight: "100vh" }} />}>
+              <Suspense fallback={<div style={{ background: "#f8faff", minHeight: "100vh" }} />}>
                 <PrivacyPolicy />
               </Suspense>
             }

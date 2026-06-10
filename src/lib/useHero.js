@@ -13,27 +13,50 @@ export const HERO_FALLBACK = {
 let cache = null;
 let fetchPromise = null;
 
+const normalize = (d) => ({
+  ...HERO_FALLBACK,
+  ...d,
+  typed_items: Array.isArray(d?.typed_items) && d.typed_items.length > 0
+    ? d.typed_items
+    : HERO_FALLBACK.typed_items,
+});
+
+const fetchFresh = async () => {
+  const { data: d } = await supabase.from("hero_info").select("*").limit(1).single();
+  return d ? normalize(d) : HERO_FALLBACK;
+};
+
 export function useHero() {
   const [data, setData] = useState(cache ?? HERO_FALLBACK);
   const [loading, setLoading] = useState(!cache);
 
   useEffect(() => {
-    if (cache) { setData(cache); setLoading(false); return; }
-    if (!isSupabaseConfigured) { setData(HERO_FALLBACK); setLoading(false); return; }
-    if (!fetchPromise) {
-      fetchPromise = supabase.from("hero_info").select("*").limit(1).single()
-        .then(({ data: d }) => d ?? HERO_FALLBACK)
-        .catch(() => HERO_FALLBACK);
-    }
-    fetchPromise.then((result) => {
-      cache = {
-        ...HERO_FALLBACK,
-        ...result,
-        typed_items: Array.isArray(result.typed_items) ? result.typed_items : HERO_FALLBACK.typed_items,
-      };
+    if (cache) {
       setData(cache);
       setLoading(false);
-    });
+    } else if (!isSupabaseConfigured) {
+      setData(HERO_FALLBACK);
+      setLoading(false);
+    } else {
+      if (!fetchPromise) fetchPromise = fetchFresh().catch(() => HERO_FALLBACK);
+      fetchPromise.then((result) => {
+        cache = result;
+        setData(result);
+        setLoading(false);
+      });
+    }
+
+    if (!isSupabaseConfigured) return;
+
+    const channel = supabase
+      .channel("hero_info_live")
+      .on("postgres_changes", { event: "*", schema: "public", table: "hero_info" }, async () => {
+        const fresh = await fetchFresh().catch(() => null);
+        if (fresh) { cache = fresh; fetchPromise = null; setData(fresh); }
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
   }, []);
 
   return { data, loading };

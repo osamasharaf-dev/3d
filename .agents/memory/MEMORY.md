@@ -1,0 +1,4 @@
+- [Realtime CMS sync pattern](realtime-cms.md) — all data hooks need Supabase Realtime subscription to push DB changes to mounted components; cache invalidation alone is insufficient.
+- [Light mode palette](light-mode-palette.md) — sky/indigo/cyan palette; page bg #f8faff, primary #0ea5e9, secondary #4f46e5, accent #06b6d4, text dark #0f172a.
+- [Screenshot tool + Framer Motion](framer-screenshot.md) — Replit screenshot tool captures initial opacity:0 state before animations play; blank screenshots are expected, not a bug.
+- [Skills admin panel](skills-admin.md) — SkillsPanel added to AdminDashboard; skills table has id, category, name, icon, order_index; CRUD works by tracking _deleted flag, upsert/insert/delete on save.

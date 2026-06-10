@@ -8,11 +8,11 @@ import { styles } from "../styles";
 import { textVariant } from "../utils/motion";
 
 const TAG_COLORS = {
-  "blue-text-gradient":   { bg: "rgba(59,130,246,0.13)",  text: "#60a5fa",  border: "rgba(59,130,246,0.28)"  },
-  "green-text-gradient":  { bg: "rgba(34,197,94,0.11)",   text: "#4ade80",  border: "rgba(34,197,94,0.28)"   },
-  "pink-text-gradient":   { bg: "rgba(236,72,153,0.11)",  text: "#f472b6",  border: "rgba(236,72,153,0.28)"  },
-  "violet-text-gradient": { bg: "rgba(145,94,255,0.14)",  text: "#c4b5fd",  border: "rgba(145,94,255,0.28)"  },
-  "orange-text-gradient": { bg: "rgba(249,115,22,0.11)",  text: "#fb923c",  border: "rgba(249,115,22,0.28)"  },
+  "blue-text-gradient":   { bg: "rgba(14,165,233,0.10)",  text: "#0ea5e9",  border: "rgba(14,165,233,0.22)"  },
+  "green-text-gradient":  { bg: "rgba(16,185,129,0.10)",  text: "#059669",  border: "rgba(16,185,129,0.22)"  },
+  "pink-text-gradient":   { bg: "rgba(236,72,153,0.10)",  text: "#db2777",  border: "rgba(236,72,153,0.22)"  },
+  "violet-text-gradient": { bg: "rgba(79,70,229,0.10)",   text: "#4f46e5",  border: "rgba(79,70,229,0.22)"   },
+  "orange-text-gradient": { bg: "rgba(249,115,22,0.10)",  text: "#ea580c",  border: "rgba(249,115,22,0.22)"  },
 };
 
 /* ── Project Modal ────────────────────────────────────────── */
@@ -42,7 +42,7 @@ const ProjectModal = memo(({ project, onClose }) => {
       exit={{ opacity: 0 }}
       transition={{ duration: 0.22 }}
       className="fixed inset-0 z-[9980] flex items-center justify-center p-4"
-      style={{ background: "rgba(2,5,16,0.80)", backdropFilter: "blur(10px)" }}
+      style={{ background: "rgba(15,23,42,0.65)", backdropFilter: "blur(10px)" }}
       onClick={onClose}
       role="dialog"
       aria-modal="true"
@@ -53,30 +53,27 @@ const ProjectModal = memo(({ project, onClose }) => {
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.94, y: 16 }}
         transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
-        className="relative w-full max-w-2xl max-h-[88vh] overflow-y-auto rounded-3xl"
+        className="relative w-full max-w-2xl max-h-[88vh] overflow-y-auto rounded-3xl bg-white"
         style={{
-          background: "rgba(8,10,20,0.97)",
-          backdropFilter: "blur(24px)",
-          WebkitBackdropFilter: "blur(24px)",
-          border: "1.5px solid rgba(145,94,255,0.22)",
-          boxShadow: "0 32px 96px rgba(0,0,0,0.65), 0 0 0 1px rgba(145,94,255,0.08)",
+          border: "1.5px solid rgba(14,165,233,0.2)",
+          boxShadow: "0 32px 80px rgba(14,165,233,0.18), 0 0 0 1px rgba(14,165,233,0.08)",
           scrollbarWidth: "none",
         }}
         onClick={e => e.stopPropagation()}
       >
-        {/* Top shimmer */}
-        <div aria-hidden="true" className="absolute top-0 left-0 right-0 h-px"
-          style={{ background: "linear-gradient(90deg, transparent, rgba(145,94,255,0.7), rgba(142,197,255,0.5), transparent)" }}
+        {/* Top accent */}
+        <div aria-hidden="true" className="absolute top-0 left-0 right-0 h-[2px] rounded-t-3xl"
+          style={{ background: "linear-gradient(90deg, #0ea5e9, #4f46e5, #06b6d4)" }}
         />
 
-        {/* Close button */}
+        {/* Close */}
         <button
           onClick={onClose}
           aria-label="Close modal"
-          className="absolute top-4 right-4 z-10 w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200 hover:bg-white/10"
-          style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)" }}
+          className="absolute top-4 right-4 z-10 w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200 hover:bg-sky-50"
+          style={{ background: "rgba(14,165,233,0.08)", border: "1px solid rgba(14,165,233,0.18)" }}
         >
-          <FiX size={16} className="text-white/70" />
+          <FiX size={16} className="text-sky-600" />
         </button>
 
         {/* Image gallery */}
@@ -91,43 +88,25 @@ const ProjectModal = memo(({ project, onClose }) => {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
               transition={{ duration: 0.25 }}
-              style={{ filter: "brightness(0.88) saturate(1.05)" }}
             />
           </AnimatePresence>
-          {/* Gradient overlay */}
-          <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-[#08090f] via-transparent to-transparent" />
+          <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-white/80 via-transparent to-transparent" />
 
-          {/* Gallery nav — show only if multiple images */}
           {images.length > 1 && (
             <>
-              <button
-                onClick={() => setImgIdx(i => (i - 1 + images.length) % images.length)}
-                aria-label="Previous image"
-                className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-xl flex items-center justify-center backdrop-blur-sm transition-all hover:scale-105"
-                style={{ background: "rgba(7,8,13,0.75)", border: "1px solid rgba(255,255,255,0.15)" }}
-              >
-                <FiChevronLeft size={16} className="text-white" />
+              <button onClick={() => setImgIdx(i => (i - 1 + images.length) % images.length)} aria-label="Previous image"
+                className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-xl flex items-center justify-center backdrop-blur-sm transition-all hover:scale-105 bg-white/90 border border-slate-200">
+                <FiChevronLeft size={16} className="text-slate-700" />
               </button>
-              <button
-                onClick={() => setImgIdx(i => (i + 1) % images.length)}
-                aria-label="Next image"
-                className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-xl flex items-center justify-center backdrop-blur-sm transition-all hover:scale-105"
-                style={{ background: "rgba(7,8,13,0.75)", border: "1px solid rgba(255,255,255,0.15)" }}
-              >
-                <FiChevronRight size={16} className="text-white" />
+              <button onClick={() => setImgIdx(i => (i + 1) % images.length)} aria-label="Next image"
+                className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-xl flex items-center justify-center backdrop-blur-sm transition-all hover:scale-105 bg-white/90 border border-slate-200">
+                <FiChevronRight size={16} className="text-slate-700" />
               </button>
-              {/* Dots */}
               <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
                 {images.map((_, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setImgIdx(i)}
-                    aria-label={`Image ${i + 1}`}
-                    className="w-1.5 h-1.5 rounded-full transition-all duration-300"
-                    style={{
-                      background: i === imgIdx ? "#915EFF" : "rgba(255,255,255,0.35)",
-                      width: i === imgIdx ? "20px" : "6px",
-                    }}
+                  <button key={i} onClick={() => setImgIdx(i)} aria-label={`Image ${i + 1}`}
+                    className="h-1.5 rounded-full transition-all duration-300"
+                    style={{ background: i === imgIdx ? "#0ea5e9" : "rgba(14,165,233,0.3)", width: i === imgIdx ? "20px" : "6px" }}
                   />
                 ))}
               </div>
@@ -137,23 +116,16 @@ const ProjectModal = memo(({ project, onClose }) => {
 
         {/* Content */}
         <div className="p-6 sm:p-8">
-          <h2 className="text-white font-bold text-[22px] sm:text-[26px] leading-tight mb-2">
-            {project.name}
-          </h2>
-          <p className="text-[#aaa6c3] text-[14px] leading-relaxed mb-5">
-            {project.description}
-          </p>
+          <h2 className="text-slate-900 font-bold text-[22px] sm:text-[26px] leading-tight mb-2">{project.name}</h2>
+          <p className="text-slate-500 text-[14px] leading-relaxed mb-5">{project.description}</p>
 
-          {/* Features if available */}
           {project.features && (
             <div className="mb-5">
-              <p className="text-white/60 text-[11px] font-bold uppercase tracking-widest mb-3">
-                Key Features
-              </p>
+              <p className="text-sky-500 text-[11px] font-bold uppercase tracking-widest mb-3">Key Features</p>
               <ul className="space-y-1.5">
                 {project.features.map((f, i) => (
-                  <li key={i} className="flex items-start gap-2 text-[13px] text-[#aaa6c3]">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#915EFF] mt-1.5 flex-shrink-0" />
+                  <li key={i} className="flex items-start gap-2 text-[13px] text-slate-600">
+                    <span className="w-1.5 h-1.5 rounded-full bg-sky-400 mt-1.5 flex-shrink-0" />
                     {f}
                   </li>
                 ))}
@@ -161,7 +133,6 @@ const ProjectModal = memo(({ project, onClose }) => {
             </div>
           )}
 
-          {/* Tags */}
           <div className="flex flex-wrap gap-2 mb-6">
             {project.tags.map(tag => {
               const c = TAG_COLORS[tag.color] || TAG_COLORS["violet-text-gradient"];
@@ -174,27 +145,19 @@ const ProjectModal = memo(({ project, onClose }) => {
             })}
           </div>
 
-          {/* Action buttons */}
           <div className="flex flex-wrap gap-3">
             <a href={project.source_code_link} target="_blank" rel="noopener noreferrer">
-              <motion.button
-                whileHover={{ scale: 1.04 }}
-                whileTap={{ scale: 0.95 }}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-[13px] font-bold text-white"
-                style={{ background: "rgba(255,255,255,0.07)", border: "1.5px solid rgba(255,255,255,0.14)" }}
-              >
+              <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.95 }}
+                className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-[13px] font-bold text-slate-700 bg-slate-100 border border-slate-200 hover:border-sky-300 hover:bg-sky-50 transition-all">
                 <FiGithub size={15} />
                 View Code
               </motion.button>
             </a>
             {project.live_demo_link && project.live_demo_link !== "#" && (
               <a href={project.live_demo_link} target="_blank" rel="noopener noreferrer">
-                <motion.button
-                  whileHover={{ scale: 1.04 }}
-                  whileTap={{ scale: 0.95 }}
+                <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.95 }}
                   className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-[13px] font-bold text-white"
-                  style={{ background: "linear-gradient(135deg, #915EFF, #6d3fcf)", boxShadow: "0 4px 18px rgba(145,94,255,0.28)" }}
-                >
+                  style={{ background: "linear-gradient(135deg, #0ea5e9, #4f46e5)", boxShadow: "0 4px 18px rgba(14,165,233,0.28)" }}>
                   <FiExternalLink size={15} />
                   Live Preview
                 </motion.button>
@@ -217,8 +180,8 @@ const ProjectCard = memo(({ project, index, onClick }) => {
     const el = tiltRef.current;
     if (!el) return;
     const rect = el.getBoundingClientRect();
-    const x =  ((e.clientY - rect.top  - rect.height / 2) / rect.height) * 7;
-    const y = -((e.clientX - rect.left - rect.width  / 2) / rect.width)  * 7;
+    const x =  ((e.clientY - rect.top  - rect.height / 2) / rect.height) * 5;
+    const y = -((e.clientX - rect.left - rect.width  / 2) / rect.width)  * 5;
     el.style.transform = `perspective(1100px) rotateX(${x.toFixed(2)}deg) rotateY(${y.toFixed(2)}deg) translateZ(6px)`;
   }, []);
 
@@ -248,7 +211,7 @@ const ProjectCard = memo(({ project, index, onClick }) => {
       aria-label={`Open ${project.name} details`}
       onKeyDown={e => { if (e.key === "Enter" || e.key === " ") onClick(); }}
       style={{ cursor: "pointer" }}
-      className="group relative rounded-2xl"
+      className="group relative rounded-2xl overflow-hidden"
     >
       <div
         ref={tiltRef}
@@ -256,81 +219,67 @@ const ProjectCard = memo(({ project, index, onClick }) => {
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         className="rounded-2xl overflow-hidden"
-        style={{ transformStyle: "preserve-3d" }}
-      >
-      {/* Image */}
-      <div className="relative h-[200px] overflow-hidden">
-        <img
-          src={project.image}
-          alt={`${project.name} preview`}
-          loading="lazy"
-          decoding="async"
-          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
-          style={{ filter: "brightness(0.82) saturate(1.08)" }}
-        />
-        <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-[#080a10] via-[#080a10]/40 to-transparent" />
-
-        {/* Click to open hint */}
-        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
-          <motion.div
-            whileHover={{ scale: 1.06 }}
-            className="px-4 py-2 rounded-xl text-[12px] font-bold text-white backdrop-blur-sm"
-            style={{ background: "rgba(145,94,255,0.75)", border: "1px solid rgba(145,94,255,0.5)" }}
-          >
-            View Details
-          </motion.div>
-        </div>
-
-        {/* Index badge */}
-        <div className="absolute top-4 left-4 w-8 h-8 rounded-lg flex items-center justify-center text-[11px] font-bold text-white/70 backdrop-blur-sm"
-          style={{ background: "rgba(7,8,13,0.65)", border: "1px solid rgba(255,255,255,0.1)" }}>
-          {String(index + 1).padStart(2, "0")}
-        </div>
-      </div>
-
-      {/* Card body */}
-      <div className="p-5"
         style={{
-          background: hovered ? "rgba(17,21,34,0.98)" : "rgba(10,12,20,0.92)",
-          backdropFilter: "blur(18px)",
-          WebkitBackdropFilter: "blur(18px)",
-          border: "1.5px solid",
-          borderColor: hovered ? "rgba(145,94,255,0.32)" : "rgba(255,255,255,0.07)",
-          borderTop: "none",
-          transition: "background 0.3s ease, border-color 0.3s ease",
+          transformStyle: "preserve-3d",
+          boxShadow: hovered ? "0 20px 48px rgba(14,165,233,0.15)" : "0 4px 24px rgba(14,165,233,0.07)",
+          transition: "box-shadow 0.3s ease",
         }}
       >
-        <div aria-hidden="true" className="absolute top-0 left-0 right-0 h-px transition-opacity duration-400"
-          style={{
-            background: "linear-gradient(90deg, transparent, rgba(145,94,255,0.7), rgba(142,197,255,0.5), transparent)",
-            opacity: hovered ? 1 : 0,
-          }}
-        />
-        <h3 className="text-white font-bold text-[17px] leading-snug mb-2 tracking-tight">
-          {project.name}
-        </h3>
-        <p className="text-[#aaa6c3] text-[13px] leading-relaxed line-clamp-3 mb-4">
-          {project.description}
-        </p>
-        <div className="flex flex-wrap gap-1.5">
-          {project.tags.map(tag => {
-            const c = TAG_COLORS[tag.color] || TAG_COLORS["violet-text-gradient"];
-            return (
-              <span key={tag.name} className="text-[10px] font-semibold px-2 py-0.5 rounded-full"
-                style={{ background: c.bg, color: c.text, border: `1px solid ${c.border}` }}>
-                {tag.name}
-              </span>
-            );
-          })}
-        </div>
-        <div className="mt-4 h-[1.5px] w-0 group-hover:w-10 rounded-full transition-all duration-500 ease-out"
-          style={{ background: "linear-gradient(90deg, #915EFF, #8ec5ff)" }}
-        />
-      </div>
+        {/* Image */}
+        <div className="relative h-[200px] overflow-hidden">
+          <img
+            src={project.image}
+            alt={`${project.name} preview`}
+            loading="lazy"
+            decoding="async"
+            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
+          />
+          <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-white/90 via-transparent to-transparent" />
 
-        <div aria-hidden="true" className="absolute inset-0 rounded-2xl pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-          style={{ boxShadow: "0 0 44px rgba(145,94,255,0.12) inset" }}
-        />
+          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
+            <motion.div
+              whileHover={{ scale: 1.06 }}
+              className="px-4 py-2 rounded-xl text-[12px] font-bold text-white backdrop-blur-sm"
+              style={{ background: "rgba(14,165,233,0.85)", border: "1px solid rgba(14,165,233,0.5)" }}
+            >
+              View Details
+            </motion.div>
+          </div>
+
+          <div className="absolute top-4 left-4 w-8 h-8 rounded-lg flex items-center justify-center text-[11px] font-bold text-sky-600 bg-white/90 border border-sky-100">
+            {String(index + 1).padStart(2, "0")}
+          </div>
+        </div>
+
+        {/* Card body */}
+        <div className="p-5 bg-white"
+          style={{
+            borderLeft: hovered ? "1.5px solid rgba(14,165,233,0.28)" : "1.5px solid rgba(14,165,233,0.12)",
+            borderRight: hovered ? "1.5px solid rgba(14,165,233,0.28)" : "1.5px solid rgba(14,165,233,0.12)",
+            borderBottom: hovered ? "1.5px solid rgba(14,165,233,0.28)" : "1.5px solid rgba(14,165,233,0.12)",
+            transition: "border-color 0.3s ease",
+          }}
+        >
+          <div aria-hidden="true" className="absolute top-0 left-0 right-0 h-px transition-opacity duration-400"
+            style={{ background: "linear-gradient(90deg, transparent, #0ea5e9, #4f46e5, transparent)", opacity: hovered ? 1 : 0 }}
+          />
+          <h3 className="text-slate-900 font-bold text-[17px] leading-snug mb-2 tracking-tight">{project.name}</h3>
+          <p className="text-slate-500 text-[13px] leading-relaxed line-clamp-3 mb-4">{project.description}</p>
+          <div className="flex flex-wrap gap-1.5">
+            {project.tags.map(tag => {
+              const c = TAG_COLORS[tag.color] || TAG_COLORS["violet-text-gradient"];
+              return (
+                <span key={tag.name} className="text-[10px] font-semibold px-2 py-0.5 rounded-full"
+                  style={{ background: c.bg, color: c.text, border: `1px solid ${c.border}` }}>
+                  {tag.name}
+                </span>
+              );
+            })}
+          </div>
+          <div className="mt-4 h-[1.5px] w-0 group-hover:w-10 rounded-full transition-all duration-500 ease-out"
+            style={{ background: "linear-gradient(90deg, #0ea5e9, #4f46e5)" }}
+          />
+        </div>
       </div>
     </motion.article>
   );
@@ -354,16 +303,16 @@ const Projects = () => {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.6, delay: 0.1 }}
-        className="mt-4 text-secondary text-[16px] max-w-2xl leading-[28px]"
+        className="mt-4 text-slate-500 text-[16px] max-w-2xl leading-[28px]"
       >
         A selection of real-world applications built with modern technologies —
         each project demonstrates clean architecture, performance, and thoughtful UX.
-        <span className="text-[#915EFF]/60 text-[13px] ml-2">Click any card to explore.</span>
+        <span className="text-sky-400 text-[13px] ml-2">Click any card to explore.</span>
       </motion.p>
 
       {loading ? (
         <div className="mt-14 flex justify-center">
-          <div className="w-8 h-8 rounded-full border-2 border-[#915EFF] border-t-transparent animate-spin" />
+          <div className="w-8 h-8 rounded-full border-2 border-sky-400 border-t-transparent animate-spin" />
         </div>
       ) : (
         <div className="mt-14 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -378,11 +327,8 @@ const Projects = () => {
         </div>
       )}
 
-      {/* Modal */}
       <AnimatePresence>
-        {selected && (
-          <ProjectModal project={selected} onClose={() => setSelected(null)} />
-        )}
+        {selected && <ProjectModal project={selected} onClose={() => setSelected(null)} />}
       </AnimatePresence>
     </>
   );

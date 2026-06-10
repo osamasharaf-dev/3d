@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { supabase, isSupabaseConfigured } from "./supabase";
 
 export function useSkills() {
@@ -6,32 +6,34 @@ export function useSkills() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
+  const fetchData = useCallback(async () => {
     if (!isSupabaseConfigured) {
       setSkills([]);
       setLoading(false);
       return;
     }
-
-    supabase
-      .from("skills")
-      .select("*")
-      .order("category", { ascending: true })
-      .then(({ data, error: err }) => {
-        if (err) setError(err.message);
-        setSkills(data || []);
-        setLoading(false);
-      });
-  }, []);
-
-  const refetch = async () => {
-    if (!isSupabaseConfigured) return;
-    const { data } = await supabase
+    setLoading(true);
+    const { data, error: err } = await supabase
       .from("skills")
       .select("*")
       .order("category", { ascending: true });
+    if (err) setError(err.message);
     setSkills(data || []);
-  };
+    setLoading(false);
+  }, []);
 
-  return { skills, loading, error, refetch };
+  useEffect(() => {
+    fetchData();
+
+    if (!isSupabaseConfigured) return;
+
+    const channel = supabase
+      .channel("skills_live")
+      .on("postgres_changes", { event: "*", schema: "public", table: "skills" }, fetchData)
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [fetchData]);
+
+  return { skills, loading, error, refetch: fetchData };
 }

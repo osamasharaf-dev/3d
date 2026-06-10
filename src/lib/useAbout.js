@@ -20,29 +20,54 @@ export const ABOUT_FALLBACK = {
 let cache = null;
 let fetchPromise = null;
 
+const normalize = (d) => ({
+  ...ABOUT_FALLBACK,
+  ...d,
+  bio_paragraphs: Array.isArray(d?.bio_paragraphs) && d.bio_paragraphs.length > 0
+    ? d.bio_paragraphs
+    : ABOUT_FALLBACK.bio_paragraphs,
+  services: Array.isArray(d?.services) && d.services.length > 0
+    ? d.services
+    : ABOUT_FALLBACK.services,
+  resume_url: d?.resume_url || "",
+});
+
+const fetchFresh = async () => {
+  const { data: d } = await supabase.from("about_info").select("*").limit(1).single();
+  return d ? normalize(d) : ABOUT_FALLBACK;
+};
+
 export function useAbout() {
   const [data, setData] = useState(cache ?? ABOUT_FALLBACK);
   const [loading, setLoading] = useState(!cache);
 
   useEffect(() => {
-    if (cache) { setData(cache); setLoading(false); return; }
-    if (!isSupabaseConfigured) { setData(ABOUT_FALLBACK); setLoading(false); return; }
-    if (!fetchPromise) {
-      fetchPromise = supabase.from("about_info").select("*").limit(1).single()
-        .then(({ data: d }) => d ?? ABOUT_FALLBACK)
-        .catch(() => ABOUT_FALLBACK);
-    }
-    fetchPromise.then((result) => {
-      cache = {
-        ...ABOUT_FALLBACK,
-        ...result,
-        bio_paragraphs: Array.isArray(result.bio_paragraphs) ? result.bio_paragraphs : ABOUT_FALLBACK.bio_paragraphs,
-        services: Array.isArray(result.services) ? result.services : ABOUT_FALLBACK.services,
-        resume_url: result.resume_url || "",
-      };
+    if (cache) {
       setData(cache);
       setLoading(false);
-    });
+    } else if (!isSupabaseConfigured) {
+      setData(ABOUT_FALLBACK);
+      setLoading(false);
+    } else {
+      if (!fetchPromise) fetchPromise = fetchFresh().catch(() => ABOUT_FALLBACK);
+      fetchPromise.then((result) => {
+        cache = result;
+        setData(result);
+        setLoading(false);
+      });
+    }
+
+    if (!isSupabaseConfigured) return;
+
+    const channel = supabase
+      .channel("about_info_live")
+      .on("postgres_changes", { event: "*", schema: "public", table: "about_info" }, async () => {
+        const fresh = await fetchFresh().catch(() => null);
+        if (fresh) { cache = fresh; fetchPromise = null; setData(fresh); }
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
   }, []);
 
   return { data, loading };

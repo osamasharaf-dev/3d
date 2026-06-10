@@ -11,24 +11,43 @@ const FALLBACK = [
 let cache = null;
 let fetchPromise = null;
 
+const fetchFresh = async () => {
+  const { data: d } = await supabase
+    .from("certifications").select("*").order("order_index", { ascending: true });
+  return d && d.length > 0 ? d : FALLBACK;
+};
+
 export function useCertifications() {
   const [data, setData] = useState(cache ?? FALLBACK);
   const [loading, setLoading] = useState(!cache);
 
   useEffect(() => {
-    if (cache) { setData(cache); setLoading(false); return; }
-    if (!isSupabaseConfigured) { setData(FALLBACK); setLoading(false); return; }
-    if (!fetchPromise) {
-      fetchPromise = supabase
-        .from("certifications").select("*").order("order_index", { ascending: true })
-        .then(({ data: d }) => (d && d.length > 0 ? d : FALLBACK))
-        .catch(() => FALLBACK);
-    }
-    fetchPromise.then((result) => {
-      cache = result;
-      setData(result);
+    if (cache) {
+      setData(cache);
       setLoading(false);
-    });
+    } else if (!isSupabaseConfigured) {
+      setData(FALLBACK);
+      setLoading(false);
+    } else {
+      if (!fetchPromise) fetchPromise = fetchFresh().catch(() => FALLBACK);
+      fetchPromise.then((result) => {
+        cache = result;
+        setData(result);
+        setLoading(false);
+      });
+    }
+
+    if (!isSupabaseConfigured) return;
+
+    const channel = supabase
+      .channel("certifications_live")
+      .on("postgres_changes", { event: "*", schema: "public", table: "certifications" }, async () => {
+        const fresh = await fetchFresh().catch(() => null);
+        if (fresh) { cache = fresh; fetchPromise = null; setData(fresh); }
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
   }, []);
 
   return { data, loading };

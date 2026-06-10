@@ -17,11 +17,13 @@ const ServiceCard = memo(({ index, title, icon_name, icon }) => {
     <Tilt className="xs:w-[255px] w-full">
       <motion.div
         variants={fadeIn("right", "spring", index * 0.5, 0.75)}
-        className="w-full green-pink-gradient p-[1px] rounded-[20px] shadow-card"
+        className="w-full p-[1px] rounded-[20px]"
+        style={{ background: "linear-gradient(135deg, #0ea5e9, #4f46e5)", boxShadow: "0 8px 32px rgba(14,165,233,0.12)" }}
       >
         <div
           options={{ max: 45, scale: 1, speed: 450 }}
-          className="bg-[#111522] rounded-[20px] py-5 px-12 min-h-[280px] flex justify-evenly items-center flex-col"
+          className="rounded-[20px] py-5 px-12 min-h-[280px] flex justify-evenly items-center flex-col"
+          style={{ background: "#ffffff" }}
         >
           <img
             src={resolvedIcon}
@@ -30,9 +32,7 @@ const ServiceCard = memo(({ index, title, icon_name, icon }) => {
             loading="lazy"
             decoding="async"
           />
-          <h3 className="text-white text-[20px] font-bold text-center">
-            {title}
-          </h3>
+          <h3 className="text-slate-800 text-[20px] font-bold text-center">{title}</h3>
         </div>
       </motion.div>
     </Tilt>
@@ -62,25 +62,13 @@ const About = () => {
       >
         {bio.length > 0 ? (
           bio.map((para, i) => (
-            <p key={i} className={i > 0 ? "mt-4" : ""}>{para}</p>
+            <p key={i} className={i > 0 ? "mt-4 text-slate-600" : "text-slate-600"}>{para}</p>
           ))
         ) : (
           <>
-            <p>
-              I am a Software Engineer and Full-Stack Web Developer passionate about
-              building modern digital solutions, scalable web applications, and
-              high-performance digital experiences.
-            </p>
-            <p className="mt-4">
-              With expertise spanning front-end development, back-end systems,
-              databases, and cloud-based deployment, I transform ideas into reliable
-              and impactful products that help businesses grow and succeed in the
-              digital world.
-            </p>
-            <p className="mt-4">
-              My goal is not only to write code, but to create meaningful solutions
-              that combine functionality, performance, and exceptional user experience.
-            </p>
+            <p className="text-slate-600">I am a Software Engineer and Full-Stack Web Developer passionate about building modern digital solutions, scalable web applications, and high-performance digital experiences.</p>
+            <p className="mt-4 text-slate-600">With expertise spanning front-end development, back-end systems, databases, and cloud-based deployment, I transform ideas into reliable and impactful products that help businesses grow and succeed in the digital world.</p>
+            <p className="mt-4 text-slate-600">My goal is not only to write code, but to create meaningful solutions that combine functionality, performance, and exceptional user experience.</p>
           </>
         )}
       </motion.div>
@@ -91,12 +79,8 @@ const About = () => {
           href={resumeUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 mt-10 px-6 py-3 text-white rounded-md shadow-md transition-all duration-200 hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-opacity-50"
-          style={{
-            background: "linear-gradient(135deg, #1591DC, #2C5EAD)",
-            boxShadow: "0 4px 18px rgba(21,145,220,0.3)",
-            textDecoration: "none",
-          }}
+          className="inline-flex items-center gap-2 mt-10 px-6 py-3 text-white rounded-xl shadow-md transition-all duration-200 hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:ring-opacity-50"
+          style={{ background: "linear-gradient(135deg, #0ea5e9, #4f46e5)", boxShadow: "0 4px 18px rgba(14,165,233,0.3)", textDecoration: "none" }}
         >
           <FiExternalLink className="w-4 h-4" />
           <span className="font-semibold">See my Resume</span>
