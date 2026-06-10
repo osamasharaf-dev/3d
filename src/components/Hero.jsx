@@ -72,16 +72,14 @@ const FloatingPortraitCard = memo(() => {
               className="absolute -inset-1.5 rounded-full"
               style={{ background: "linear-gradient(135deg, #0ea5e9, #4f46e5, #0ea5e9)" }}
             />
-            <div
-              className="relative w-24 h-24 rounded-full flex items-center justify-center"
-              style={{ background: "linear-gradient(135deg, #e0f2fe 0%, #e0e7ff 50%, #dbeafe 100%)" }}
-            >
-              <span
-                className="text-3xl font-black tracking-tight"
-                style={{ background: "linear-gradient(135deg, #0ea5e9, #4f46e5)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}
-              >
-                OS
-              </span>
+            <div className="relative w-24 h-24 rounded-full overflow-hidden">
+              <img
+                src="/my-photo.jpg"
+                alt="Osama Sharaf"
+                className="w-full h-full object-cover object-top"
+                loading="eager"
+                decoding="async"
+              />
             </div>
             <div
               className="absolute bottom-1 right-1 w-4 h-4 rounded-full border-2"
