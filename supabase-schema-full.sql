@@ -20,6 +20,7 @@ create table if not exists public.about_info (
   bio_paragraphs jsonb not null default '[]',
   services jsonb not null default '[]',
   hire_email text default '',
+  resume_url text default '',
   updated_at timestamptz default now()
 );
 
@@ -91,11 +92,12 @@ values (
   'View My Work', 'Get In Touch'
 ) on conflict do nothing;
 
-insert into public.about_info (bio_paragraphs, services, hire_email)
+insert into public.about_info (bio_paragraphs, services, hire_email, resume_url)
 values (
   '["I am a Software Engineer and Full-Stack Web Developer passionate about building modern digital solutions, scalable web applications, and high-performance digital experiences.","With expertise spanning front-end development, back-end systems, databases, and cloud-based deployment, I transform ideas into reliable and impactful products that help businesses grow and succeed in the digital world.","My goal is not only to write code, but to create meaningful solutions that combine functionality, performance, and exceptional user experience."]',
   '[{"title":"Frontend Development","icon_name":"web"},{"title":"Backend Development","icon_name":"mobile"},{"title":"Database Management","icon_name":"backend"},{"title":"Cloud & DevOps","icon_name":"creator"}]',
-  'osamaabdulhalimsharaf@gmail.com'
+  'osamaabdulhalimsharaf@gmail.com',
+  ''
 ) on conflict do nothing;
 
 insert into public.contact_info (email, phone, linkedin, github, facebook, instagram, whatsapp)
@@ -124,3 +126,6 @@ insert into public.professional_skills (category, icon, color, skills, order_ind
   ('Problem Solving','🧠','#a78bfa','["Analytical Thinking","Technical Troubleshooting","Strategic Planning","Decision Making"]',1),
   ('Work Excellence','⚡','#34d399','["Time Management","Adaptability","Working Under Pressure","Attention to Detail","Continuous Learning","Fast Problem Resolution"]',2)
 on conflict do nothing;
+
+-- ── Migration: add resume_url if table already exists ───────
+alter table public.about_info add column if not exists resume_url text default '';

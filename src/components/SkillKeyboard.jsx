@@ -1,333 +1,101 @@
-// SkillKeyboard.jsx
-// This component renders an interactive 3D skill keyboard using Spline and GSAP animations.
-// Each key represents a skill, and the keyboard animates in response to user actions.
+import React, { useMemo } from "react";
+import { motion } from "framer-motion";
+import { useSkills } from "../lib/useSkills";
+import { SectionWrapper } from "../hoc";
+import { styles } from "../styles";
+import { fadeIn, textVariant } from "../utils/motion";
 
-import gsap from "gsap";
-import React, { Suspense, useCallback, useEffect, useRef, useState } from "react";
-import { SKILLS, SkillNames } from "../constants/skills";
-import { sleep } from "../utils/sleep";
-import useMediaQuery from "../utils/useMediaQuery";
-import soundEffects from "../utils/soundEffects";
+const FALLBACK_GROUPS = [
+  { category: "Frontend", icon: "🎨", skillList: ["React.js", "Next.js", "TypeScript", "Tailwind CSS", "HTML5 & CSS3"] },
+  { category: "Backend", icon: "⚙️", skillList: ["Node.js", "Express.js", "Python", "Django", "REST APIs"] },
+  { category: "Database", icon: "🗄️", skillList: ["PostgreSQL", "MySQL", "MongoDB", "Supabase", "Redis"] },
+  { category: "DevOps & Cloud", icon: "🚀", skillList: ["Docker", "Vercel", "Netlify", "GitHub Actions", "CI/CD"] },
+  { category: "Tools", icon: "🛠️", skillList: ["Git & GitHub", "VS Code", "Figma", "Postman", "Linux"] },
+  { category: "AI & Modern", icon: "🤖", skillList: ["OpenAI API", "LangChain", "Prompt Engineering", "Machine Learning"] },
+];
 
-// Lazy-load the Spline React component for 3D rendering
-const Spline = React.lazy(() => import("@splinetool/react-spline"));
+const CARD_COLORS = [
+  { accent: "#915EFF", glow: "rgba(145,94,255,0.12)" },
+  { accent: "#8ec5ff", glow: "rgba(142,197,255,0.12)" },
+  { accent: "#34d399", glow: "rgba(52,211,153,0.12)" },
+  { accent: "#f472b6", glow: "rgba(244,114,182,0.12)" },
+  { accent: "#fb923c", glow: "rgba(251,146,60,0.12)" },
+  { accent: "#a78bfa", glow: "rgba(167,139,250,0.12)" },
+];
 
-// Keyboard transformation states for different sections and device types
-const STATES = {
-  hero: {
-    desktop: {
-      scale: { x: 0.35, y: 0.33, z: 0.35 },
-      position: { x: 20, y: 0, z: 40 }, // Centered horizontally and vertically
-      rotation: { x: 0, y: 0, z: 0 },
-    },
-    mobile: {
-      scale: { x: 0.17, y: 0.17, z: 0.17 },
-      position: { x: 10, y: 0, z: 0 }, // Centered for mobile
-      rotation: { x: 0, y: 0, z: 0 },
-    },
-  },
-  // State for the skills section
-  skills: {
-    desktop: {
-      scale: { x: 0.33, y: 0.33, z: 0.33 },
-      position: { x: 0, y: 0, z: 0 }, // Centered
-      rotation: { x: 0, y: Math.PI / 12, z: 0 },
-    },
-    mobile: {
-      scale: { x: 0.24, y: 0.24, z: 0.24 },
-      position: { x: 0, y: 0, z: 0 }, // Centered
-      rotation: { x: 0, y: Math.PI / 6, z: 0 },
-    },
-  },
-  // State for the projects section
-  projects: {
-    desktop: {
-      scale: { x: 0.25, y: 0.25, z: 0.25 },
-      position: { x: 0, y: 0, z: 0 }, // Centered
-      rotation: { x: Math.PI, y: Math.PI / 3, z: Math.PI },
-    },
-    mobile: {
-      scale: { x: 0.18, y: 0.18, z: 0.18 },
-      position: { x: 0, y: 0, z: 0 }, // Centered
-      rotation: { x: Math.PI, y: Math.PI / 3, z: Math.PI },
-    },
-  },
-  // State for the contact section
-  contact: {
-    desktop: {
-      scale: { x: 0.33, y: 0.33, z: 0.33 },
-      position: { x: 0, y: 0, z: 0 }, // Centered
-      rotation: { x: 0, y: 0, z: 0 },
-    },
-    mobile: {
-      scale: { x: 0.24, y: 0.24, z: 0.24 },
-      position: { x: 0, y: 0, z: 0 }, // Centered
-      rotation: { x: Math.PI, y: Math.PI / 3, z: Math.PI },
-    },
-  },
+const SkillCard = ({ index, category, icon, skillList }) => {
+  const color = CARD_COLORS[index % CARD_COLORS.length];
+  return (
+    <motion.div
+      variants={fadeIn("up", "spring", index * 0.08, 0.6)}
+      className="relative rounded-2xl p-6 flex flex-col gap-4 overflow-hidden"
+      style={{
+        background: "rgba(10,12,22,0.82)",
+        border: `1.5px solid ${color.accent}22`,
+        backdropFilter: "blur(12px)",
+        WebkitBackdropFilter: "blur(12px)",
+        boxShadow: `0 8px 32px rgba(0,0,0,0.3), 0 0 0 1px ${color.accent}11`,
+      }}
+    >
+      <div
+        aria-hidden="true"
+        className="absolute top-0 left-0 right-0 h-[2px]"
+        style={{ background: `linear-gradient(90deg, transparent, ${color.accent}, transparent)` }}
+      />
+      <div className="flex items-center gap-3">
+        <div
+          className="w-11 h-11 rounded-xl flex items-center justify-center text-2xl flex-shrink-0"
+          style={{ background: color.glow, border: `1px solid ${color.accent}33` }}
+        >
+          {icon}
+        </div>
+        <h3 className="font-bold text-[17px] text-white">{category}</h3>
+      </div>
+      <ul className="space-y-2">
+        {skillList.map((skill, i) => (
+          <li key={i} className="flex items-center gap-2.5 text-[#aaa6c3] text-[13px]">
+            <div
+              className="w-1.5 h-1.5 rounded-full flex-shrink-0"
+              style={{ background: color.accent }}
+            />
+            {skill}
+          </li>
+        ))}
+      </ul>
+    </motion.div>
+  );
 };
 
 const SkillKeyboard = () => {
-  // Detect if the user is on a mobile device
-  const isMobile = useMediaQuery("(max-width: 768px)");
-  // Ref for the Spline component instance
-  const splineContainer = useRef(null);
-  // Ref for the section element to observe
-  const sectionRef = useRef(null);
-  // Spline application instance (lets you control the 3D scene)
-  const [splineApp, setSplineApp] = useState();
-  // Currently highlighted skill (when a key is hovered or pressed)
-  const [selectedSkill, setSelectedSkill] = useState(null);
-  // Which section of the site is active (affects keyboard animation)
-  const [activeSection, setActiveSection] = useState("skills");
-  // Whether the keyboard animation has finished revealing
-  const [keyboardRevealed, setKeyboardRevealed] = useState(false);
-  // Whether the section is in view (for triggering animation)
-  const [isInView, setIsInView] = useState(false);
+  const { skills: rawSkills } = useSkills();
 
-  // Helper to get the correct transformation state for the current section/device
-  const keyboardStates = (section) => {
-    return STATES[section][isMobile ? "mobile" : "desktop"];
-  };
-
-  // Set up intersection observer to detect when skills section comes into view
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsInView(true);
-        }
-      },
-      {
-        threshold: 0.3, // Trigger when 30% of the section is visible
-        rootMargin: "0px 0px -100px 0px", // Trigger slightly before the section is fully in view
-      }
-    );
-
-    if (sectionRef.current) {
-      observer.observe(sectionRef.current);
-    }
-
-    return () => {
-      if (sectionRef.current) {
-        observer.unobserve(sectionRef.current);
-      }
-    };
-  }, []);
-
-  // Handle mouse hover events on the 3D keys
-  const handleMouseHover = useCallback(
-    (e) => {
-      if (!splineApp || selectedSkill?.name === e.target.name) return;
-      // If hovering over the keyboard body/platform, clear selection
-      if (e.target.name === "body" || e.target.name === "platform") {
-        setSelectedSkill(null);
-        if (splineApp.getVariable("heading") && splineApp.getVariable("desc")) {
-          splineApp.setVariable("heading", "");
-          splineApp.setVariable("desc", "");
-        }
-      } else {
-        // Otherwise, set the selected skill based on the key name
-        if (!selectedSkill || selectedSkill.name !== e.target.name) {
-          const skill = SKILLS[e.target.name];
-          setSelectedSkill(skill);
-        }
-      }
-    },
-    [selectedSkill, splineApp]
-  );
-
-  // Update the Spline scene when the selected skill changes
-  useEffect(() => {
-    if (!selectedSkill || !splineApp) return;
-    splineApp.setVariable("heading", selectedSkill.label);
-    splineApp.setVariable("desc", selectedSkill.shortDescription);
-  }, [selectedSkill, splineApp]);
-
-  // Show/hide skill labels depending on section and device
-  useEffect(() => {
-    if (!splineApp) return;
-    // Only light mode for now
-    const textDesktopLight = splineApp.findObjectByName("text-desktop");
-    const textMobileLight = splineApp.findObjectByName("text-mobile");
-    if (!textDesktopLight || !textMobileLight) return;
-    if (activeSection !== "skills") {
-      textDesktopLight.visible = false;
-      textMobileLight.visible = false;
-      return;
-    }
-    if (!isMobile) {
-      textDesktopLight.visible = true;
-      textMobileLight.visible = false;
-    } else {
-      textDesktopLight.visible = false;
-      textMobileLight.visible = true;
-    }
-  }, [splineApp, isMobile, activeSection]);
-
-  useEffect(() => {
-    if (!splineApp) return;
-
-    const handleKeyUp = () => {
-      if (!splineApp) return;
-      splineApp.setVariable("heading", "");
-      splineApp.setVariable("desc", "");
-    };
-
-    const handleKeyDown = (e) => {
-      if (!splineApp) return;
-      const skill = SKILLS[e.target.name];
-      if (skill) setSelectedSkill(skill);
-      splineApp.setVariable("heading", skill?.label || "");
-      splineApp.setVariable("desc", skill?.shortDescription || "");
-      soundEffects.playClick();
-    };
-
-    splineApp.addEventListener("keyUp", handleKeyUp);
-    splineApp.addEventListener("keyDown", handleKeyDown);
-    splineApp.addEventListener("mouseHover", handleMouseHover);
-
-    handleGsapAnimations();
-
-    return () => {
-      splineApp.removeEventListener("keyUp", handleKeyUp);
-      splineApp.removeEventListener("keyDown", handleKeyDown);
-      splineApp.removeEventListener("mouseHover", handleMouseHover);
-    };
-  }, [splineApp, handleMouseHover]);
-
-  // Trigger the keyboard reveal animation when the scene is ready AND section is in view
-  useEffect(() => {
-    if (!splineApp || keyboardRevealed || !isInView) return;
-    revealKeyCaps();
-  }, [splineApp, keyboardRevealed, activeSection, isInView]);
-
-  // Animate the keyboard and keycaps into view
-  const revealKeyCaps = async () => {
-    if (!splineApp) return;
-    const kbd = splineApp.findObjectByName("keyboard");
-    if (!kbd) return;
-    kbd.visible = false;
-    await sleep(400); // Wait before revealing
-    kbd.visible = true;
-    setKeyboardRevealed(true);
-    // Animate keyboard scale
-    gsap.fromTo(
-      kbd?.scale,
-      { x: 0.01, y: 0.01, z: 0.01 },
-      {
-        x: keyboardStates(activeSection).scale.x,
-        y: keyboardStates(activeSection).scale.y,
-        z: keyboardStates(activeSection).scale.z,
-        duration: 1.5,
-        ease: "elastic.out(1, 0.6)",
-      }
-    );
-    // Animate keycaps
-    const allObjects = splineApp.getAllObjects();
-    const keycaps = allObjects.filter((obj) => obj.name === "keycap");
-    await sleep(900);
-    if (isMobile) {
-      // Show all mobile keycaps at once
-      const mobileKeyCaps = allObjects.filter(
-        (obj) => obj.name === "keycap-mobile"
-      );
-      mobileKeyCaps.forEach((keycap) => {
-        keycap.visible = true;
-      });
-    } else {
-      // Animate desktop keycaps one by one
-      const desktopKeyCaps = allObjects.filter(
-        (obj) => obj.name === "keycap-desktop"
-      );
-      desktopKeyCaps.forEach(async (keycap, idx) => {
-        await sleep(idx * 70);
-        keycap.visible = true;
-      });
-    }
-    // Animate all keycaps with a bounce effect
-    keycaps.forEach(async (keycap, idx) => {
-      keycap.visible = false;
-      await sleep(idx * 70);
-      keycap.visible = true;
-      gsap.fromTo(
-        keycap.position,
-        { y: 100 },
-        { y: 25, duration: 0.5, delay: 0.1, ease: "bounce.out" }
-      );
+  const groups = useMemo(() => {
+    if (!rawSkills || rawSkills.length === 0) return FALLBACK_GROUPS;
+    const map = {};
+    rawSkills.forEach((s) => {
+      const cat = s.category || "General";
+      if (!map[cat]) map[cat] = { category: cat, icon: s.icon || "💡", skillList: [] };
+      const name = s.name || s.title || s.label || "";
+      if (name) map[cat].skillList.push(name);
     });
-  };
+    const result = Object.values(map);
+    return result.length > 0 ? result : FALLBACK_GROUPS;
+  }, [rawSkills]);
 
-
-  // Set up initial GSAP animations for the keyboard
-  const handleGsapAnimations = () => {
-    if (!splineApp) return;
-    const kbd = splineApp.findObjectByName("keyboard");
-    if (!kbd || !splineContainer.current) return;
-    // Set initial scale and position
-    gsap.set(kbd.scale, { ...keyboardStates("hero").scale });
-    gsap.set(kbd.position, { ...keyboardStates("hero").position });
-    gsap.timeline({
-      onStart: () => setActiveSection("skills"),
-    });
-    // You can add scroll-based triggers here if you want to animate between sections
-  };
-
-  // Render the 3D keyboard section
   return (
-    <section
-      ref={sectionRef}
-      id="skills"
-      style={{
-        width: "100%",
-        height: "100vh",
-        margin: "0 auto",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
-      {/* Skills Title */}
-
-      <div
-        style={{
-          width: "100%",
-          height: "100%",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <h2
-          style={{
-            fontSize: "4rem",
-            fontWeight: 700,
-            marginTop: 34,
-            textAlign: "center",
-            letterSpacing: 2,
-            color: "#fff",
-            textShadow: "0 2px 16px rgba(0,0,0,0.2)",
-          }}
-        >
-          Skills
-        </h2>
-        <p style={{ textAlign: "center", color: "#aaa" }}>
-          (hint: press a key)
-        </p>
-        {/* Suspense fallback while loading the Spline 3D scene */}
-        <Suspense fallback={<div>Loading 3D Keyboard...</div>}>
-          <Spline
-            ref={splineContainer}
-            onLoad={(app) => setSplineApp(app)}
-            scene="/assets/skills-keyboard.spline"
-          />
-        </Suspense>
+    <>
+      <motion.div variants={textVariant()}>
+        <p className={`${styles.sectionSubText} text-center`}>What I work with</p>
+        <h2 className={`${styles.sectionHeadText} text-center`}>Technical Skills.</h2>
+      </motion.div>
+      <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        {groups.map((group, i) => (
+          <SkillCard key={group.category} index={i} {...group} />
+        ))}
       </div>
-      <span id="projects"></span>
-    </section>
+      <span id="projects" />
+    </>
   );
 };
 
-export default SkillKeyboard;
+export default SectionWrapper(SkillKeyboard, "skills-section");

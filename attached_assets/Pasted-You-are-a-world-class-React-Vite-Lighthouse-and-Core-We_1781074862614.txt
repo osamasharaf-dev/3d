@@ -1,0 +1,243 @@
+You are a world-class React, Vite, Lighthouse and Core Web Vitals optimization engineer.
+
+IMPORTANT:
+My absolute priority is achieving the highest possible PageSpeed Insights score on Mobile and Desktop, even if some visual effects, videos, heavy animations, audio files, decorative assets, or non-essential elements must be removed or replaced.
+
+Preserve:
+- Website content
+- Portfolio projects
+- Text content
+- Branding
+- Contact functionality
+- CMS functionality
+- Admin dashboard functionality
+
+You are allowed to simplify visual effects when necessary for performance.
+
+==================================================
+CRITICAL PERFORMANCE TARGETS
+==================================================
+
+Current metrics:
+
+FCP = 10.4s
+LCP = 20.7s
+TBT = 24,110ms
+Speed Index = 17.8s
+CLS = 0.044
+
+Target metrics:
+
+FCP < 1.8s
+LCP < 2.5s
+TBT < 200ms
+Speed Index < 3s
+CLS < 0.1
+
+Goal:
+Lighthouse score 95-100 on Mobile and Desktop.
+
+==================================================
+STEP 1 - REMOVE ALL UNUSED AUDIO
+==================================================
+
+Search entire project.
+
+Delete:
+- All audio files
+- All sound effects
+- All audio libraries
+- All audio imports
+- All unused audio code
+
+If sounds are not actually used by visitors, completely remove them.
+
+==================================================
+STEP 2 - REMOVE HEAVY VIDEO BACKGROUNDS
+==================================================
+
+Find all video backgrounds.
+
+Remove them completely.
+
+Replace them with:
+
+- Lightweight animated gradients
+- CSS-only effects
+- Lightweight glow effects
+- Static optimized background
+
+No video files should remain.
+
+==================================================
+STEP 3 - REMOVE PERFORMANCE BOTTLENECKS
+==================================================
+
+Analyze and fix:
+
+- Largest JavaScript bundles
+- Unused dependencies
+- Unused packages
+- Unused CSS
+- Render blocking resources
+- Large assets
+- Heavy animations
+
+Delete anything unnecessary.
+
+==================================================
+STEP 4 - OPTIMIZE REACT
+==================================================
+
+Implement:
+
+- React.lazy
+- Dynamic imports
+- Code splitting
+- Memoization
+- Prevent unnecessary renders
+
+Load sections only when needed.
+
+==================================================
+STEP 5 - OPTIMIZE IMAGES
+==================================================
+
+Convert all images to WebP.
+
+Compress all images.
+
+Lazy load all non-critical images.
+
+Preload only critical hero assets.
+
+Remove oversized images.
+
+==================================================
+STEP 6 - REBUILD SKILLS SECTION
+==================================================
+
+The current skills section contains a decorative image that is too heavy.
+
+Remove the image completely.
+
+Replace the entire skills section with a lightweight CMS-driven card system.
+
+Create elegant animated cards.
+
+Example cards:
+
+Frontend
+Backend
+Database
+DevOps
+Tools
+Frameworks
+AI Tools
+Technologies
+
+Requirements:
+
+- Fast loading
+- Mobile friendly
+- Lightweight animations
+- No large images
+- No canvas
+- No video
+- No heavy libraries
+
+Cards should have:
+
+- Icon
+- Title
+- Description
+- Skill list
+
+All cards must be manageable from the Admin Dashboard.
+
+I want to be able to:
+
+- Add cards
+- Edit cards
+- Delete cards
+- Reorder cards
+
+directly from CMS/Admin Panel.
+
+Create database structure if needed.
+
+==================================================
+STEP 7 - ANIMATION OPTIMIZATION
+==================================================
+
+Keep the website attractive.
+
+But replace expensive animations with:
+
+- CSS transforms
+- Opacity transitions
+- GPU accelerated animations
+
+Remove:
+
+- Expensive scroll effects
+- Heavy parallax
+- Heavy particles
+- Heavy 3D rendering
+
+Use lightweight alternatives.
+
+==================================================
+STEP 8 - HERO SECTION OPTIMIZATION
+==================================================
+
+The Hero section must load instantly.
+
+Make sure:
+
+- Main heading appears immediately
+- Main image loads first
+- LCP element is optimized
+- No blocking resources
+
+==================================================
+STEP 9 - FONTS
+==================================================
+
+Optimize all fonts:
+
+- font-display: swap
+- preload only critical fonts
+- reduce font requests
+- remove unused font weights
+
+==================================================
+STEP 10 - FINAL PERFORMANCE PASS
+==================================================
+
+Perform a complete Lighthouse optimization pass.
+
+Continue improving until:
+
+FCP < 1.8s
+LCP < 2.5s
+TBT < 200ms
+Speed Index < 3s
+
+==================================================
+FINAL REPORT
+==================================================
+
+After implementation:
+
+1. List every file modified.
+2. List every file removed.
+3. Explain every optimization.
+4. Show expected Lighthouse improvements.
+5. Verify CMS/Admin Dashboard still works.
+6. Verify website functionality remains intact.
+7. Verify Netlify deployment compatibility.
+
+Do not stop after giving recommendations.
+
+Directly modify the project and implement all changes.

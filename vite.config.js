@@ -14,15 +14,13 @@ export default defineConfig({
     target: 'esnext',
     minify: 'esbuild',
     sourcemap: false,
-    chunkSizeWarningLimit: 3000,
+    chunkSizeWarningLimit: 2000,
     rollupOptions: {
       output: {
         manualChunks(id) {
-          if (id.includes('three')) return 'three'
-          if (id.includes('@react-three')) return 'fiber'
+          if (id.includes('@react-three/fiber') || id.includes('@react-three/drei')) return 'three-react'
+          if (id.includes('/node_modules/three/')) return 'three-core'
           if (id.includes('framer-motion')) return 'framer'
-          if (id.includes('@splinetool')) return 'spline'
-          if (id.includes('gsap')) return 'gsap'
           if (
             id.includes('react-dom') ||
             id.includes('react-router-dom') ||
@@ -30,6 +28,7 @@ export default defineConfig({
           ) {
             return 'react-vendor'
           }
+          if (id.includes('@supabase')) return 'supabase'
         },
         assetFileNames: 'assets/[name]-[hash][extname]',
         chunkFileNames: 'assets/[name]-[hash].js',
@@ -38,17 +37,9 @@ export default defineConfig({
     },
   },
 
-  ssr: {
-    noExternal: ['@splinetool/react-spline', '@react-three/drei', 'three-mesh-bvh'],
-  },
-
   optimizeDeps: {
     include: [
-      'three',
-      '@react-three/fiber',
-      '@react-three/drei',
       'framer-motion',
-      // Ensure lodash.debounce (CJS) is pre-bundled so default import works
       'lodash.debounce',
     ],
     exclude: ['@splinetool/react-spline'],

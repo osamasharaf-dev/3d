@@ -14,6 +14,7 @@ export const ABOUT_FALLBACK = {
     { title: "Cloud & DevOps", icon_name: "creator" },
   ],
   hire_email: "osamaabdulhalimsharaf@gmail.com",
+  resume_url: "",
 };
 
 let cache = null;
@@ -37,6 +38,7 @@ export function useAbout() {
         ...result,
         bio_paragraphs: Array.isArray(result.bio_paragraphs) ? result.bio_paragraphs : ABOUT_FALLBACK.bio_paragraphs,
         services: Array.isArray(result.services) ? result.services : ABOUT_FALLBACK.services,
+        resume_url: result.resume_url || "",
       };
       setData(cache);
       setLoading(false);

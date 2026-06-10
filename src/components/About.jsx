@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import React, { memo } from "react";
-import { RiBriefcase4Fill } from "react-icons/ri";
+import { FiExternalLink } from "react-icons/fi";
 import { Tilt } from "react-tilt";
 import { SectionWrapper } from "../hoc";
 import useMagnetic from "../reactbits/hooks/useMagnetic";
@@ -47,7 +47,7 @@ const About = () => {
 
   const bio = data.bio_paragraphs || [];
   const services = data.services || [];
-  const hireEmail = data.hire_email || "osamaabdulhalimsharaf@gmail.com";
+  const resumeUrl = data.resume_url || "";
 
   return (
     <>
@@ -85,16 +85,23 @@ const About = () => {
         )}
       </motion.div>
 
-      <button
-        ref={resumeButtonRef}
-        className="mt-10 px-6 py-3 text-white bg-gradient-to-r from-cyan-500 to-indigo-500 rounded-md shadow-md hover:from-cyan-600 hover:to-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 transition-all duration-200"
-        onClick={() => window.open(`mailto:${hireEmail}`, "_blank")}
-      >
-        <span className="font-semibold flex gap-1.5 items-center">
-          <RiBriefcase4Fill />
-          Hire Me
-        </span>
-      </button>
+      {resumeUrl && (
+        <a
+          ref={resumeButtonRef}
+          href={resumeUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-2 mt-10 px-6 py-3 text-white rounded-md shadow-md transition-all duration-200 hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-opacity-50"
+          style={{
+            background: "linear-gradient(135deg, #1591DC, #2C5EAD)",
+            boxShadow: "0 4px 18px rgba(21,145,220,0.3)",
+            textDecoration: "none",
+          }}
+        >
+          <FiExternalLink className="w-4 h-4" />
+          <span className="font-semibold">See my Resume</span>
+        </a>
+      )}
 
       <div className="mt-12 flex flex-wrap gap-10">
         {services.map((service, index) => (
