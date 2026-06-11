@@ -10,6 +10,8 @@ const FALLBACK = [
 
 let cache = null;
 let fetchPromise = null;
+let channelRef = null;
+const subscribers = new Set();
 
 const fetchFresh = async () => {
   const { data: d } = await supabase
@@ -22,6 +24,8 @@ export function useCertifications() {
   const [loading, setLoading] = useState(!cache);
 
   useEffect(() => {
+    subscribers.add(setData);
+
     if (cache) {
       setData(cache);
       setLoading(false);
@@ -37,17 +41,27 @@ export function useCertifications() {
       });
     }
 
-    if (!isSupabaseConfigured) return;
+    if (!channelRef && isSupabaseConfigured) {
+      channelRef = supabase
+        .channel("certifications_live")
+        .on("postgres_changes", { event: "*", schema: "public", table: "certifications" }, async () => {
+          const fresh = await fetchFresh().catch(() => null);
+          if (fresh) {
+            cache = fresh;
+            fetchPromise = null;
+            subscribers.forEach((s) => s(fresh));
+          }
+        })
+        .subscribe();
+    }
 
-    const channel = supabase
-      .channel("certifications_live")
-      .on("postgres_changes", { event: "*", schema: "public", table: "certifications" }, async () => {
-        const fresh = await fetchFresh().catch(() => null);
-        if (fresh) { cache = fresh; fetchPromise = null; setData(fresh); }
-      })
-      .subscribe();
-
-    return () => { supabase.removeChannel(channel); };
+    return () => {
+      subscribers.delete(setData);
+      if (subscribers.size === 0 && channelRef) {
+        supabase.removeChannel(channelRef);
+        channelRef = null;
+      }
+    };
   }, []);
 
   return { data, loading };

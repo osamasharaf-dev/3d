@@ -1,308 +1,86 @@
-import { motion, useMotionValue, useSpring } from "framer-motion";
-import { memo, useCallback, useEffect, useRef, useState } from "react";
+import { motion } from "framer-motion";
+import { memo, useEffect, useRef, useState } from "react";
 
-import useParallax from "../reactbits/hooks/useParallax";
 import { styles } from "../styles";
 import useMediaQuery from "../utils/useMediaQuery";
 import { FloatingTechCanvas } from "./canvas";
 import { useHero, HERO_FALLBACK } from "../lib/useHero";
 
 /* ─────────────────────────────────────────────────────────────
-   ENTRANCE ANIMATION
-   Photo starts large + centered → shrinks into its card frame.
-   Only transform + opacity are animated → 100% GPU-composited.
+   CLEAN PORTRAIT  (right side — desktop only)
+   No card, no animations, no hover movement, no entrance.
+   Appears immediately on load.
 ───────────────────────────────────────────────────────────── */
-const ENTRANCE_PX = 360; // starting photo diameter in px
-
-const PhotoEntrance = memo(({ onDone }) => {
-  useEffect(() => {
-    const img    = document.getElementById("hero-entrance-img");
-    const circle = document.getElementById("portrait-circle");
-
-    if (!img || !circle) { onDone(); return; }
-
-    // Wait two rAF frames so the DOM has fully laid out
-    let r1, r2;
-    r1 = requestAnimationFrame(() => {
-      r2 = requestAnimationFrame(() => {
-        const rect = circle.getBoundingClientRect();
-        const vw   = window.innerWidth;
-        const vh   = window.innerHeight;
-
-        // Where does the circle sit relative to the viewport centre?
-        const targetCX = rect.left + rect.width  / 2;
-        const targetCY = rect.top  + rect.height / 2;
-        const dx       = targetCX - vw / 2;
-        const dy       = targetCY - vh / 2;
-        const scale    = rect.width / ENTRANCE_PX;
-
-        // Animate ONLY transform + opacity → compositor thread, zero jank
-        const anim = img.animate(
-          [
-            {
-              transform: "translate(-50%,-50%) scale(1)",
-              opacity:   1,
-              borderRadius: "50%",
-            },
-            {
-              transform: `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) scale(${scale})`,
-              opacity:   0,
-              borderRadius: "50%",
-            },
-          ],
-          {
-            duration:  820,
-            easing:    "cubic-bezier(0.77, 0, 0.18, 1)",
-            fill:      "forwards",
-          }
-        );
-
-        anim.onfinish = onDone;
-      });
-    });
-
-    return () => {
-      cancelAnimationFrame(r1);
-      cancelAnimationFrame(r2);
-    };
-  }, [onDone]);
-
-  return (
-    /* Fixed overlay — pointer-events: none so page is still interactive */
+const Portrait = memo(() => (
+  <div className="relative flex-shrink-0 select-none" aria-hidden="true">
+    {/* Ambient glow */}
     <div
-      aria-hidden="true"
+      className="absolute -inset-8 rounded-full pointer-events-none"
       style={{
-        position: "fixed",
-        inset: 0,
-        zIndex: 9999,
-        pointerEvents: "none",
+        background:
+          "radial-gradient(ellipse, rgba(14,165,233,0.22) 0%, rgba(79,70,229,0.10) 55%, transparent 75%)",
+        filter: "blur(24px)",
+      }}
+    />
+
+    {/* Gradient ring */}
+    <div
+      className="relative rounded-full p-[3px]"
+      style={{
+        background: "linear-gradient(135deg, #0ea5e9, #4f46e5, #06b6d4)",
+        boxShadow: "0 8px 48px rgba(14,165,233,0.28), 0 2px 12px rgba(79,70,229,0.18)",
       }}
     >
-      {/* Frosted backdrop */}
-      <div
-        style={{
-          position: "absolute",
-          inset: 0,
-          background: "rgba(248,250,255,0.70)",
-          backdropFilter: "blur(2px)",
-          WebkitBackdropFilter: "blur(2px)",
-        }}
-      />
-
-      {/* The large entrance photo */}
-      <img
-        id="hero-entrance-img"
-        src="/my-photo.jpg"
-        alt=""
-        style={{
-          position:       "fixed",
-          top:            "50%",
-          left:           "50%",
-          width:          ENTRANCE_PX,
-          height:         ENTRANCE_PX,
-          borderRadius:   "50%",
-          objectFit:      "cover",
-          objectPosition: "top center",
-          willChange:     "transform, opacity",
-          boxShadow:
-            "0 0 0 5px rgba(255,255,255,0.7), 0 0 0 7px rgba(14,165,233,0.35), 0 28px 72px rgba(14,165,233,0.28)",
-        }}
-      />
-    </div>
-  );
-});
-
-PhotoEntrance.displayName = "PhotoEntrance";
-
-/* ─────────────────────────────────────────────────────────────
-   PORTRAIT CARD  (right side of hero)
-───────────────────────────────────────────────────────────── */
-const FloatingPortraitCard = memo(({ visible, floating }) => {
-  const cardRef = useRef(null);
-  const rawX    = useMotionValue(0);
-  const rawY    = useMotionValue(0);
-  const springX = useSpring(rawX, { stiffness: 130, damping: 20 });
-  const springY = useSpring(rawY, { stiffness: 130, damping: 20 });
-
-  const handleMouseMove = useCallback(
-    (e) => {
-      if (!cardRef.current) return;
-      const r = cardRef.current.getBoundingClientRect();
-      rawX.set(((e.clientY - r.top  - r.height / 2) / r.height) * 12);
-      rawY.set(-((e.clientX - r.left - r.width  / 2) / r.width)  * 12);
-    },
-    [rawX, rawY]
-  );
-
-  const handleMouseLeave = useCallback(() => {
-    rawX.set(0);
-    rawY.set(0);
-  }, [rawX, rawY]);
-
-  return (
-    <motion.div
-      ref={cardRef}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
-      /* Only start floating after entrance completes */
-      animate={floating ? { y: [0, -12, 0] } : { y: 0 }}
-      transition={floating ? { duration: 4.5, repeat: Infinity, ease: "easeInOut" } : {}}
-      style={{
-        rotateX:        springX,
-        rotateY:        springY,
-        transformStyle: "preserve-3d",
-        perspective:    1000,
-        /* Fade in after entrance */
-        opacity:    visible ? 1 : 0,
-        transition: "opacity 0.3s ease",
-      }}
-      className="relative cursor-pointer select-none"
-    >
-      {/* Glow */}
-      <div
-        aria-hidden="true"
-        className="absolute -inset-6 rounded-full opacity-30 blur-3xl pointer-events-none"
-        style={{
-          background:
-            "radial-gradient(ellipse, rgba(14,165,233,0.4) 0%, rgba(79,70,229,0.15) 60%, transparent 80%)",
-        }}
-      />
-
-      {/* Card */}
-      <div
-        className="relative rounded-3xl overflow-hidden"
-        style={{
-          background:           "rgba(255,255,255,0.92)",
-          backdropFilter:       "blur(20px)",
-          WebkitBackdropFilter: "blur(20px)",
-          border:               "1.5px solid rgba(14,165,233,0.2)",
-          boxShadow:
-            "0 20px 60px rgba(14,165,233,0.15), 0 4px 16px rgba(79,70,229,0.10), inset 0 1px 0 rgba(255,255,255,0.9)",
-          width:   "220px",
-          padding: "28px 24px 24px",
-        }}
-      >
-        {/* Top shimmer */}
-        <div
-          aria-hidden="true"
-          className="absolute top-0 left-0 right-0 h-px"
-          style={{
-            background:
-              "linear-gradient(90deg, transparent, rgba(14,165,233,0.6), rgba(79,70,229,0.4), transparent)",
-          }}
-        />
-
-        <div className="flex flex-col items-center gap-4">
-          {/* ── Photo circle ── */}
-          <div className="relative">
-            {/* Gradient ring behind the photo */}
-            <div
-              aria-hidden="true"
-              className="absolute -inset-1.5 rounded-full"
-              style={{
-                background: "linear-gradient(135deg, #0ea5e9, #4f46e5, #0ea5e9)",
-              }}
-            />
-            {/* THE TARGET FRAME the entrance animates toward */}
-            <div
-              id="portrait-circle"
-              className="relative w-24 h-24 rounded-full overflow-hidden"
-            >
-              <img
-                src="/my-photo.jpg"
-                alt="Osama Sharaf"
-                className="w-full h-full object-cover object-top"
-                loading="eager"
-                decoding="async"
-              />
-            </div>
-            {/* Online dot */}
-            <div
-              className="absolute bottom-1 right-1 w-4 h-4 rounded-full border-2"
-              style={{ background: "#22c55e", borderColor: "rgba(255,255,255,0.9)" }}
-            />
-          </div>
-
-          {/* Name */}
-          <div className="text-center">
-            <p className="text-slate-800 font-bold text-[15px] tracking-wide">
-              OSAMA SHARAF
-            </p>
-            <p className="text-sky-500 text-[11px] font-semibold tracking-wider uppercase mt-0.5">
-              Software Engineer
-            </p>
-          </div>
-
-          {/* Tags */}
-          <div className="flex flex-wrap justify-center gap-1.5">
-            {["React", "Node.js", "Full-Stack"].map((tag) => (
-              <span
-                key={tag}
-                className="text-[10px] font-semibold px-2 py-0.5 rounded-full"
-                style={{
-                  background: "rgba(14,165,233,0.10)",
-                  color:      "#0ea5e9",
-                  border:     "1px solid rgba(14,165,233,0.25)",
-                }}
-              >
-                {tag}
-              </span>
-            ))}
-          </div>
-
-          <div
-            aria-hidden="true"
-            className="w-full h-px"
-            style={{ background: "rgba(14,165,233,0.12)" }}
+      {/* White buffer ring */}
+      <div className="rounded-full p-[3px] bg-white">
+        {/* Photo */}
+        <div className="w-44 h-44 lg:w-52 lg:h-52 xl:w-56 xl:h-56 rounded-full overflow-hidden">
+          <img
+            src="/my-photo.jpg"
+            alt="Osama Sharaf"
+            width="224"
+            height="224"
+            fetchpriority="high"
+            decoding="sync"
+            className="w-full h-full object-cover object-top"
+            style={{ display: "block" }}
           />
-
-          {/* Status */}
-          <div className="flex items-center gap-2">
-            <div
-              aria-hidden="true"
-              className="w-2 h-2 rounded-full animate-pulse"
-              style={{ background: "#22c55e" }}
-            />
-            <span className="text-[11px] text-slate-500 font-medium">
-              Available for work
-            </span>
-          </div>
         </div>
-
-        <div
-          aria-hidden="true"
-          className="absolute bottom-0 right-0 w-16 h-16 opacity-15 pointer-events-none"
-          style={{ background: "radial-gradient(circle, #0ea5e9 0%, transparent 70%)" }}
-        />
       </div>
-    </motion.div>
-  );
-});
+    </div>
 
-FloatingPortraitCard.displayName = "FloatingPortraitCard";
+    {/* Online badge */}
+    <div
+      className="absolute bottom-3 right-3 flex items-center gap-1.5 px-2.5 py-1 rounded-full"
+      style={{
+        background: "rgba(255,255,255,0.95)",
+        border: "1px solid rgba(34,197,94,0.3)",
+        boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+      }}
+    >
+      <span
+        className="w-2 h-2 rounded-full"
+        style={{ background: "#22c55e", boxShadow: "0 0 6px #22c55e" }}
+      />
+      <span className="text-[10px] font-semibold text-slate-600">Available</span>
+    </div>
+  </div>
+));
+
+Portrait.displayName = "Portrait";
 
 /* ─────────────────────────────────────────────────────────────
    HERO
 ───────────────────────────────────────────────────────────── */
 const Hero = () => {
-  const { data: heroData }  = useHero();
-  const typedItemsRef        = useRef(HERO_FALLBACK.typed_items);
+  const { data: heroData } = useHero();
+  const typedItemsRef = useRef(HERO_FALLBACK.typed_items);
 
-  const [typedText,  setTypedText]  = useState("");
-  const [itemIndex,  setItemIndex]  = useState(0);
-  const [charIndex,  setCharIndex]  = useState(0);
+  const [typedText, setTypedText] = useState("");
+  const [itemIndex, setItemIndex] = useState(0);
+  const [charIndex, setCharIndex] = useState(0);
 
-  /* Entrance state */
-  const [entranceDone,    setEntranceDone]    = useState(false);
-  const [entranceVisible, setEntranceVisible] = useState(true);
-
-  const isMobile = useMediaQuery("(max-width: 1023px)"); // lg breakpoint
-  const { ref: parallaxRef } = useParallax({ strength: 0.03, maxOffset: 15, enabled: !isMobile });
-
-  const handleEntranceDone = useCallback(() => {
-    setEntranceVisible(false);
-    setEntranceDone(true);
-  }, []);
+  const isMobile = useMediaQuery("(max-width: 1023px)");
 
   useEffect(() => {
     if (Array.isArray(heroData?.typed_items) && heroData.typed_items.length > 0) {
@@ -311,20 +89,28 @@ const Hero = () => {
   }, [heroData]);
 
   useEffect(() => {
-    const items   = typedItemsRef.current;
+    const items = typedItemsRef.current;
     const current = items[itemIndex % items.length] || "";
+
     if (charIndex < current.length) {
+      const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (prefersReduced) {
+        setTypedText(current);
+        setCharIndex(current.length);
+        return;
+      }
       const t = setTimeout(() => {
         setTypedText((p) => p + current[charIndex]);
         setCharIndex((c) => c + 1);
-      }, 100);
+      }, 90);
       return () => clearTimeout(t);
     }
+
     const t = setTimeout(() => {
       setItemIndex((i) => (i + 1) % items.length);
       setCharIndex(0);
       setTypedText("");
-    }, 1400);
+    }, 1600);
     return () => clearTimeout(t);
   }, [charIndex, itemIndex]);
 
@@ -334,13 +120,8 @@ const Hero = () => {
       id="hero"
       aria-label="Hero — Osama Sharaf, Full-Stack Developer"
     >
-      {/* Entrance animation — only on desktop where the card is visible */}
-      {!isMobile && entranceVisible && (
-        <PhotoEntrance onDone={handleEntranceDone} />
-      )}
-
-      {/* 3D background */}
-      <div className="absolute inset-0 opacity-30" aria-hidden="true">
+      {/* 3D background — reduced opacity for performance */}
+      <div className="absolute inset-0 opacity-25" aria-hidden="true">
         <FloatingTechCanvas />
       </div>
 
@@ -367,16 +148,14 @@ const Hero = () => {
           />
         </div>
 
-        {/* Text + card */}
-        <div
-          ref={parallaxRef}
-          className="flex-1 flex flex-col lg:flex-row items-start lg:items-center gap-8 lg:gap-12"
-        >
+        {/* Text + portrait */}
+        <div className="flex-1 flex flex-col lg:flex-row items-start lg:items-center gap-8 lg:gap-16">
+          {/* Text column */}
           <div className="flex-1">
             <motion.div
-              initial={{ opacity: 0, y: 28 }}
+              initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+              transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
             >
               <p className="text-sky-500 text-[13px] sm:text-[14px] font-semibold tracking-[0.2em] uppercase mb-2">
                 Software Engineer &amp; Full-Stack Developer
@@ -385,9 +164,9 @@ const Hero = () => {
                 {heroData.greeting || "Hi, I'm"}{" "}
                 <span
                   style={{
-                    background:            "linear-gradient(135deg, #0ea5e9 0%, #4f46e5 60%, #06b6d4 100%)",
-                    WebkitBackgroundClip:  "text",
-                    WebkitTextFillColor:   "transparent",
+                    background: "linear-gradient(135deg, #0ea5e9 0%, #4f46e5 60%, #06b6d4 100%)",
+                    WebkitBackgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
                   }}
                 >
                   {heroData.name || "Osama Sharaf"}
@@ -396,20 +175,20 @@ const Hero = () => {
             </motion.div>
 
             <motion.div
-              initial={{ opacity: 0, y: 22 }}
+              initial={{ opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
+              transition={{ duration: 0.7, delay: 0.12, ease: [0.16, 1, 0.3, 1] }}
             >
               <p className={`${styles.heroSubText} mt-2`} aria-live="polite">
-                I'm{" "}
+                I&apos;m{" "}
                 <span
                   style={{
-                    color:         "#0ea5e9",
-                    fontWeight:    "bold",
-                    borderBottom:  "2px solid rgba(14,165,233,0.4)",
+                    color: "#0ea5e9",
+                    fontWeight: "bold",
+                    borderBottom: "2px solid rgba(14,165,233,0.4)",
                     paddingBottom: "2px",
-                    minWidth:      "1ch",
-                    display:       "inline-block",
+                    minWidth: "1ch",
+                    display: "inline-block",
                   }}
                 >
                   {typedText}
@@ -418,6 +197,7 @@ const Hero = () => {
                   |
                 </span>
               </p>
+
               <p className="mt-3 text-slate-500 text-[14px] sm:text-[15px] max-w-[480px] leading-[1.75] font-medium">
                 {heroData.subtitle ||
                   "Building modern digital solutions, scalable web applications, and high-performance digital experiences."}
@@ -426,9 +206,9 @@ const Hero = () => {
 
             {/* CTA buttons */}
             <motion.div
-              initial={{ opacity: 0, y: 18 }}
+              initial={{ opacity: 0, y: 14 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+              transition={{ duration: 0.6, delay: 0.25, ease: [0.16, 1, 0.3, 1] }}
               className="flex flex-wrap gap-3 mt-7"
             >
               <a href="#portfolio" aria-label="View my portfolio">
@@ -438,13 +218,20 @@ const Hero = () => {
                   transition={{ type: "spring", stiffness: 420, damping: 24 }}
                   className="relative px-6 py-2.5 rounded-xl text-[13px] font-bold tracking-wide text-white overflow-hidden"
                   style={{
-                    background:  "linear-gradient(135deg, #0ea5e9 0%, #4f46e5 100%)",
-                    boxShadow:   "0 4px 22px rgba(14,165,233,0.30), inset 0 1px 0 rgba(255,255,255,0.2)",
+                    background: "linear-gradient(135deg, #0ea5e9 0%, #4f46e5 100%)",
+                    boxShadow: "0 4px 22px rgba(14,165,233,0.30), inset 0 1px 0 rgba(255,255,255,0.2)",
                   }}
                 >
                   <span className="flex items-center gap-2">
                     {heroData.cta_primary || "View My Work"}
-                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} aria-hidden="true">
+                    <svg
+                      className="w-3.5 h-3.5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2.5}
+                      aria-hidden="true"
+                    >
                       <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                     </svg>
                   </span>
@@ -465,15 +252,43 @@ const Hero = () => {
             </motion.div>
           </div>
 
-          {/* Portrait card — desktop only */}
-          <div className="hidden lg:flex items-center justify-center flex-shrink-0 mr-8 mt-4">
-            <FloatingPortraitCard
-              visible={isMobile || entranceDone}
-              floating={entranceDone}
-            />
-          </div>
+          {/* Portrait — desktop only, appears immediately */}
+          {!isMobile && (
+            <motion.div
+              className="flex items-center justify-center flex-shrink-0 mr-4 mt-2"
+              initial={{ opacity: 0, scale: 0.96 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5, ease: "easeOut" }}
+            >
+              <Portrait />
+            </motion.div>
+          )}
         </div>
       </div>
+
+      {/* Mobile portrait — shown below text on small screens */}
+      {isMobile && (
+        <div className="absolute bottom-20 left-1/2 -translate-x-1/2 z-10">
+          <div
+            className="rounded-full p-[2px]"
+            style={{ background: "linear-gradient(135deg, #0ea5e9, #4f46e5)" }}
+          >
+            <div className="rounded-full p-[2px] bg-white">
+              <div className="w-20 h-20 rounded-full overflow-hidden">
+                <img
+                  src="/my-photo.jpg"
+                  alt="Osama Sharaf"
+                  width="80"
+                  height="80"
+                  fetchpriority="high"
+                  decoding="sync"
+                  className="w-full h-full object-cover object-top"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Scroll indicator */}
       <div

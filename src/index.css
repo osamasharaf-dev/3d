@@ -19,7 +19,6 @@
   padding: 0;
   box-sizing: border-box;
   font-family: "Poppins", sans-serif;
-  scroll-behavior: smooth;
   color-scheme: light;
 }
 
@@ -275,6 +274,34 @@ canvas {
 
 /* Ensure images never overflow */
 img { max-width: 100%; height: auto; }
+
+/* ── Respect user motion preferences ────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ── Smooth scrolling only when user hasn't opted out ── */
+@media (prefers-reduced-motion: no-preference) {
+  html { scroll-behavior: smooth; }
+}
+
+/* ── Focus visible — accessibility ──────────────────── */
+:focus-visible {
+  outline: 2px solid #0ea5e9;
+  outline-offset: 3px;
+}
+
+/* ── Admin spin animation ────────────────────────────── */
+@keyframes adminspin {
+  to { transform: rotate(360deg); }
+}
 
 /* ── Dev background floating animation ──────────────── */
 @keyframes devFloat {

@@ -12,13 +12,16 @@ export const HERO_FALLBACK = {
 
 let cache = null;
 let fetchPromise = null;
+let channelRef = null;
+const subscribers = new Set();
 
 const normalize = (d) => ({
   ...HERO_FALLBACK,
   ...d,
-  typed_items: Array.isArray(d?.typed_items) && d.typed_items.length > 0
-    ? d.typed_items
-    : HERO_FALLBACK.typed_items,
+  typed_items:
+    Array.isArray(d?.typed_items) && d.typed_items.length > 0
+      ? d.typed_items
+      : HERO_FALLBACK.typed_items,
 });
 
 const fetchFresh = async () => {
@@ -31,6 +34,8 @@ export function useHero() {
   const [loading, setLoading] = useState(!cache);
 
   useEffect(() => {
+    subscribers.add(setData);
+
     if (cache) {
       setData(cache);
       setLoading(false);
@@ -38,7 +43,9 @@ export function useHero() {
       setData(HERO_FALLBACK);
       setLoading(false);
     } else {
-      if (!fetchPromise) fetchPromise = fetchFresh().catch(() => HERO_FALLBACK);
+      if (!fetchPromise) {
+        fetchPromise = fetchFresh().catch(() => HERO_FALLBACK);
+      }
       fetchPromise.then((result) => {
         cache = result;
         setData(result);
@@ -46,17 +53,27 @@ export function useHero() {
       });
     }
 
-    if (!isSupabaseConfigured) return;
+    if (!channelRef && isSupabaseConfigured) {
+      channelRef = supabase
+        .channel("hero_info_live")
+        .on("postgres_changes", { event: "*", schema: "public", table: "hero_info" }, async () => {
+          const fresh = await fetchFresh().catch(() => null);
+          if (fresh) {
+            cache = fresh;
+            fetchPromise = null;
+            subscribers.forEach((s) => s(fresh));
+          }
+        })
+        .subscribe();
+    }
 
-    const channel = supabase
-      .channel("hero_info_live")
-      .on("postgres_changes", { event: "*", schema: "public", table: "hero_info" }, async () => {
-        const fresh = await fetchFresh().catch(() => null);
-        if (fresh) { cache = fresh; fetchPromise = null; setData(fresh); }
-      })
-      .subscribe();
-
-    return () => { supabase.removeChannel(channel); };
+    return () => {
+      subscribers.delete(setData);
+      if (subscribers.size === 0 && channelRef) {
+        supabase.removeChannel(channelRef);
+        channelRef = null;
+      }
+    };
   }, []);
 
   return { data, loading };

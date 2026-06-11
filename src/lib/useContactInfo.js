@@ -13,10 +13,18 @@ export const CONTACT_FALLBACK = {
 
 let cache = null;
 let fetchPromise = null;
+let channelRef = null;
+const subscribers = new Set();
 
 const fetchFresh = async () => {
   const { data: d } = await supabase.from("contact_info").select("*").limit(1).single();
   return d ? { ...CONTACT_FALLBACK, ...d } : CONTACT_FALLBACK;
+};
+
+const notifyAll = (result) => {
+  cache = result;
+  fetchPromise = null;
+  subscribers.forEach((s) => s(result));
 };
 
 export function useContactInfo() {
@@ -24,6 +32,8 @@ export function useContactInfo() {
   const [loading, setLoading] = useState(!cache);
 
   useEffect(() => {
+    subscribers.add(setData);
+
     if (cache) {
       setData(cache);
       setLoading(false);
@@ -31,7 +41,9 @@ export function useContactInfo() {
       setData(CONTACT_FALLBACK);
       setLoading(false);
     } else {
-      if (!fetchPromise) fetchPromise = fetchFresh().catch(() => CONTACT_FALLBACK);
+      if (!fetchPromise) {
+        fetchPromise = fetchFresh().catch(() => CONTACT_FALLBACK);
+      }
       fetchPromise.then((result) => {
         cache = result;
         setData(result);
@@ -39,20 +51,30 @@ export function useContactInfo() {
       });
     }
 
-    if (!isSupabaseConfigured) return;
+    /* Create the realtime channel only once (singleton) */
+    if (!channelRef && isSupabaseConfigured) {
+      channelRef = supabase
+        .channel("contact_info_live")
+        .on("postgres_changes", { event: "*", schema: "public", table: "contact_info" }, async () => {
+          const fresh = await fetchFresh().catch(() => null);
+          if (fresh) notifyAll(fresh);
+        })
+        .subscribe();
+    }
 
-    const channel = supabase
-      .channel("contact_info_live")
-      .on("postgres_changes", { event: "*", schema: "public", table: "contact_info" }, async () => {
-        const fresh = await fetchFresh().catch(() => null);
-        if (fresh) { cache = fresh; fetchPromise = null; setData(fresh); }
-      })
-      .subscribe();
-
-    return () => { supabase.removeChannel(channel); };
+    return () => {
+      subscribers.delete(setData);
+      if (subscribers.size === 0 && channelRef) {
+        supabase.removeChannel(channelRef);
+        channelRef = null;
+      }
+    };
   }, []);
 
   return { data, loading };
 }
 
-export function invalidateContactCache() { cache = null; fetchPromise = null; }
+export function invalidateContactCache() {
+  cache = null;
+  fetchPromise = null;
+}

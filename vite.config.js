@@ -14,21 +14,19 @@ export default defineConfig({
     target: 'esnext',
     minify: 'esbuild',
     sourcemap: false,
-    chunkSizeWarningLimit: 2000,
+    cssCodeSplit: true,
+    chunkSizeWarningLimit: 1500,
     rollupOptions: {
       output: {
         manualChunks(id) {
           if (id.includes('@react-three/fiber') || id.includes('@react-three/drei')) return 'three-react'
           if (id.includes('/node_modules/three/')) return 'three-core'
           if (id.includes('framer-motion')) return 'framer'
-          if (
-            id.includes('react-dom') ||
-            id.includes('react-router-dom') ||
-            (id.includes('node_modules/react/') && !id.includes('react-three'))
-          ) {
-            return 'react-vendor'
-          }
+          if (id.includes('react-dom') || id.includes('react-router-dom')) return 'react-vendor'
           if (id.includes('@supabase')) return 'supabase'
+          if (id.includes('@emailjs')) return 'emailjs'
+          if (id.includes('react-icons')) return 'icons'
+          if (id.includes('@splinetool')) return 'spline'
         },
         assetFileNames: 'assets/[name]-[hash][extname]',
         chunkFileNames: 'assets/[name]-[hash].js',
@@ -38,10 +36,7 @@ export default defineConfig({
   },
 
   optimizeDeps: {
-    include: [
-      'framer-motion',
-      'lodash.debounce',
-    ],
+    include: ['react', 'react-dom', 'react-router-dom', 'framer-motion'],
     exclude: ['@splinetool/react-spline'],
   },
 })

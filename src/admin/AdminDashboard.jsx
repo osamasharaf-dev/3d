@@ -5,6 +5,7 @@ import { invalidateHeroCache } from "../lib/useHero";
 import { invalidateCertificationsCache } from "../lib/useCertifications";
 import { invalidateProfessionalSkillsCache } from "../lib/useProfessionalSkills";
 import { invalidateContactCache } from "../lib/useContactInfo";
+import { invalidateProjectsCache } from "../lib/useProjects";
 
 /* ── Theme tokens ─────────────────────────────────────────── */
 const C = {
@@ -451,6 +452,14 @@ function ProjectsPanel() {
   const save=async(e)=>{
     e.preventDefault();setSaving(true);
     for(const proj of projects){
+      // Handle deletions
+      if(proj._deleted){
+        if(proj.id&&!String(proj.id).startsWith("new_")){
+          const{error}=await supabase.from("projects").delete().eq("id",proj.id);
+          if(error){showToast(error.message,"error");setSaving(false);return;}
+        }
+        continue;
+      }
       const payload={
         name:proj.name,description:proj.description,
         image_url:proj.image_url||null,
@@ -468,6 +477,8 @@ function ProjectsPanel() {
       }
       if(error){showToast(error.message,"error");setSaving(false);return;}
     }
+    setProjects(prev=>prev.filter(p=>!p._deleted));
+    invalidateProjectsCache();
     setSaving(false);showToast("Projects saved!","success");
   };
 
@@ -480,11 +491,11 @@ function ProjectsPanel() {
         <AddBtn onClick={()=>setProjects(p=>[...p,{id:`new_${Date.now()}`,name:"",description:"",image_url:"",source_code_link:"",live_demo_link:"",tags:[],features:[],order_index:p.length}])} label="Add Project" />
       </div>
 
-      {projects.map((proj,i)=>(
+      {projects.filter(p=>!p._deleted).map((proj,i)=>(
         <div key={proj.id||i} style={CS}>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16,flexWrap:"wrap",gap:8}}>
             <span style={{fontWeight:700,color:C.textPrimary,fontSize:15}}>{proj.name||`Project #${i+1}`}</span>
-            <RemoveBtn onClick={()=>setProjects(p=>p.filter((_,j)=>j!==i))} />
+            <RemoveBtn onClick={()=>setProjects(p=>p.map((pr,j)=>j===i?{...pr,_deleted:true}:pr))} />
           </div>
 
           <div style={{marginBottom:12}}>
@@ -843,7 +854,6 @@ export default function AdminDashboard() {
   return (
     <>
       <style>{`
-        @keyframes adminspin { to { transform:rotate(360deg); } }
         *, *::before, *::after { box-sizing:border-box; }
         input:focus, textarea:focus, select:focus {
           border-color:#4BB8FA !important;
