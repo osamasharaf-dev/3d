@@ -161,6 +161,57 @@ function ImageUploadBtn({ currentUrl, onUrl, folder = "images", label = "Upload 
   );
 }
 
+/* ── Migration Notice ─────────────────────────────────────── */
+function MigrationNotice() {
+  const [dismissed, setDismissed] = React.useState(() => sessionStorage.getItem("migration_notice_dismissed") === "1");
+  const [copied, setCopied] = React.useState(false);
+
+  if (dismissed) return null;
+
+  const sql = `-- Run in Supabase Dashboard → SQL Editor
+ALTER TABLE public.hero_info ADD COLUMN IF NOT EXISTS photo_url TEXT DEFAULT '';
+ALTER TABLE public.skills ADD COLUMN IF NOT EXISTS order_index INTEGER DEFAULT 0;
+ALTER TABLE public.projects ADD COLUMN IF NOT EXISTS order_index INTEGER DEFAULT 0;
+ALTER TABLE public.projects ADD COLUMN IF NOT EXISTS source_code_link TEXT;
+ALTER TABLE public.projects ADD COLUMN IF NOT EXISTS live_demo_link TEXT;
+ALTER TABLE public.projects ADD COLUMN IF NOT EXISTS features JSONB DEFAULT '[]';
+ALTER TABLE public.projects ADD COLUMN IF NOT EXISTS images JSONB DEFAULT '[]';`;
+
+  const copy = () => {
+    navigator.clipboard.writeText(sql).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000); });
+  };
+  const dismiss = () => { sessionStorage.setItem("migration_notice_dismissed","1"); setDismissed(true); };
+
+  return (
+    <div style={{ marginBottom:20,padding:"16px 20px",borderRadius:14,background:"rgba(245,158,11,0.08)",border:"1.5px solid rgba(245,158,11,0.35)",position:"relative" }}>
+      <button onClick={dismiss} style={{ position:"absolute",top:10,right:12,background:"none",border:"none",cursor:"pointer",color:"#92400e",fontSize:16,lineHeight:1 }}>✕</button>
+      <div style={{ display:"flex",gap:10,alignItems:"flex-start" }}>
+        <span style={{ fontSize:20,flexShrink:0 }}>⚠️</span>
+        <div>
+          <div style={{ fontWeight:700,color:"#92400e",fontSize:14,marginBottom:4 }}>Database Migration Required</div>
+          <div style={{ color:"#78350f",fontSize:13,marginBottom:10 }}>
+            A few columns are missing from your Supabase tables (<code style={{background:"rgba(0,0,0,0.06)",padding:"1px 5px",borderRadius:4}}>hero_info.photo_url</code>, <code style={{background:"rgba(0,0,0,0.06)",padding:"1px 5px",borderRadius:4}}>projects.order_index</code>, etc.).
+            Copy the SQL below and run it in your <strong>Supabase Dashboard → SQL Editor</strong> to fix image uploads and project ordering. You only need to do this once.
+          </div>
+          <pre style={{ background:"rgba(0,0,0,0.06)",borderRadius:8,padding:"10px 12px",fontSize:11,overflowX:"auto",margin:"0 0 10px",color:"#1c1917",whiteSpace:"pre-wrap",wordBreak:"break-all" }}>{sql}</pre>
+          <div style={{ display:"flex",gap:8,flexWrap:"wrap" }}>
+            <button onClick={copy} style={{ background:"rgba(245,158,11,0.18)",color:"#92400e",border:"1.5px solid rgba(245,158,11,0.4)",borderRadius:8,padding:"7px 16px",fontSize:13,fontWeight:700,cursor:"pointer" }}>
+              {copied ? "✓ Copied!" : "📋 Copy SQL"}
+            </button>
+            <a href="https://supabase.com/dashboard" target="_blank" rel="noreferrer"
+              style={{ background:"rgba(245,158,11,0.18)",color:"#92400e",border:"1.5px solid rgba(245,158,11,0.4)",borderRadius:8,padding:"7px 16px",fontSize:13,fontWeight:700,cursor:"pointer",textDecoration:"none" }}>
+              🔗 Open Supabase Dashboard
+            </a>
+            <button onClick={dismiss} style={{ background:"none",color:"#a8a29e",border:"1.5px solid #d6d3d1",borderRadius:8,padding:"7px 16px",fontSize:13,cursor:"pointer" }}>
+              Dismiss
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ── Overview ─────────────────────────────────────────────── */
 function OverviewPanel() {
   const [counts, setCounts] = useState({});
@@ -220,6 +271,7 @@ function OverviewPanel() {
   ];
   return (
     <div>
+      <MigrationNotice />
       <h2 style={{ fontSize:22,fontWeight:800,color:C.textPrimary,marginBottom:20 }}>Dashboard Overview</h2>
       <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(140px,1fr))",gap:12 }}>
         {items.map(({label,key,icon})=>(

@@ -38,10 +38,17 @@ const normalizeProject = (p) => ({
 
 const fetchFresh = async () => {
   if (!isSupabaseConfigured) return { data: staticProjects, source: "static" };
-  const { data, error } = await supabase
+  // Try ordering by order_index first; fall back to created_at if column missing
+  let { data, error } = await supabase
     .from("projects")
     .select("*")
     .order("order_index", { ascending: true });
+  if (error) {
+    ({ data, error } = await supabase
+      .from("projects")
+      .select("*")
+      .order("created_at", { ascending: true }));
+  }
   if (error) return { data: staticProjects, source: "static" };
   return { data: (data || []).map(normalizeProject), source: "supabase" };
 };

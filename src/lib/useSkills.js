@@ -13,10 +13,18 @@ export function useSkills() {
       return;
     }
     setLoading(true);
-    const { data, error: err } = await supabase
+    let { data, error: err } = await supabase
       .from("skills")
       .select("*")
-      .order("category", { ascending: true });
+      .order("category", { ascending: true })
+      .order("order_index", { ascending: true });
+    // Fallback: order_index column may not exist yet (run supabase-migration.sql to fix)
+    if (err) {
+      ({ data, error: err } = await supabase
+        .from("skills")
+        .select("*")
+        .order("category", { ascending: true }));
+    }
     if (err) setError(err.message);
     setSkills(data || []);
     setLoading(false);
