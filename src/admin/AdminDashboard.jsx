@@ -207,7 +207,7 @@ function OverviewPanel() {
 
 /* ── Hero Panel ──────────────────────────────────────────── */
 function HeroPanel() {
-  const [form, setForm] = useState({name:"",greeting:"",subtitle:"",cta_primary:"",cta_secondary:"",typed_items:[""]});
+  const [form, setForm] = useState({name:"",greeting:"",subtitle:"",cta_primary:"",cta_secondary:"",typed_items:[""],photo_url:""});
   const [loading,setLoading] = useState(true);
   const [saving,setSaving]   = useState(false);
   const [toast,setToast]     = useState(null);
@@ -232,6 +232,17 @@ function HeroPanel() {
     <form onSubmit={save}>
       {toast&&<Toast {...toast}/>}
       <h2 style={{fontSize:22,fontWeight:800,color:C.textPrimary,marginBottom:20}}>Hero Section</h2>
+      {/* Profile Photo */}
+      <div style={CS}>
+        <label style={LS}>Profile Photo</label>
+        <ImageUploadBtn
+          currentUrl={form.photo_url||""}
+          onUrl={url=>setForm(p=>({...p,photo_url:url}))}
+          folder="profile"
+          label="Upload Profile Photo"
+        />
+      </div>
+
       <div style={CS}>
         {[["Name","name"],["Greeting","greeting"],["Subtitle","subtitle"],["Primary CTA","cta_primary"],["Secondary CTA","cta_secondary"]].map(([label,field])=>(
           <div key={field} style={{marginBottom:16}}>

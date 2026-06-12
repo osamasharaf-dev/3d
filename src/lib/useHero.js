@@ -8,6 +8,7 @@ export const HERO_FALLBACK = {
   subtitle: "Building modern digital solutions, scalable web applications, and high-performance digital experiences.",
   cta_primary: "View My Work",
   cta_secondary: "Get In Touch",
+  photo_url: "",
 };
 
 let cache = null;
