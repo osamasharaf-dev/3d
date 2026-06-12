@@ -1,17 +1,18 @@
-const CACHE_VERSION = 'v1';
+const CACHE_VERSION = 'v2';
 const STATIC_CACHE  = `static-${CACHE_VERSION}`;
 const IMAGE_CACHE   = `images-${CACHE_VERSION}`;
 const FONT_CACHE    = `fonts-${CACHE_VERSION}`;
 
 const STATIC_EXTENSIONS = ['.js', '.css', '.woff', '.woff2', '.otf', '.ttf'];
 const IMAGE_EXTENSIONS  = ['.webp', '.png', '.jpg', '.jpeg', '.svg', '.gif', '.avif'];
-const FONT_HOSTS        = ['fonts.googleapis.com', 'fonts.gstatic.com'];
-
 const PRECACHE_URLS = [
   '/',
+  '/my-photo.avif',
   '/my-photo.webp',
-  '/my-photo.jpg',
   '/favicon.svg',
+  '/fonts/poppins-400.woff2',
+  '/fonts/poppins-600.woff2',
+  '/fonts/poppins-700.woff2',
 ];
 
 /* ── Install: precache critical shell assets ──────────────── */
@@ -49,8 +50,8 @@ self.addEventListener('fetch', (event) => {
 
   const ext = url.pathname.substring(url.pathname.lastIndexOf('.')).toLowerCase();
 
-  if (FONT_HOSTS.includes(url.host)) {
-    event.respondWith(staleWhileRevalidate(request, FONT_CACHE));
+  if (url.pathname.startsWith('/fonts/')) {
+    event.respondWith(cacheFirst(request, FONT_CACHE, { maxAge: 365 * 24 * 60 * 60 }));
     return;
   }
 

@@ -1,0 +1,152 @@
+You are a Senior Performance Engineer.
+
+Audit and optimize my portfolio website: https://osamasharaf.dev
+
+My goal is to achieve:
+
+- Mobile Performance: 95-100
+- Desktop Performance: 100
+- Accessibility: 100
+- Best Practices: 100
+- SEO: 100
+
+Current Lighthouse issues:
+
+- FCP ≈ 4.0s
+- LCP ≈ 4.6s
+- Network payload ≈ 3.5MB
+- Improve image delivery
+- Reduce unused JavaScript
+- Render-blocking requests
+- Forced reflow
+- Optimize DOM size
+- Layout shift culprits
+- LCP breakdown issues
+- Third-party impact
+
+I want you to inspect every file in the repository and apply ALL optimizations below.
+
+========================
+PHASE 1 - FIND ROOT CAUSE
+========================
+
+1. Identify the exact LCP element.
+2. Identify the largest assets.
+3. List the heaviest JavaScript bundles.
+4. Find all render-blocking resources.
+5. Find all unused CSS.
+6. Find all unused JavaScript.
+7. Find all images larger than necessary.
+8. Detect layout shifts.
+9. Detect expensive re-renders.
+10. Produce a before/after report.
+
+========================
+PHASE 2 - IMAGE OPTIMIZATION
+========================
+
+- Convert all PNG/JPG images to AVIF.
+- Fallback to WebP.
+- Generate responsive image sizes.
+- Compress images aggressively.
+- Remove oversized images.
+- Add width and height attributes.
+- Lazy load non-critical images.
+- Preload only the hero image.
+- Ensure hero image loads in <1s.
+
+========================
+PHASE 3 - JAVASCRIPT
+========================
+
+- Remove unused JS.
+- Remove dead code.
+- Remove unnecessary libraries.
+- Enable tree shaking.
+- Split bundles.
+- Dynamic imports.
+- Route based code splitting.
+- Component lazy loading.
+- Defer non-critical scripts.
+- Minify everything.
+
+========================
+PHASE 4 - ANIMATION OPTIMIZATION
+========================
+
+- Audit Framer Motion.
+- Audit GSAP.
+- Audit scroll animations.
+- Remove unnecessary animation calculations.
+- Use transform and opacity only.
+- Eliminate layout thrashing.
+- Eliminate forced reflows.
+- Avoid animations on initial render when possible.
+
+========================
+PHASE 5 - FONTS
+========================
+
+- Self-host fonts.
+- Preload critical fonts.
+- font-display: swap.
+- Remove unused font weights.
+- Reduce font files.
+
+========================
+PHASE 6 - NETWORK
+========================
+
+- Enable Brotli.
+- Enable Gzip fallback.
+- Enable HTTP/2 or HTTP/3.
+- Add long-term cache headers.
+- Optimize CDN usage.
+- Reduce payload below 1MB.
+
+========================
+PHASE 7 - REACT / NEXTJS
+========================
+
+- Prevent unnecessary re-renders.
+- Use memo where beneficial.
+- Use useMemo/useCallback where needed.
+- Lazy load sections below the fold.
+- Hydrate only required components.
+- Optimize client-side rendering.
+
+========================
+PHASE 8 - DOM
+========================
+
+- Reduce DOM depth.
+- Remove unnecessary wrappers.
+- Simplify structure.
+
+========================
+PHASE 9 - MOBILE
+========================
+
+- Prioritize mobile performance.
+- Ensure smooth scrolling.
+- Remove jank.
+- Maintain 60fps.
+
+========================
+FINAL TASK
+========================
+
+After all optimizations:
+
+1. Run Lighthouse again.
+2. Compare before and after.
+3. Show:
+   - Bundle size reduction
+   - Image savings
+   - JS savings
+   - CSS savings
+   - LCP improvement
+   - FCP improvement
+   - CLS improvement
+4. Ensure no functionality is broken.
+5. Keep visual design exactly the same.

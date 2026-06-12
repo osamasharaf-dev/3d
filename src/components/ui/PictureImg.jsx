@@ -1,17 +1,26 @@
 import { memo } from "react";
 
 /**
- * Drop-in replacement for <img> that serves WebP automatically.
+ * Drop-in <img> replacement that auto-serves AVIF → WebP → original.
  *
  * Rules:
- *  - Local paths ending in .png / .jpg / .jpeg  → adds a WebP <source>
- *  - Already-WebP or external URLs              → plain <img>, no overhead
+ *  - Local paths ending in .png / .jpg / .jpeg → wraps in <picture>
+ *    with AVIF source (best compression) + WebP source (wide support)
+ *  - Already-WebP local paths → adds only AVIF source
+ *  - Already-AVIF, data: URIs, or external URLs → plain <img>, zero overhead
  *  - All standard <img> props are forwarded transparently
  *
  * Usage:
  *   <PictureImg src="/projects/hero.jpg" alt="…" className="…" />
- *   <PictureImg src={importedWebpAsset}  alt="…" />   ← no-op wrapper
+ *   <PictureImg src={importedWebpAsset}  alt="…" />
  */
+
+function toAvif(src) {
+  if (typeof src === "string" && src.startsWith("/")) {
+    return src.replace(/\.(png|jpe?g|webp)$/i, ".avif");
+  }
+  return null;
+}
 
 function toWebP(src) {
   if (typeof src === "string" && src.startsWith("/") && /\.(png|jpe?g)$/i.test(src)) {
@@ -21,9 +30,10 @@ function toWebP(src) {
 }
 
 const PictureImg = memo(({ src, alt = "", className, style, ...rest }) => {
+  const avifSrc = toAvif(src);
   const webpSrc = toWebP(src);
 
-  if (!webpSrc) {
+  if (!avifSrc && !webpSrc) {
     return (
       <img src={src} alt={alt} className={className} style={style} {...rest} />
     );
@@ -31,7 +41,8 @@ const PictureImg = memo(({ src, alt = "", className, style, ...rest }) => {
 
   return (
     <picture>
-      <source type="image/webp" srcSet={webpSrc} />
+      {avifSrc && <source type="image/avif" srcSet={avifSrc} />}
+      {webpSrc && <source type="image/webp" srcSet={webpSrc} />}
       <img src={src} alt={alt} className={className} style={style} {...rest} />
     </picture>
   );

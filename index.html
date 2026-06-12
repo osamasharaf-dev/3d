@@ -21,27 +21,14 @@
     <meta name="color-scheme" content="light" />
     <meta name="msapplication-TileColor" content="#f8faff" />
 
-    <!-- Critical font preconnect -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Self-hosted Poppins: preload weight-400 (most critical), others load fast from same origin -->
+    <link rel="preload" as="font" href="/fonts/poppins-400.woff2" type="font/woff2" crossorigin />
+    <link rel="preload" as="font" href="/fonts/poppins-600.woff2" type="font/woff2" crossorigin />
+    <link rel="preload" as="font" href="/fonts/poppins-700.woff2" type="font/woff2" crossorigin />
 
-    <!-- Poppins — non-blocking async load, only weights used (400,500,600,700,800) -->
-    <link
-      rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap"
-      media="print"
-      onload="this.media='all'"
-    />
-    <noscript>
-      <link
-        rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap"
-      />
-    </noscript>
-
-    <!-- LCP: preload hero portrait (critical above-the-fold image) -->
+    <!-- LCP: preload hero portrait — AVIF first (browsers that support it pick AVIF) -->
+    <link rel="preload" as="image" href="/my-photo.avif" fetchpriority="high" type="image/avif" />
     <link rel="preload" as="image" href="/my-photo.webp" fetchpriority="high" type="image/webp" />
-    <link rel="preload" as="image" href="/my-photo.jpg" fetchpriority="high" />
 
     <!-- Open Graph -->
     <meta property="og:type" content="website" />

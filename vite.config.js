@@ -33,7 +33,6 @@ export default defineConfig({
           if (id.includes('@supabase')) return 'supabase'
           if (id.includes('@emailjs')) return 'emailjs'
           if (id.includes('react-icons')) return 'icons'
-          if (id.includes('@splinetool')) return 'spline'
           if (id.includes('gsap')) return 'gsap'
         },
         assetFileNames: 'assets/[name]-[hash][extname]',
@@ -48,6 +47,5 @@ export default defineConfig({
 
   optimizeDeps: {
     include: ['react', 'react-dom', 'react-router-dom', 'framer-motion'],
-    exclude: ['@splinetool/react-spline'],
   },
 })
