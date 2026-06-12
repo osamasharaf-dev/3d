@@ -153,22 +153,21 @@ const Hero = () => {
           />
         </div>
 
-        {/* Text + portrait */}
-        <div className="flex-1 flex flex-col lg:flex-row items-start lg:items-center gap-8 lg:gap-16">
-          {/* Mobile portrait — above text, centered */}
-          {isMobile && (
-            <motion.div
-              className="w-full flex justify-center pt-2"
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, ease: "easeOut" }}
-            >
-              <Portrait mobile photoSrc={heroData.photo_url || "/my-photo.jpg"} />
-            </motion.div>
-          )}
+        {/* Text + portrait — row on desktop, column on mobile */}
+        <div className="flex-1 flex flex-col lg:flex-row items-center gap-8 lg:gap-14">
 
-          {/* Text column */}
-          <div className="flex-1">
+          {/* Portrait — CSS order: above text on mobile, right side on desktop */}
+          <motion.div
+            className="order-first lg:order-last flex-shrink-0 flex justify-center"
+            initial={{ opacity: 0, scale: 0.96 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+          >
+            <Portrait mobile={isMobile} photoSrc={heroData.photo_url || "/my-photo.jpg"} />
+          </motion.div>
+
+          {/* Text column — left on desktop, below image on mobile */}
+          <div className="flex-1 min-w-0 order-last lg:order-first">
             <motion.div
               initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
@@ -269,17 +268,6 @@ const Hero = () => {
             </motion.div>
           </div>
 
-          {/* Portrait — desktop only, appears immediately */}
-          {!isMobile && (
-            <motion.div
-              className="flex items-center justify-center flex-shrink-0 mr-4 mt-2"
-              initial={{ opacity: 0, scale: 0.96 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5, ease: "easeOut" }}
-            >
-              <Portrait photoSrc={heroData.photo_url || "/my-photo.jpg"} />
-            </motion.div>
-          )}
         </div>
       </div>
 
