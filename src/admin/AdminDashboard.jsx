@@ -6,6 +6,7 @@ import { invalidateCertificationsCache } from "../lib/useCertifications";
 import { invalidateProfessionalSkillsCache } from "../lib/useProfessionalSkills";
 import { invalidateContactCache } from "../lib/useContactInfo";
 import { invalidateProjectsCache } from "../lib/useProjects";
+import { projects as STATIC_PROJECTS } from "../constants/index";
 
 /* ── Theme tokens ─────────────────────────────────────────── */
 const C = {
@@ -163,11 +164,51 @@ function ImageUploadBtn({ currentUrl, onUrl, folder = "images", label = "Upload 
 /* ── Overview ─────────────────────────────────────────────── */
 function OverviewPanel() {
   const [counts, setCounts] = useState({});
-  useEffect(()=>{
+  const [seeding, setSeeding] = useState(false);
+  const [seedMsg, setSeedMsg] = useState(null);
+
+  const loadCounts = () => {
     const tables=["certifications","professional_skills","contact_info","about_info","hero_info","skills","projects"];
     Promise.all(tables.map(t=>supabase.from(t).select("*",{count:"exact",head:true}).then(({count})=>({t,count}))))
       .then(res=>setCounts(Object.fromEntries(res.map(({t,count})=>[t,count??0]))));
-  },[]);
+  };
+
+  useEffect(()=>{ loadCounts(); },[]);
+
+  const seedProjects = async () => {
+    setSeeding(true); setSeedMsg(null);
+    const { data: existing } = await supabase.from("projects").select("id");
+    if (existing && existing.length > 0) {
+      setSeedMsg({ type:"info", text:`Database already has ${existing.length} project(s). Delete them first if you want to re-seed.` });
+      setSeeding(false); return;
+    }
+    const STABLE_IMAGES = {
+      "E-Commerce Platform":      "/projects/neuralnet.png",
+      "Task Management System":   "/projects/krypton.png",
+      "3D Portfolio Website":     "/projects/portfolio-home.png",
+      "Real-Time Chat Application": "/projects/novalearn.png",
+      "Analytics Dashboard":      "/projects/astroPixel.png",
+      "Restaurant Booking System":"/projects/neuralnet1.png",
+    };
+    const payload = STATIC_PROJECTS.map((p) => ({
+      title: p.name,
+      description: p.description,
+      image: STABLE_IMAGES[p.name] || null,
+      tech_stack: Array.isArray(p.tags)
+        ? p.tags.map(t => typeof t === "object" ? t : { name: t, color: "blue-text-gradient" })
+        : [],
+    }));
+    const { error } = await supabase.from("projects").insert(payload);
+    if (error) {
+      setSeedMsg({ type:"error", text: `Seed failed: ${error.message}` });
+    } else {
+      setSeedMsg({ type:"success", text:`Seeded ${payload.length} projects from static defaults.` });
+      invalidateProjectsCache();
+      loadCounts();
+    }
+    setSeeding(false);
+  };
+
   const items=[
     {label:"Hero Info",     key:"hero_info",          icon:"🏠"},
     {label:"About Info",    key:"about_info",          icon:"👤"},
@@ -189,6 +230,28 @@ function OverviewPanel() {
           </div>
         ))}
       </div>
+
+      {counts["projects"] === 0 && (
+        <div style={{ ...CS,marginTop:20,background:"rgba(21,145,220,0.06)",border:"1px solid rgba(21,145,220,0.25)" }}>
+          <h3 style={{ fontWeight:700,color:C.textPrimary,marginBottom:8,fontSize:15 }}>Projects Database is Empty</h3>
+          <p style={{ color:C.textSecondary,fontSize:14,marginBottom:12 }}>
+            Click below to seed the database with your 6 default portfolio projects. You can edit or delete them afterwards in the Projects panel.
+          </p>
+          {seedMsg && (
+            <div style={{ padding:"8px 12px",borderRadius:6,marginBottom:12,fontSize:13,
+              background: seedMsg.type==="error" ? C.errorBg : seedMsg.type==="success" ? C.successBg : "rgba(21,145,220,0.08)",
+              color: seedMsg.type==="error" ? C.errorColor : seedMsg.type==="success" ? C.successColor : C.labelColor,
+              border:`1px solid ${seedMsg.type==="error" ? C.errorBorder : seedMsg.type==="success" ? C.successBorder : "rgba(21,145,220,0.3)"}`,
+            }}>{seedMsg.text}</div>
+          )}
+          <button type="button" disabled={seeding} onClick={seedProjects}
+            style={{ background:C.btnPrimary,color:"#fff",border:"none",borderRadius:8,padding:"10px 20px",
+              fontWeight:700,fontSize:14,cursor:seeding?"not-allowed":"pointer",opacity:seeding?0.7:1 }}>
+            {seeding ? "Seeding…" : "Migrate Static Projects to Database"}
+          </button>
+        </div>
+      )}
+
       <div style={{ ...CS,marginTop:20 }}>
         <h3 style={{ fontWeight:700,color:C.textPrimary,marginBottom:12,fontSize:15 }}>Quick Guide</h3>
         <ul style={{ color:C.textSecondary,fontSize:14,lineHeight:2,paddingLeft:18,margin:0 }}>
@@ -452,8 +515,8 @@ function ProjectsPanel() {
   const showToast=(msg,type)=>{setToast({msg,type});setTimeout(()=>setToast(null),3000);};
 
   useEffect(()=>{
-    supabase.from("projects").select("*").order("order_index",{ascending:true}).then(({data})=>{
-      if(data)setProjects(data.map(p=>({...p,tags:Array.isArray(p.tags)?p.tags:[],features:Array.isArray(p.features)?p.features:[]})));
+    supabase.from("projects").select("*").order("created_at",{ascending:true}).then(({data})=>{
+      if(data)setProjects(data.map(p=>({...p,tech_stack:Array.isArray(p.tech_stack)?p.tech_stack:[]})));
       setLoading(false);
     });
   },[]);
@@ -463,7 +526,6 @@ function ProjectsPanel() {
   const save=async(e)=>{
     e.preventDefault();setSaving(true);
     for(const proj of projects){
-      // Handle deletions
       if(proj._deleted){
         if(proj.id&&!String(proj.id).startsWith("new_")){
           const{error}=await supabase.from("projects").delete().eq("id",proj.id);
@@ -472,13 +534,10 @@ function ProjectsPanel() {
         continue;
       }
       const payload={
-        name:proj.name,description:proj.description,
-        image_url:proj.image_url||null,
-        source_code_link:proj.source_code_link||null,
-        live_demo_link:proj.live_demo_link||null,
-        tags:proj.tags||[],
-        features:proj.features||[],
-        order_index:proj.order_index??0,
+        title: proj.title||"",
+        description: proj.description||"",
+        image: proj.image||null,
+        tech_stack: proj.tech_stack||[],
       };
       let error;
       if(proj.id&&!String(proj.id).startsWith("new_")){
@@ -499,19 +558,19 @@ function ProjectsPanel() {
       {toast&&<Toast {...toast}/>}
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20,flexWrap:"wrap",gap:8}}>
         <h2 style={{fontSize:22,fontWeight:800,color:C.textPrimary}}>Projects</h2>
-        <AddBtn onClick={()=>setProjects(p=>[...p,{id:`new_${Date.now()}`,name:"",description:"",image_url:"",source_code_link:"",live_demo_link:"",tags:[],features:[],order_index:p.length}])} label="Add Project" />
+        <AddBtn onClick={()=>setProjects(p=>[...p,{id:`new_${Date.now()}`,title:"",description:"",image:"",tech_stack:[]}])} label="Add Project" />
       </div>
 
       {projects.filter(p=>!p._deleted).map((proj,i)=>(
         <div key={proj.id||i} style={CS}>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16,flexWrap:"wrap",gap:8}}>
-            <span style={{fontWeight:700,color:C.textPrimary,fontSize:15}}>{proj.name||`Project #${i+1}`}</span>
+            <span style={{fontWeight:700,color:C.textPrimary,fontSize:15}}>{proj.title||`Project #${i+1}`}</span>
             <RemoveBtn onClick={()=>setProjects(p=>p.map((pr,j)=>j===i?{...pr,_deleted:true}:pr))} />
           </div>
 
           <div style={{marginBottom:12}}>
             <label style={LS}>Project Name</label>
-            <input {...IS} value={proj.name||""} onChange={e=>upd(i,"name",e.target.value)} required />
+            <input {...IS} value={proj.title||""} onChange={e=>upd(i,"title",e.target.value)} required />
           </div>
           <div style={{marginBottom:12}}>
             <label style={LS}>Description</label>
@@ -519,70 +578,38 @@ function ProjectsPanel() {
               onChange={e=>upd(i,"description",e.target.value)} />
           </div>
 
-          {/* Cover image upload */}
           <div style={{marginBottom:12}}>
             <label style={LS}>Cover Image</label>
             <ImageUploadBtn
-              currentUrl={proj.image_url||""}
-              onUrl={url=>upd(i,"image_url",url)}
+              currentUrl={proj.image||""}
+              onUrl={url=>upd(i,"image",url)}
               folder="project-covers"
               label="Upload Project Cover"
             />
           </div>
 
-          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:12}}>
-            <div>
-              <label style={LS}>GitHub URL</label>
-              <input {...IS} type="url" placeholder="https://github.com/…" value={proj.source_code_link||""}
-                onChange={e=>upd(i,"source_code_link",e.target.value)} />
-            </div>
-            <div>
-              <label style={LS}>Live Demo URL</label>
-              <input {...IS} type="url" placeholder="https://…" value={proj.live_demo_link||""}
-                onChange={e=>upd(i,"live_demo_link",e.target.value)} />
-            </div>
-          </div>
-
-          <div style={{display:"grid",gridTemplateColumns:"1fr 80px",gap:12,marginBottom:16}}>
-            <div>
-              <label style={LS}>Tags (one per line, format: name|#color)</label>
-              <textarea
-                style={{...IS.style,minHeight:70,resize:"vertical",fontFamily:"monospace",fontSize:13}}
-                value={(proj.tags||[]).map(t=>typeof t==="object"?`${t.name}|${t.color||"#0ea5e9"}`:(t||"")).join("\n")}
-                onChange={e=>{
-                  const tags=e.target.value.split("\n").filter(Boolean).map(line=>{
-                    const[name,color]=line.split("|");
-                    return{name:(name||"").trim(),color:(color||"#0ea5e9").trim()};
-                  });
-                  upd(i,"tags",tags);
-                }}
-                placeholder={"React.js|#0ea5e9\nNode.js|#22c55e\nMongoDB|#4f46e5"}
-              />
-            </div>
-            <div>
-              <label style={LS}>Order</label>
-              <input {...IS} type="number" value={proj.order_index??i}
-                onChange={e=>upd(i,"order_index",parseInt(e.target.value)||0)} />
-            </div>
-          </div>
-
-          <div>
-            <label style={LS}>Key Features</label>
-            {(proj.features||[]).map((ft,j)=>(
-              <div key={j} style={{display:"flex",gap:8,marginBottom:6,alignItems:"center"}}>
-                <input {...IS} style={{...IS.style,flex:1}} value={ft||""}
-                  onChange={e=>{const a=[...(proj.features||[])];a[j]=e.target.value;upd(i,"features",a);}} />
-                <RemoveBtn onClick={()=>upd(i,"features",(proj.features||[]).filter((_,k)=>k!==j))} />
-              </div>
-            ))}
-            <AddBtn onClick={()=>upd(i,"features",[...(proj.features||[]),""])} label="Add Feature" />
+          <div style={{marginBottom:16}}>
+            <label style={LS}>Tech Stack / Tags (one per line, format: name|gradient-class)</label>
+            <textarea
+              style={{...IS.style,minHeight:70,resize:"vertical",fontFamily:"monospace",fontSize:13}}
+              value={(proj.tech_stack||[]).map(t=>typeof t==="object"?`${t.name}|${t.color||"blue-text-gradient"}`:(t||"")).join("\n")}
+              onChange={e=>{
+                const tech_stack=e.target.value.split("\n").filter(Boolean).map((line,idx)=>{
+                  const[name,color]=line.split("|");
+                  const colors=["blue-text-gradient","green-text-gradient","pink-text-gradient","violet-text-gradient","orange-text-gradient"];
+                  return{name:(name||"").trim(),color:(color||colors[idx%colors.length]).trim()};
+                });
+                upd(i,"tech_stack",tech_stack);
+              }}
+              placeholder={"React.js|blue-text-gradient\nNode.js|green-text-gradient\nMongoDB|pink-text-gradient"}
+            />
           </div>
         </div>
       ))}
 
       {projects.length===0&&(
         <div style={{...CS,textAlign:"center",color:C.textSecondary,fontSize:14,padding:40}}>
-          No projects yet. Click "+ Add Project" to get started.
+          No projects yet. Click "+ Add Project" to get started, or use the Overview panel to migrate your default projects.
         </div>
       )}
       <div><SaveBtn loading={saving} /></div>

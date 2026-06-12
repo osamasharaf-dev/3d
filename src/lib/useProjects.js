@@ -5,13 +5,31 @@ import { projects as staticProjects } from "../constants";
 let cache = null;
 let fetchPromise = null;
 
+const TAG_COLORS = [
+  "blue-text-gradient", "green-text-gradient", "pink-text-gradient",
+  "violet-text-gradient", "orange-text-gradient",
+];
+
+const normalizeTags = (tech_stack, tags) => {
+  if (Array.isArray(tech_stack) && tech_stack.length > 0) {
+    return tech_stack.map((t, i) =>
+      typeof t === "object" && t !== null && t.name
+        ? t
+        : { name: String(t), color: TAG_COLORS[i % TAG_COLORS.length] }
+    );
+  }
+  if (Array.isArray(tags) && tags.length > 0) return tags;
+  return [];
+};
+
 const normalizeProject = (p) => ({
   id: p.id,
-  name: p.name,
-  description: p.description,
-  tags: Array.isArray(p.tags) ? p.tags : [],
-  image: p.image_url || p.image || "",
-  images: Array.isArray(p.images) ? p.images : p.image_url ? [p.image_url] : [],
+  name: p.title || p.name || "",
+  description: p.description || "",
+  tags: normalizeTags(p.tech_stack, p.tags),
+  image: p.image || p.image_url || "",
+  images: Array.isArray(p.images) ? p.images
+    : (p.image || p.image_url) ? [p.image || p.image_url] : [],
   source_code_link: p.source_code_link || "#",
   live_demo_link: p.live_demo_link || "#",
   features: Array.isArray(p.features) ? p.features : [],
@@ -24,8 +42,8 @@ const fetchFresh = async () => {
     .from("projects")
     .select("*")
     .order("order_index", { ascending: true });
-  if (error || !data || data.length === 0) return { data: staticProjects, source: "static" };
-  return { data: data.map(normalizeProject), source: "supabase" };
+  if (error) return { data: staticProjects, source: "static" };
+  return { data: (data || []).map(normalizeProject), source: "supabase" };
 };
 
 export function useProjects() {
