@@ -5,6 +5,7 @@ import { styles } from "../styles";
 import useMediaQuery from "../utils/useMediaQuery";
 import { FloatingTechCanvas } from "./canvas";
 import { useHero, HERO_FALLBACK } from "../lib/useHero";
+import PictureImg from "./ui/PictureImg";
 
 /* ─────────────────────────────────────────────────────────────
    CLEAN PORTRAIT  — rounded rectangle, head + upper body
@@ -42,7 +43,7 @@ const Portrait = memo(({ mobile = false, photoSrc = "/my-photo.webp" }) => (
               : "w-44 h-56 lg:w-52 lg:h-64 xl:w-56 xl:h-72"
           }`}
         >
-          <img
+          <PictureImg
             src={photoSrc}
             alt="Osama Sharaf"
             fetchpriority="high"

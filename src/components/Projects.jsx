@@ -1,6 +1,7 @@
 import { AnimatePresence, motion } from "framer-motion";
 import React, { memo, useCallback, useEffect, useRef, useState } from "react";
 import { FiExternalLink, FiGithub, FiX, FiChevronLeft, FiChevronRight } from "react-icons/fi";
+import PictureImg from "./ui/PictureImg";
 
 import { useProjects } from "../lib/useProjects";
 import { SectionWrapper } from "../hoc";
@@ -227,11 +228,13 @@ const ProjectCard = memo(({ project, index, onClick }) => {
       >
         {/* Image */}
         <div className="relative h-[200px] overflow-hidden">
-          <img
+          <PictureImg
             src={project.image}
             alt={`${project.name} preview`}
             loading="lazy"
             decoding="async"
+            width={400}
+            height={200}
             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
           />
           <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-white/90 via-transparent to-transparent" />

@@ -8,6 +8,7 @@ import { styles } from "../styles";
 import { fadeIn, textVariant } from "../utils/motion";
 import { useAbout } from "../lib/useAbout";
 import { web, mobile, backend, creator } from "../assets";
+import PictureImg from "./ui/PictureImg";
 
 const ICON_MAP = { web, mobile, backend, creator };
 
@@ -25,9 +26,11 @@ const ServiceCard = memo(({ index, title, icon_name, icon }) => {
           className="rounded-[20px] py-5 px-12 min-h-[280px] flex justify-evenly items-center flex-col"
           style={{ background: "#ffffff" }}
         >
-          <img
+          <PictureImg
             src={resolvedIcon}
             alt={title}
+            width={64}
+            height={64}
             className="w-16 h-16 object-contain"
             loading="lazy"
             decoding="async"

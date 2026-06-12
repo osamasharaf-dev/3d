@@ -1,13 +1,13 @@
-import backend from "./backend.png";
-import creator from "./creator.png";
-import mobile from "./mobile.png";
-import web from "./web.png";
-import github from "./github.png";
+import backend from "./backend.webp";
+import creator from "./creator.webp";
+import mobile from "./mobile.webp";
+import web from "./web.webp";
+import github from "./github.webp";
 
-import coursera from "./achievement/Coursera.png";
-import hr from "./achievement/HR.jpg";
-import cp from "./achievement/Certiport.jpg";
-import fcc from "./achievement/free_code_camp.jpg";
+import coursera from "./achievement/Coursera.webp";
+import hr from "./achievement/HR.webp";
+import cp from "./achievement/Certiport.webp";
+import fcc from "./achievement/free_code_camp.webp";
 
 import novalearn from "./project/novalearn.webp";
 import novalearn1 from "./project/novalearn1.webp";
