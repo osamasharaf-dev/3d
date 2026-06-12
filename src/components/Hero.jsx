@@ -7,39 +7,44 @@ import { FloatingTechCanvas } from "./canvas";
 import { useHero, HERO_FALLBACK } from "../lib/useHero";
 
 /* ─────────────────────────────────────────────────────────────
-   CLEAN PORTRAIT  (right side — desktop only)
-   No card, no animations, no hover movement, no entrance.
-   Appears immediately on load.
+   CLEAN PORTRAIT  — rounded rectangle, head + upper body
 ───────────────────────────────────────────────────────────── */
-const Portrait = memo(() => (
-  <div className="relative flex-shrink-0 select-none" aria-hidden="true">
+const Portrait = memo(({ mobile = false }) => (
+  <div
+    className={`relative flex-shrink-0 select-none ${mobile ? "mx-auto" : ""}`}
+    aria-hidden="true"
+  >
     {/* Ambient glow */}
     <div
-      className="absolute -inset-8 rounded-full pointer-events-none"
+      className="absolute -inset-6 rounded-[28px] pointer-events-none"
       style={{
         background:
-          "radial-gradient(ellipse, rgba(14,165,233,0.22) 0%, rgba(79,70,229,0.10) 55%, transparent 75%)",
-        filter: "blur(24px)",
+          "radial-gradient(ellipse, rgba(14,165,233,0.20) 0%, rgba(79,70,229,0.09) 55%, transparent 75%)",
+        filter: "blur(20px)",
       }}
     />
 
-    {/* Gradient ring */}
+    {/* Gradient border */}
     <div
-      className="relative rounded-full p-[3px]"
+      className="relative rounded-[20px] p-[2px]"
       style={{
         background: "linear-gradient(135deg, #0ea5e9, #4f46e5, #06b6d4)",
-        boxShadow: "0 8px 48px rgba(14,165,233,0.28), 0 2px 12px rgba(79,70,229,0.18)",
+        boxShadow: "0 8px 40px rgba(14,165,233,0.22), 0 2px 12px rgba(79,70,229,0.14)",
       }}
     >
-      {/* White buffer ring */}
-      <div className="rounded-full p-[3px] bg-white">
-        {/* Photo */}
-        <div className="w-44 h-44 lg:w-52 lg:h-52 xl:w-56 xl:h-56 rounded-full overflow-hidden">
+      {/* Inner white buffer */}
+      <div className="rounded-[18px] p-[2px] bg-white">
+        {/* Photo — portrait ratio, showing head + upper body */}
+        <div
+          className={`overflow-hidden rounded-[16px] ${
+            mobile
+              ? "w-32 h-40"
+              : "w-44 h-56 lg:w-52 lg:h-64 xl:w-56 xl:h-72"
+          }`}
+        >
           <img
             src="/my-photo.jpg"
             alt="Osama Sharaf"
-            width="224"
-            height="224"
             fetchpriority="high"
             decoding="sync"
             className="w-full h-full object-cover object-top"
@@ -51,7 +56,7 @@ const Portrait = memo(() => (
 
     {/* Online badge */}
     <div
-      className="absolute bottom-3 right-3 flex items-center gap-1.5 px-2.5 py-1 rounded-full"
+      className="absolute bottom-2.5 right-2.5 flex items-center gap-1.5 px-2.5 py-1 rounded-full"
       style={{
         background: "rgba(255,255,255,0.95)",
         border: "1px solid rgba(34,197,94,0.3)",
@@ -150,6 +155,18 @@ const Hero = () => {
 
         {/* Text + portrait */}
         <div className="flex-1 flex flex-col lg:flex-row items-start lg:items-center gap-8 lg:gap-16">
+          {/* Mobile portrait — above text, centered */}
+          {isMobile && (
+            <motion.div
+              className="w-full flex justify-center pt-2"
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, ease: "easeOut" }}
+            >
+              <Portrait mobile />
+            </motion.div>
+          )}
+
           {/* Text column */}
           <div className="flex-1">
             <motion.div
@@ -266,29 +283,6 @@ const Hero = () => {
         </div>
       </div>
 
-      {/* Mobile portrait — shown below text on small screens */}
-      {isMobile && (
-        <div className="absolute bottom-20 left-1/2 -translate-x-1/2 z-10">
-          <div
-            className="rounded-full p-[2px]"
-            style={{ background: "linear-gradient(135deg, #0ea5e9, #4f46e5)" }}
-          >
-            <div className="rounded-full p-[2px] bg-white">
-              <div className="w-20 h-20 rounded-full overflow-hidden">
-                <img
-                  src="/my-photo.jpg"
-                  alt="Osama Sharaf"
-                  width="80"
-                  height="80"
-                  fetchpriority="high"
-                  decoding="sync"
-                  className="w-full h-full object-cover object-top"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Scroll indicator */}
       <div
