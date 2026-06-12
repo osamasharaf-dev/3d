@@ -9,7 +9,7 @@ import { useHero, HERO_FALLBACK } from "../lib/useHero";
 /* ─────────────────────────────────────────────────────────────
    CLEAN PORTRAIT  — rounded rectangle, head + upper body
 ───────────────────────────────────────────────────────────── */
-const Portrait = memo(({ mobile = false, photoSrc = "/my-photo.jpg" }) => (
+const Portrait = memo(({ mobile = false, photoSrc = "/my-photo.webp" }) => (
   <div
     className={`relative flex-shrink-0 select-none ${mobile ? "mx-auto" : ""}`}
     aria-hidden="true"
@@ -47,6 +47,8 @@ const Portrait = memo(({ mobile = false, photoSrc = "/my-photo.jpg" }) => (
             alt="Osama Sharaf"
             fetchpriority="high"
             decoding="sync"
+            width={mobile ? 128 : 224}
+            height={mobile ? 160 : 288}
             className="w-full h-full object-cover object-top"
             style={{ display: "block" }}
           />
@@ -163,7 +165,7 @@ const Hero = () => {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5, ease: "easeOut" }}
           >
-            <Portrait mobile={isMobile} photoSrc={heroData.photo_url || "/my-photo.jpg"} />
+            <Portrait mobile={isMobile} photoSrc={heroData.photo_url || "/my-photo.webp"} />
           </motion.div>
 
           {/* Text column — left on desktop, below image on mobile */}

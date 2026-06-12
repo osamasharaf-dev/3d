@@ -26,9 +26,9 @@ const ElasticCursor  = lazy(() => import("./components/ElasticCursor"));
 const PrivacyPolicy  = lazy(() => import("./components/PrivacyPolicy"));
 const AdminDashboard = lazy(() => import("./admin/AdminDashboard"));
 
-/* Lightweight fallback — same bg, no layout shift */
-const SectionFallback = () => (
-  <div style={{ background: "#f8faff", minHeight: "200px" }} aria-hidden="true" />
+/* Lightweight fallback — same bg, sized to reduce CLS */
+const SectionFallback = ({ height = "400px" }) => (
+  <div style={{ background: "#f8faff", minHeight: height }} aria-hidden="true" />
 );
 
 const AdminFallback = () => (
@@ -60,38 +60,50 @@ const MainPage = () => (
       <Hero />
     </div>
 
-    {/* All sections below the fold — lazy */}
-    <Suspense fallback={<SectionFallback />}>
-      <About />
-    </Suspense>
+    {/* All sections below the fold — lazy with content-visibility */}
+    <div className="section-offscreen">
+      <Suspense fallback={<SectionFallback height="620px" />}>
+        <About />
+      </Suspense>
+    </div>
 
-    <Suspense fallback={<SectionFallback />}>
-      <StatsSection />
-    </Suspense>
+    <div className="section-offscreen">
+      <Suspense fallback={<SectionFallback height="180px" />}>
+        <StatsSection />
+      </Suspense>
+    </div>
 
-    <Suspense fallback={<SectionFallback />}>
-      <Projects />
-    </Suspense>
+    <div className="section-offscreen">
+      <Suspense fallback={<SectionFallback height="800px" />}>
+        <Projects />
+      </Suspense>
+    </div>
 
-    <Suspense fallback={<SectionFallback />}>
-      <Achievement />
-    </Suspense>
+    <div className="section-offscreen">
+      <Suspense fallback={<SectionFallback height="600px" />}>
+        <Achievement />
+      </Suspense>
+    </div>
 
-    <Suspense fallback={<SectionFallback />}>
-      <SkillKeyboard />
-    </Suspense>
+    <div className="section-offscreen">
+      <Suspense fallback={<SectionFallback height="500px" />}>
+        <SkillKeyboard />
+      </Suspense>
+    </div>
 
-    <Suspense fallback={<SectionFallback />}>
-      <Feedbacks />
-    </Suspense>
+    <div className="section-offscreen">
+      <Suspense fallback={<SectionFallback height="480px" />}>
+        <Feedbacks />
+      </Suspense>
+    </div>
 
-    <div className="relative z-0">
-      <Suspense fallback={<SectionFallback />}>
+    <div className="relative z-0 section-offscreen">
+      <Suspense fallback={<SectionFallback height="600px" />}>
         <Contact />
       </Suspense>
     </div>
 
-    <Suspense fallback={<SectionFallback />}>
+    <Suspense fallback={<SectionFallback height="200px" />}>
       <Footer />
     </Suspense>
   </div>

@@ -19,6 +19,7 @@ export default defineConfig({
   build: {
     target: 'esnext',
     minify: 'esbuild',
+    cssMinify: true,
     sourcemap: false,
     cssCodeSplit: true,
     chunkSizeWarningLimit: 1500,
@@ -33,11 +34,15 @@ export default defineConfig({
           if (id.includes('@emailjs')) return 'emailjs'
           if (id.includes('react-icons')) return 'icons'
           if (id.includes('@splinetool')) return 'spline'
+          if (id.includes('gsap')) return 'gsap'
         },
         assetFileNames: 'assets/[name]-[hash][extname]',
         chunkFileNames: 'assets/[name]-[hash].js',
         entryFileNames: 'assets/[name]-[hash].js',
       },
+    },
+    esbuildOptions: {
+      legalComments: 'none',
     },
   },
 

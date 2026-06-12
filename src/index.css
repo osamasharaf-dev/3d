@@ -314,3 +314,13 @@ img { max-width: 100%; height: auto; }
   0%, 100% { opacity: var(--base-opacity, 0.045); }
   50% { opacity: calc(var(--base-opacity, 0.045) * 0.6); }
 }
+
+.dev-bg-item {
+  animation: devFloat 6s ease-in-out infinite, devFade 8s ease-in-out infinite;
+}
+
+/* ── Content visibility for below-fold sections ─────── */
+.section-offscreen {
+  content-visibility: auto;
+  contain-intrinsic-size: 0 600px;
+}

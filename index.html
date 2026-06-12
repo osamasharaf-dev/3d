@@ -22,15 +22,10 @@
     <meta name="msapplication-TileColor" content="#f8faff" />
 
     <!-- Critical font preconnect -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
-    <!-- Poppins — only the weights we actually use (400,500,600,700,800) -->
-    <link
-      rel="preload"
-      as="style"
-      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap"
-    />
+    <!-- Poppins — non-blocking async load, only weights used (400,500,600,700,800) -->
     <link
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap"
@@ -45,6 +40,7 @@
     </noscript>
 
     <!-- LCP: preload hero portrait (critical above-the-fold image) -->
+    <link rel="preload" as="image" href="/my-photo.webp" fetchpriority="high" type="image/webp" />
     <link rel="preload" as="image" href="/my-photo.jpg" fetchpriority="high" />
 
     <!-- Open Graph -->

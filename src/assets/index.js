@@ -9,22 +9,22 @@ import hr from "./achievement/HR.jpg";
 import cp from "./achievement/Certiport.jpg";
 import fcc from "./achievement/free_code_camp.jpg";
 
-import novalearn from "./project/novalearn.png";
-import novalearn1 from "./project/novalearn1.png";
-import novalearn2 from "./project/novalearn2.png";
+import novalearn from "./project/novalearn.webp";
+import novalearn1 from "./project/novalearn1.webp";
+import novalearn2 from "./project/novalearn2.webp";
 
-import neuralnet from "./project/neuralnet.png";
-import neuralnet1 from "./project/neuralnet1.png";
-import neuralnet2 from "./project/neuralnet2.png";
+import neuralnet from "./project/neuralnet.webp";
+import neuralnet1 from "./project/neuralnet1.webp";
+import neuralnet2 from "./project/neuralnet2.webp";
 
-import astroPixel from "./project/astroPixel.png";
+import astroPixel from "./project/astroPixel.webp";
 
-import krypton from "./project/Krypton.png";
+import krypton from "./project/Krypton.webp";
 
-import portfolio from "./nav-link-previews/home.png";
-import about from "./nav-link-previews/about.png";
-import skills from "./nav-link-previews/skills.png";
-import contact from "./nav-link-previews/contact.png";
+import portfolio from "./nav-link-previews/home.webp";
+import about from "./nav-link-previews/about.webp";
+import skills from "./nav-link-previews/skills.webp";
+import contact from "./nav-link-previews/contact.webp";
 
 import code from "./badge/code.svg";
 import concepts from "./badge/concepts.svg";
