@@ -1,7 +1,8 @@
 import { AnimatePresence, motion, useMotionValue, useSpring } from "framer-motion";
 import React, { useEffect, useRef, useState } from "react";
-import { FaFacebook, FaInstagram } from "react-icons/fa";
+import { FaFacebook, FaInstagram, FaLinkedin, FaGithub } from "react-icons/fa";
 import { FaWhatsapp } from "react-icons/fa6";
+import { useContactInfo } from "../lib/useContactInfo";
 
 const NAV_LINKS = [
   { title: "Home",           href: "#hero",         id: "hero"         },
@@ -12,13 +13,16 @@ const NAV_LINKS = [
   { title: "Contact",        href: "#contact",      id: "contact"      },
 ];
 
-const SOCIAL_LINKS = [
-  { icon: FaFacebook,  href: "https://facebook.com/osamasharaf",  label: "Facebook",  color: "#1877F2" },
-  { icon: FaWhatsapp,  href: "https://wa.me/963935562470",        label: "WhatsApp",  color: "#25D366" },
-  { icon: FaInstagram, href: "https://instagram.com/osamasharaf", label: "Instagram", color: "#E4405F" },
-];
+const ICON_MAP = { FaFacebook, FaInstagram, FaWhatsapp, FaLinkedin, FaGithub };
 
 const Navbar = () => {
+  const { data: contactInfo } = useContactInfo();
+
+  const socialLinks = [
+    contactInfo.facebook  && { key: "FaFacebook",  href: contactInfo.facebook,  label: "Facebook",  color: "#1877F2" },
+    contactInfo.whatsapp  && { key: "FaWhatsapp",  href: contactInfo.whatsapp,  label: "WhatsApp",  color: "#25D366" },
+    contactInfo.instagram && { key: "FaInstagram", href: contactInfo.instagram, label: "Instagram", color: "#E4405F" },
+  ].filter(Boolean);
   const [scrolled, setScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState("hero");
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -130,22 +134,26 @@ const Navbar = () => {
         {/* Right: social + hamburger */}
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-1.5">
-            {SOCIAL_LINKS.map(({ icon: Icon, href, label, color }) => (
-              <motion.a
-                key={label}
-                href={href}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={label}
-                whileHover={{ scale: 1.18, y: -2 }}
-                whileTap={{ scale: 0.9 }}
-                transition={{ type: "spring", stiffness: 500, damping: 22 }}
-                className="w-8 h-8 rounded-xl flex items-center justify-center border border-slate-200 hover:border-sky-300 transition-all duration-300"
-                style={{ background: "rgba(248,250,255,0.8)", color }}
-              >
-                <Icon className="text-sm" />
-              </motion.a>
-            ))}
+            {socialLinks.map(({ key, href, label, color }) => {
+              const Icon = ICON_MAP[key];
+              if (!Icon) return null;
+              return (
+                <motion.a
+                  key={label}
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={label}
+                  whileHover={{ scale: 1.18, y: -2 }}
+                  whileTap={{ scale: 0.9 }}
+                  transition={{ type: "spring", stiffness: 500, damping: 22 }}
+                  className="w-8 h-8 rounded-xl flex items-center justify-center border border-slate-200 hover:border-sky-300 transition-all duration-300"
+                  style={{ background: "rgba(248,250,255,0.8)", color }}
+                >
+                  <Icon className="text-sm" />
+                </motion.a>
+              );
+            })}
           </div>
 
           {/* Mobile hamburger */}
@@ -170,7 +178,7 @@ const Navbar = () => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -10, scale: 0.97 }}
             transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-            className="absolute top-[68px] left-4 right-4 rounded-2xl border border-sky-100 overflow-hidden"
+            className="absolute top-[68px] left-4 right-4 rounded-2xl border border-sky-100 overflow-hidden max-h-[calc(100svh-80px)]"
             style={{
               background: "rgba(255,255,255,0.96)",
               backdropFilter: "blur(24px)",
@@ -179,7 +187,7 @@ const Navbar = () => {
             }}
             role="menu"
           >
-            <div className="flex flex-col p-3 gap-1">
+            <div className="flex flex-col p-3 gap-1 overflow-y-auto max-h-[calc(100svh-100px)]">
               {NAV_LINKS.map((link, i) => {
                 const isActive = activeSection === link.id;
                 return (

@@ -147,7 +147,7 @@ const CommandPalette = () => {
               </div>
 
               {/* Results */}
-              <div ref={listRef} className="max-h-[340px] overflow-y-auto py-2" style={{ scrollbarWidth: "none" }}>
+              <div ref={listRef} className="max-h-[45vh] sm:max-h-[340px] overflow-y-auto py-2" style={{ scrollbarWidth: "none" }}>
                 {filtered.length === 0 && (
                   <div className="px-4 py-8 text-center text-white/30 text-[13px]">
                     No results for "{query}"
